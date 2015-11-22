@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python2
 
 import re
 from BaseHTMLProcessor import BaseHTMLProcessor
@@ -144,7 +144,7 @@ def translate(url, dialectName="chef"):
 def test(url):
 	"""test all dialects against URL"""
 	for dialect in ("chef", "fudd", "olde"):
-		outfile = "%s.html" % dialect
+		outfile = "parsed_html/%s.html" % dialect
 		fsock = open(outfile, "wb")
 		fsock.write(translate(url, dialect))
 		fsock.close()
