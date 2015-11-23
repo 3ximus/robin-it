@@ -1,3 +1,8 @@
+'''
+ This class overrides the methods of SGMLParser that handle the various 
+tags found in a html file.
+Breaks the html into pieces
+'''
 from sgmllib import SGMLParser
 import htmlentitydefs
 
