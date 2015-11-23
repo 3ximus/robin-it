@@ -12,7 +12,6 @@ except urllib2.HTTPError, e:
     print e.fp.read()
 
 content = page.read()
-print content
 parser = url_lister.URLlister()
 try:
 	parser.feed(content)
