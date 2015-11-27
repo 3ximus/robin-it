@@ -3,7 +3,7 @@
 ''' 
 Small script for listing href's in a given URL
 Uses url_lister to parse html with "href" fields
-Created - 12.9.15
+Created - 24.11.15
 Copyright (C) 2015 - eximus
 '''
 
@@ -25,4 +25,4 @@ parser = url_lister.URLlister()
 parser.feed(content) # Parse content
 parser.close()
 #print content
-for url in parser.url: print url
+#for url in parser.url: print url

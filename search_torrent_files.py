@@ -2,7 +2,7 @@
 
 ''' 
 Search Kickass for torrents/magnets of given keyword
-Created - 12.9.15
+Created - 24.11.15
 Copyright (C) 2015 - eximus
 '''
 
@@ -18,7 +18,8 @@ kickass_url = "https://kickass.unblocked.la/"
 hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 
 # Build URL
-search_url = kickass_url + 'search/' +  urllib.quote(search_terms, safe='') + '?field=seeders&sorder=desc'
+search_url = kickass_url + 'search/' +  urllib2.quote(search_terms, safe='') + '?field=seeders&sorder=desc'
+print search_url
 request = urllib2.Request(search_url, headers=hdr)
 print "\033[0;32m%s\033[0m" % search_url
 page = urllib2.urlopen(request)
@@ -32,4 +33,4 @@ parser.close()
 match_pattern = re.compile('.*\.html|magnet:?.*')
 for url in parser.url:
 	matches = match_pattern.findall(url)
-	for match in matches: print match
+#	for match in matches: print match
