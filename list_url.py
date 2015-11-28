@@ -24,5 +24,4 @@ content = page.read() # Retrieve HTML
 parser = url_lister.URLlister()
 parser.feed(content) # Parse content
 parser.close()
-#print content
-#for url in parser.url: print url
+for url in parser.url: print url
