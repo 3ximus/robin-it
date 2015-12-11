@@ -41,13 +41,11 @@ Receives a string and the page URL to do the search and builds the search url fo
 Receives the order in wich you want the results to be returned, accepted values are 'seeds' and 'age'.
 NOTE: Currently only works for KICKASS Torrents page.
 '''
-def build_search_url(main_url, search_term, order_results = 'seeds', verbose = True):
+def build_search_url(main_url, search_term, page = 1, order_results = 'seeds', verbose = True):
 	if order_results == 'seeds': order_results = ORDER_SEEDS
 	elif order_results == 'age': order_results = ORDER_AGE
 	else: raise TypeError('\033[1;31mUnknown order_results parameter\033[0m')
-
-	search_url = ''
-	search_url = (main_url + 'usearch/' + urllib2.quote(search_term, safe='') + order_results)
+	search_url = '%susearch/%s/%d/%s' % (main_url, urllib2.quote(search_term, safe=''), page, order_results)
 	if verbose: print "\033[0;32mPage Link: \033[0m%s" % search_url
 	return search_url
 
@@ -73,26 +71,37 @@ def parse_page_links(url, parser=URL_lister()):
 
 '''
 Search
-Searches the given url with a given parser for links to other web pages or magnets.
+Searches the given search_term with a given parser for links to other web pages or magnets.
 Returns a list with found links.
 NOTE: Magnets will not be correctly interpreted by other functions.
 '''
-def search(url, parser=URL_lister(), allow_magnets = False, max_results_amount = 25, verbose = True):
+def search(main_url, search_term, parser=URL_lister(), allow_magnets = False, max_results_amount = 25, verbose = True, order_results = 'seeds'):
 	link_list = []
 	regex = '.*\.html' + ('|magnet:?.*' if allow_magnets else '')
 	match_pattern = re.compile(regex)
 	if verbose: print "\033[0;32mSearching...\033[0m"
-	links = parse_page_links(url, parser)
-
-	# search links
-	for link in links:
-		matches = match_pattern.findall(link)
-		match = [match for match in matches if match not in link_list]
-		if match: link_list.extend(match)
-	if verbose: print "\033[0;32mFound: \033[0m%d results on 1st page" % len(link_list)
+	
+	max_count = 0
+	current_page = 0
+	while 1:
+		added = False
+		current_page = current_page + 1
+		url = build_search_url(main_url, search_term, page=current_page, order_results=order_results, verbose=verbose)
+		links = parse_page_links(url, parser)
+		# search links
+		for link in links:
+			if max_count >= max_results_amount: break
+			matches = match_pattern.findall(link)
+			match = [match for match in matches if match not in link_list]
+			if match:
+				added = True
+				link_list.extend(match)
+				max_count = max_count + 1
+		if added == False: break
+	if verbose: print "\033[0;32mFound: \033[0m%d results on %d pages" % (max_count, current_page)
 	# fix links
-	for i in range (len(link_list)): link_list[i] = KICKASS + link_list[i].split('/')[-1]
-	return link_list[0:max_results_amount]
+	for i in range(max_count): link_list[i] = main_url + link_list[i].split('/')[-1]
+	return link_list
 
 
 '''
@@ -107,11 +116,10 @@ def get_download_links(host_url_list, verbose = True):
 	link_list = []
 	links = []
 	matches = []
-	cont = 1
 	select_pattern = 'https.*torcache.*'
 	match_pattern = re.compile(select_pattern)
-	for host_page in host_url_list: # go through all supllied links
-		if verbose: print "\033[0;32m\rFetching [%d / %d]...\033[0m" % (cont, len(host_url_list)),
+	for cont, host_page in enumerate(host_url_list): # go through all supllied links
+		if verbose: print "\033[0;32m\rFetching [%d / %d]...\033[0m" % (cont + 1, len(host_url_list)),
 		sys.stdout.flush()
 		links = parse_page_links(host_page)
 		for link in links: # search for link matching https://torcache
@@ -121,10 +129,9 @@ def get_download_links(host_url_list, verbose = True):
 				break
 		if not matches: # no matches found
 			if verbose: print "\033[1;31mNo download links in page:\033[0m %s" % host_url
-		cont = cont + 1
 	# fix links
 	for i in range (len(link_list)): link_list[i] = link_list[i] + '.torrent'
-	if verbose: print "\n%d links fetched sucessfully." % (cont - 1)
+	if verbose: print "\n%d links fetched sucessfully." % (cont + 1)
 	return link_list
 
 
@@ -134,14 +141,18 @@ Given a string parses it to look nicer.
 If url is set to True it tries to grab only the file name.
 If remove useless its set to True it will try to remove useless names.
 '''
-def parse_name(name, url = False, remove_useless = False):
+def parse_name(name, url = False, remove_useless = False, tv_show = False, split_char = '.'):
 	new_name = ''
 	tv_show_pattern = 's[0-9]*e[0-9]*'
-	useless = 'hdtv|rartv|torrent|killers|ettv|fum|x[0-9]*|web|dl|fleet|avi'
-	if url: name = name.split("]")[-1]
-	for string in name.split('.'):
+	useless = '^torrent$|^fum$|^x[0-9]*|^fleet$|^avi$'
+	if url and split_char == '.':
+		name = name.split("/")[-1].split("]")[-1]
+		split_char = '-'
+		useless = useless + '|.*html'
+	for string in name.split(split_char):
 		if remove_useless and re.search(useless,string): continue
-		new_name = new_name + ' ' + string.capitalize()
+		elif tv_show and re.search(tv_show_pattern, string): new_name = new_name + ' ' + string.upper()
+		else: new_name = new_name + ' ' + string.capitalize()
 	return new_name[1:]
 
 '''
@@ -183,13 +194,11 @@ def download_url_list(link_list, verbose = True, name_parser = False, folder = '
 	# convert to list
 	if type(link_list) is not list: link_list = [link_list,]
 	file_list = []
-	cont = 1
-	for link in link_list:
+	for cont, link in enumerate(link_list):
 		filename = link.split("]")[-1]
-		if verbose: print "\r\033[0;32mDownloading File [%d / %d]\033[0m" % (cont, len(link_list)),
+		if verbose: print "\r\033[0;32mDownloading File [%d / %d]\033[0m" % (cont + 1, len(link_list)),
 		sys.stdout.flush()
 		file_list.append(download_file(link, filename, folder=folder, name_parser=name_parser))
-		cont = cont + 1
 	return file_list
 
 
