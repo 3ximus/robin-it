@@ -13,10 +13,11 @@ import urllib2, urllib, sys, re, requests, os
 from sgmllib import SGMLParser
 
 # Defines
-KICKASS = "http://kickass.unblocked.la/"
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Sa    fari/537.11'}
+KICKASS = "http://kickass.unblocked.la/"
 ORDER_SEEDS = "?field=seeders&sorder=desc"
 ORDER_AGE = "?field=time_add&sorder=desc"
+RESULTS_PER_PAGE = 25
 
 '''
 URL Parser Class
@@ -26,7 +27,7 @@ The start_a parses for links on the web page.
 The start_td parses for title content. Not implemented.
 '''
 class URL_lister(SGMLParser):
-	# overload reset on SGMLParser
+# overload reset on SGMLParser
 	def reset(self):
 		SGMLParser.reset(self)
 		self.url= []
@@ -46,7 +47,6 @@ def build_search_url(main_url, search_term, page = 1, order_results = 'seeds', v
 	elif order_results == 'age': order_results = ORDER_AGE
 	else: raise TypeError('\033[1;31mUnknown order_results parameter\033[0m')
 	search_url = '%susearch/%s/%d/%s' % (main_url, urllib2.quote(search_term, safe=''), page, order_results)
-	if verbose: print "\033[0;32mPage Link: \033[0m%s" % search_url
 	return search_url
 
 
@@ -57,10 +57,10 @@ Returns a list with the parsed content.
 '''
 def parse_page_links(url, parser=URL_lister()):
 	request = urllib2.Request(url, headers=HEADER)
-	try:
-		page = urllib2.urlopen(request)
+	try: page = urllib2.urlopen(request)
 	except urllib2.URLError:
-		if verbose: print "\033[1;31mName or Service Unknown:\033[0m %s" % url
+		print "\033[1;31mName or Service Unknown:\033[0m %s" % url
+		return
 	content = page.read() # Retrieve HTML
 	parser.feed(content) # Parse content
 	parser.close()
@@ -75,12 +75,12 @@ Searches the given search_term with a given parser for links to other web pages 
 Returns a list with found links.
 NOTE: Magnets will not be correctly interpreted by other functions.
 '''
-def search(main_url, search_term, parser=URL_lister(), allow_magnets = False, max_results_amount = 25, verbose = True, order_results = 'seeds'):
+def search(main_url, search_term, parser=URL_lister(), allow_magnets = False, max_results_amount = RESULTS_PER_PAGE, verbose = True, order_results = 'seeds'):
 	link_list = []
 	regex = '.*\.html' + ('|magnet:?.*' if allow_magnets else '')
 	match_pattern = re.compile(regex)
 	if verbose: print "\033[0;32mSearching...\033[0m"
-	
+
 	max_count = 0
 	current_page = 0
 	while 1:
@@ -88,7 +88,8 @@ def search(main_url, search_term, parser=URL_lister(), allow_magnets = False, ma
 		current_page = current_page + 1
 		url = build_search_url(main_url, search_term, page=current_page, order_results=order_results, verbose=verbose)
 		links = parse_page_links(url, parser)
-		# search links
+# search links
+		if not links: break
 		for link in links:
 			if max_count >= max_results_amount: break
 			matches = match_pattern.findall(link)
@@ -99,7 +100,7 @@ def search(main_url, search_term, parser=URL_lister(), allow_magnets = False, ma
 				max_count = max_count + 1
 		if added == False: break
 	if verbose: print "\033[0;32mFound: \033[0m%d results on %d pages" % (max_count, current_page)
-	# fix links
+# fix links
 	for i in range(max_count): link_list[i] = main_url + link_list[i].split('/')[-1]
 	return link_list
 
@@ -111,7 +112,7 @@ Returns a list with download links found.
 NOTE: Only works for torrents.
 '''
 def get_download_links(host_url_list, verbose = True):
-	# convert to list if has a single element
+# convert to list if has a single element
 	if type(host_url_list) is not list: host_url_list = [host_url_list,]
 	link_list = []
 	links = []
@@ -127,11 +128,12 @@ def get_download_links(host_url_list, verbose = True):
 			if matches:
 				link_list.extend(matches)
 				break
-		if not matches: # no matches found
+# no matches found
+		if not matches:
 			if verbose: print "\033[1;31mNo download links in page:\033[0m %s" % host_url
-	# fix links
+# fix links
 	for i in range (len(link_list)): link_list[i] = link_list[i] + '.torrent'
-	if verbose: print "\n%d links fetched sucessfully." % (cont + 1)
+	if verbose: print "\r%d links fetched sucessfully." % (cont + 1)
 	return link_list
 
 
@@ -140,8 +142,10 @@ Parse File names
 Given a string parses it to look nicer.
 If url is set to True it tries to grab only the file name.
 If remove useless its set to True it will try to remove useless names.
+The ignore string is a regex patern to ignore
+The force_show string is a regex pattern to not ignore and make uppercase
 '''
-def parse_name(name, url = False, remove_useless = False, tv_show = False, split_char = '.'):
+def parse_name(name, url = False, remove_useless = False, tv_show = False, split_char = '.', capitalize = True, force_show = None, ignore = None):
 	new_name = ''
 	tv_show_pattern = 's[0-9]*e[0-9]*'
 	useless = '^torrent$|^fum$|^x[0-9]*|^fleet$|^avi$'
@@ -150,9 +154,11 @@ def parse_name(name, url = False, remove_useless = False, tv_show = False, split
 		split_char = '-'
 		useless = useless + '|.*html'
 	for string in name.split(split_char):
-		if remove_useless and re.search(useless,string): continue
+		if force_show and re.search(force_show, string): new_name = new_name + ' ' + string.upper()
+		elif remove_useless and re.search(useless,string): continue
+		elif ignore and re.search(ignore, string): continue
 		elif tv_show and re.search(tv_show_pattern, string): new_name = new_name + ' ' + string.upper()
-		else: new_name = new_name + ' ' + string.capitalize()
+		else: new_name = new_name + ' ' + (string.capitalize() if capitalize else string)
 	return new_name[1:]
 
 '''
@@ -167,11 +173,10 @@ Download File
 Download a file from a given URL holding the file.
 By default it saves the file in './cache' by another path can be specified.
 '''
-def download_file(url, fname, folder = './cache/', name_parser = False):
-	if not os.path.exists(folder):
-		os.mkdir(folder)
+def download_file(url, fname, location = './cache/', name_parser = False):
+	if not os.path.exists(location): os.mkdir(location)
 	if name_parser: fname = name_parser(fname)
-	fname = folder + fname
+	fname = location + fname
 	try:
 		r = requests.get(url, stream=True, headers=HEADER)
 		with open(fname, 'wb') as f:
@@ -190,15 +195,16 @@ Download URL List
 Downloads all files hosted on the given URL's
 NOTE: Website adress formating bound, may not work everywere
 '''
-def download_url_list(link_list, verbose = True, name_parser = False, folder = './cache/'):
-	# convert to list
+def download_url_list(link_list, verbose = True, name_parser = False, location = './cache/'):
+# convert to list
 	if type(link_list) is not list: link_list = [link_list,]
 	file_list = []
 	for cont, link in enumerate(link_list):
 		filename = link.split("]")[-1]
 		if verbose: print "\r\033[0;32mDownloading File [%d / %d]\033[0m" % (cont + 1, len(link_list)),
 		sys.stdout.flush()
-		file_list.append(download_file(link, filename, folder=folder, name_parser=name_parser))
+		file_list.append(download_file(link, filename, location=location, name_parser=name_parser))
+	if verbose: print "\r%d files downloaded sucessfully." % (cont + 1)
 	return file_list
 
 
@@ -206,8 +212,7 @@ def download_url_list(link_list, verbose = True, name_parser = False, folder = '
 Test program
 '''
 if __name__ == '__main__':
-	try: # Input
-		search_terms = sys.argv[1]
+	try: search_terms = sys.argv[1]
 	except IndexError:
 		print "No search term given"
 		sys.exit()
