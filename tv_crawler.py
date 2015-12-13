@@ -34,7 +34,7 @@ def decision(search_results, print_results = True):
 		elif re.search(TRUSTED_FORMAT, name): temp_buffer.append('[\033[1;33m-\033[0m]\t  %s\n' % name)
 		else: temp_buffer.append('[?]\t  %s\n' % name)
 # good distribution, select first link
-	if trusted_count < 3: return search_results[1]
+	if trusted_count < 3: return search_results[0]
 	print ''.join(temp_buffer)[:-1]
 	selection = raw_input('\033[1;33mSelect > \033[0m')
 	selection = selection.split(' ')
