@@ -10,9 +10,9 @@ import sys, re
 
 BIAS = 2
 TRUSTED_SOURCES = 'killers|rartv|immerse|publichd'
-TRUSTED_SOURCES = TRUSTED_SOURCES + TRUSTED_SOURCES.upper()
+TRUSTED_SOURCES += TRUSTED_SOURCES.upper()
 TRUSTED_FORMAT = 'web|dl|hdtv|eztv|ettv'
-TRUSTED_FORMAT = TRUSTED_FORMAT + TRUSTED_FORMAT.upper()
+TRUSTED_FORMAT += TRUSTED_FORMAT.upper()
 SEASON_MAX = 10
 QUALITY_PRESET = '720p'
 DOWNLOAD_PATH = './cache/'
@@ -29,7 +29,7 @@ def decision(search_results, print_results = True):
 		name = torrent_api.parse_name(result, url=True, remove_useless=True, tv_show = True, capitalize = False)
 		temp_buffer.append('%2d.' % i)
 		if re.search(TRUSTED_SOURCES, name):
-			trusted_count = trusted_count + 1
+			trusted_count += 1
 			temp_buffer.append('[\033[0;32mV\033[0m]\t  %s\n' % name)
 		elif re.search(TRUSTED_FORMAT, name): temp_buffer.append('[\033[1;33m-\033[0m]\t  %s\n' % name)
 		else: temp_buffer.append('[?]\t  %s\n' % name)
@@ -81,5 +81,5 @@ for s in seasons:
 # Download
 		download_links = torrent_api.get_download_links(selected_links, verbose = False)
 		files_downloaded = torrent_api.download_url_list(download_links, location=DOWNLOAD_PATH, verbose = False)
-		cont = cont + len(files_downloaded)
+		cont += len(files_downloaded)
 print 'Files Downloaded: %d, to %s' % (cont, DOWNLOAD_PATH)

@@ -75,33 +75,27 @@ Searches the given search_term with a given parser for links to other web pages 
 Returns a list with found links.
 NOTE: Magnets will not be correctly interpreted by other functions.
 '''
-def search(main_url, search_term, parser=URL_lister(), allow_magnets = False, max_results_amount = RESULTS_PER_PAGE, verbose = True, order_results = 'seeds'):
+def search(main_url, search_term, parser=URL_lister(), use_magnets = False, max_results_amount = RESULTS_PER_PAGE, verbose = True, order_results = 'seeds'):
 	link_list = []
-	regex = '.*\.html' + ('|magnet:?.*' if allow_magnets else '')
-	match_pattern = re.compile(regex)
-	if verbose: print "\033[0;32mSearching...\033[0m"
-
+	regex = '.*\.html' + ('|magnet:?.*' if use_magnets else '')
 	max_count = 0
 	current_page = 0
+	if verbose: print "\033[0;32mSearching...\033[0m"
 	while 1:
 		added = False
-		current_page = current_page + 1
+		current_page += 1
 		url = build_search_url(main_url, search_term, page=current_page, order_results=order_results, verbose=verbose)
 		links = parse_page_links(url, parser)
 # search links
 		if not links: break
 		for link in links:
-			if max_count >= max_results_amount: break
-			matches = match_pattern.findall(link)
-			match = [match for match in matches if match not in link_list]
-			if match:
+			if re.search(regex, link) and link not in link_list:
 				added = True
-				link_list.extend(match)
-				max_count = max_count + 1
-		if added == False: break
+				link_list.append(main_url + link.split('/')[-1])
+				max_count += 1
+			if max_count >= max_results_amount: break # loop control
+		if added == False: break # loop control
 	if verbose: print "\033[0;32mFound: \033[0m%d results on %d pages" % (max_count, current_page)
-# fix links
-	for i in range(max_count): link_list[i] = main_url + link_list[i].split('/')[-1]
 	return link_list
 
 
@@ -116,29 +110,28 @@ def get_download_links(host_url_list, verbose = True):
 	if type(host_url_list) is not list: host_url_list = [host_url_list,]
 	link_list = []
 	links = []
-	matches = []
 	select_pattern = 'https.*torcache.*'
-	match_pattern = re.compile(select_pattern)
 	for cont, host_page in enumerate(host_url_list): # go through all supllied links
 		if verbose: print "\033[0;32m\rFetching [%d / %d]...\033[0m" % (cont + 1, len(host_url_list)),
 		sys.stdout.flush()
 		links = parse_page_links(host_page)
-		for link in links: # search for link matching https://torcache
-			matches = match_pattern.findall(link)
-			if matches:
-				link_list.extend(matches)
+		match = False
+		for link in links:
+# search for link matching https://torcache
+			if re.search(select_pattern, link):
+				link_list.append(link)
+				match = True
 				break
 # no matches found
-		if not matches:
-			if verbose: print "\033[1;31mNo download links in page:\033[0m %s" % host_url
+		if verbose and not match: print "\033[1;31mNo download links in page:\033[0m %s" % host_url
 # fix links
-	for i in range (len(link_list)): link_list[i] = link_list[i] + '.torrent'
+	for i in range (len(link_list)): link_list[i] += '.torrent'
 	if verbose: print "\r%d links fetched sucessfully." % (cont + 1)
 	return link_list
 
 
 '''
-Parse File names
+Parse names
 Given a string parses it to look nicer.
 If url is set to True it tries to grab only the file name.
 If remove useless its set to True it will try to remove useless names.
@@ -152,13 +145,13 @@ def parse_name(name, url = False, remove_useless = False, tv_show = False, split
 	if url and split_char == '.':
 		name = name.split("/")[-1].split("]")[-1]
 		split_char = '-'
-		useless = useless + '|.*html'
+		useless += '|.*html'
 	for string in name.split(split_char):
-		if force_show and re.search(force_show, string): new_name = new_name + ' ' + string.upper()
+		if force_show and re.search(force_show, string): new_name += ' ' + string.upper()
 		elif remove_useless and re.search(useless,string): continue
 		elif ignore and re.search(ignore, string): continue
-		elif tv_show and re.search(tv_show_pattern, string): new_name = new_name + ' ' + string.upper()
-		else: new_name = new_name + ' ' + (string.capitalize() if capitalize else string)
+		elif tv_show and re.search(tv_show_pattern, string): new_name += ' ' + string.upper()
+		else: new_name += ' ' + (string.capitalize() if capitalize else string)
 	return new_name[1:]
 
 '''
