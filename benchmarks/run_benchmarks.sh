@@ -15,7 +15,7 @@ uname=$(uname -rm)
 # use the torrent_api as module containing
 parser_module="$(dirname $(pwd))/torrent_api.py"
 
-mkdir -p "outJunk/$cpu_info\ $uname/$date"
+mkdir -p "outJunk/$cpu_info\ $uname"
 i=$sample
 t_real=0
 t_user=0
