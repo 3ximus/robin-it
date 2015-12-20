@@ -19,6 +19,6 @@ except IndexError:
 
 search_me = torrent_api.build_url(KICKASS, search_terms, ORDER_SEEDS)
 search_results = torrent_api.search(search_me, allow_magnets=False, max_results_amount = 1)
-download_links = torrent_api.get_download_links(search_results)
-torrent_api.download_url_list(download_links)
+#download_links = torrent_api.get_download_links(search_results)
+#torrent_api.download_url_list(download_links)
 print "\nDONE"

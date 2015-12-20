@@ -30,9 +30,9 @@ class URL_lister(SGMLParser):
 # overload reset on SGMLParser
 	def reset(self):
 		SGMLParser.reset(self)
-		self.url= []
+		self.parsed= []
 	def start_a(self, attrs):
-		self.url.extend([y for (x,y) in attrs if x == 'href'])
+		self.parsed.extend([y for (x,y) in attrs if x == 'href'])
 	def start_td(self, attrs):
 		pass
 
@@ -65,7 +65,7 @@ def parse_page_links(url, parser=URL_lister()):
 	parser.feed(content) # Parse content
 	parser.close()
 	page.close()
-	returned_urls = parser.url
+	returned_urls = parser.parsed
 	parser.reset()
 	return returned_urls
 
