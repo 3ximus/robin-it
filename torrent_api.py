@@ -11,9 +11,10 @@ Copyright (C) 2015 - eximus
 # Imports
 import urllib2, urllib, sys, re, requests, os
 from sgmllib import SGMLParser
+from bf4 import BeautifulSoup
 
 # Defines
-HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Sa    fari/537.11'}
+HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 
 KICKASS = "http://kickass.unblocked.la/"
 ORDER_SEEDS = "?field=seeders&sorder=desc"
@@ -21,7 +22,7 @@ ORDER_AGE = "?field=time_add&sorder=desc"
 RESULTS_PER_PAGE = 25
 
 # Internal
-ERROR_MSG = "[\033[1;31ERROR\033[0m]"
+ERROR_MSG = "[\033[1;31mERROR\033[0m]"
 
 '''
 URL Parser Class
@@ -39,6 +40,33 @@ class URL_lister(SGMLParser):
 		self.parsed.extend([y for (x,y) in attrs if x == 'href'])
 	def start_td(self, attrs):
 		pass
+
+'''
+Torrent data structure
+'''
+class Torrent():
+	def __init(self):
+		self.name = ""
+		self.magnet = ""
+		self.link = ""
+		self.host = KICKASS
+		self.seeds = 0
+		self.peers = 0
+		self.size = 0
+
+'''
+Beautiful Soup 4
+Parser for BeautifulSoup 4
+Returns a tuple with Torrent class
+'''
+class BF4():
+	def __init__(self):
+		pass
+	def feed(self, content):
+		pass
+	def close(self):
+		pass
+
 
 '''
 Build Search URL
@@ -83,14 +111,15 @@ def parse_page_links(url, parser=URL_lister()):
 '''
 Parse Page Links v2
 Improve on the heavily parser dependant v1 ang give more abstraction
+Mandatory attributes for received parser are: 'feed(self, content)', 'close(self)' and 'parsed'
+The feed method should return the content or store it in a class attribute named 'parsed'
 '''
 def parse_page_links_2(html_page, parser=None):
 	if not parser: return
 	parsed = parser.feed(html_page) # TODO choose feed parameters to get expected results from parser
-	try: # some parsers need this workaround
-		if not parsed: parsed = parser.parsed
-		parser.close()
-		parser.reset()
+	parser.close()
+	if not parsed: parsed = parser.parsed
+	try: parser.reset() # some parsers need this workaround
 	except NameError: pass
 	return parsed
 
