@@ -50,7 +50,7 @@ for url in fd:
 			if isinstance(bit, module.Torrent): bit.to_string()
 			else:  print bit # retrived parsed content stored in the parsed variable attribute of the parser class
 	if hasattr(parser_instance, 'reset') : parser_instance.reset # if exists call reset method
-	break # for testing only one link
+	#break # for testing only one link
 fd.close()
 if log_fd: log_fd.close()
 

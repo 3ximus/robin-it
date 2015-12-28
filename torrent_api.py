@@ -82,7 +82,10 @@ class BS4():
 		self.parsed = []
 		self.btree = None # not an actual btree but a 'beautiful tree'
 
-	''' Receives the content to parse, or the open filedescriptor and how to parse it '''
+	''' 
+	Callable feed method
+	Receives the content to parse, or the open filedescriptor and how to parse it
+	'''
 	def feed(self, html, query_for='torrent'):
 		self.btree = BeautifulSoup(html, "lxml") # parse the webpage with lxml parser
 		if query_for == 'torrent': self._torrent_parsing(host = KICKASS) # TODO pass another host if needed
@@ -96,13 +99,13 @@ class BS4():
 
 	''' Parse acording to Kickass structure '''
 	def _torrent_parsing_kat(self):
+		tm_pattern = re.compile('Download torrent file|Torrent magnet link') # torrent and magnets pattern
 		# looking at the html all the information about the torrent can be found as follows
 		# torrent_ids comes as a list of tuples being the first element the torrent name and the last its link
 		# torren_files and magnets is a list of torrent links and magnets respectivly
 		# torrent_info comes as: size, files, age, seeds, peers. Repeated for each torrent
 		torrent_ids = [(r.get_text(), r.get('href')) for r in self.btree.find_all('a', attrs = {'class', 'cellMainLink'})]
-		torrent_files = [r.get('href') for r in self.btree.find_all('a', {'title' : 'Download torrent file'})]
-		magnets = [r.get('href') for r in self.btree.find_all('a', {'title' : 'Torrent magnet link'})]
+		tm_links = [r.get('href') for r in self.btree.find_all('a', {'title' : tm_pattern})]
 		torrent_info = [r.get_text() for r in self.btree.find_all('td', {'class', 'center'})]
 
 		# get everything nice and sorted as list of Torrent structures
@@ -110,8 +113,8 @@ class BS4():
 		for i, n in enumerate(torrent_ids):
 			to_add = Torrent(name = n[0],
 							 link = n[1],
-							 magnet = magnets[i],
-							 tor_file = torrent_files[i],
+							 magnet = tm_links[2*i + 0],
+							 tor_file = tm_links[2*i + 1],
 							 size = torrent_info[5*i + 0],
 							 files = torrent_info[5*i + 1],
 							 age = torrent_info[5*i + 2],
