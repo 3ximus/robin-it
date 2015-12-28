@@ -36,7 +36,7 @@ Benchmark Page parsers
 
 v1.1: (Speed and Usability Upgrades)
 
-	- Implement a beautiful soup parser
+	- Implement a beautiful soup parser (DONE)
 	- Implement custom parser
 	- Remove the get download links and use the search algorithm to retrive the magnets and torrent links
 	- Implement `parse_page_links_2` to use with any parser. Also make it receive content instead of making it get the page

@@ -45,7 +45,7 @@ class URL_lister(SGMLParser):
 Torrent data structure
 '''
 class Torrent():
-	def __init__(self, name, link, magnet, tor_file, seeds, peers, age, files, size, host = KICKASS):
+	def __init__(self, name = '', link = '', magnet = '', tor_file = '', seeds = '', peers = '', age = '', files = '', size = '', host = KICKASS):
 		self.name = name
 		self.link = link
 		self.magnet = magnet
@@ -77,6 +77,7 @@ Returns a tuple with Torrent class
 Maybe slower compared to URL_lister but the information is already processed and ready to be used
 '''
 class BS4():
+	
 	def __init__(self):
 		self.parsed = []
 		self.btree = None # not an actual btree but a 'beautiful tree'
@@ -96,20 +97,21 @@ class BS4():
 	''' Parse acording to Kickass structure '''
 	def _torrent_parsing_kat(self):
 		# looking at the html all the information about the torrent can be found as follows
-		# torrent_name comes as a list of names
-		# links comes as: link to page, magnet link, torrent file link. Repeated for each torrent
+		# torrent_ids comes as a list of tuples being the first element the torrent name and the last its link
+		# torren_files and magnets is a list of torrent links and magnets respectivly
 		# torrent_info comes as: size, files, age, seeds, peers. Repeated for each torrent
-		torrent_names = [r.get_text() for r in self.btree.find_all('a', attrs = {'class', 'cellMainLink'})]
-		links = [r.get('href') for r in self.btree.find_all('a', {'class', 'icon16'})]
+		torrent_ids = [(r.get_text(), r.get('href')) for r in self.btree.find_all('a', attrs = {'class', 'cellMainLink'})]
+		torrent_files = [r.get('href') for r in self.btree.find_all('a', {'title' : 'Download torrent file'})]
+		magnets = [r.get('href') for r in self.btree.find_all('a', {'title' : 'Torrent magnet link'})]
 		torrent_info = [r.get_text() for r in self.btree.find_all('td', {'class', 'center'})]
 
 		# get everything nice and sorted as list of Torrent structures
 		# compensate the fact that links and info are sequentialy on the list
-		for i, n in enumerate(torrent_names):
-			to_add = Torrent(name = n,
-							 link = links[3*i + 0],
-							 magnet = links[3*i + 1],
-							 tor_file = links[3*i + 2],
+		for i, n in enumerate(torrent_ids):
+			to_add = Torrent(name = n[0],
+							 link = n[1],
+							 magnet = magnets[i],
+							 tor_file = torrent_files[i],
 							 size = torrent_info[5*i + 0],
 							 files = torrent_info[5*i + 1],
 							 age = torrent_info[5*i + 2],
@@ -172,11 +174,11 @@ Improve on the heavily parser dependant v1 ang give more abstraction
 Mandatory attributes for received parser are: 'feed(self, content)', 'close(self)' and 'parsed'
 The feed method should return the content or store it in a class attribute named 'parsed'
 '''
-def parse_page_links_2(html_page, parser=None):
-	if not parser: return
-	parsed = parser.feed(html_page) # TODO choose feed parameters to get expected results from parser
+def parse_page_links_2(html_page, parser=BS4):
+	if not parser: raise ValueError("No parser specified")
+	parsed = parser.feed(html_page) #  choose feed parameters to get expected results from parser
 	parser.close()
-	if not parsed: parsed = parser.parsed
+	if not parsed: parsed = parser.parsed # get content through parsed class atribute
 	try: parser.reset() # some parsers need this workaround
 	except NameError: pass
 	return parsed
