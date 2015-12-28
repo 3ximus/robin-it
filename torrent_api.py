@@ -11,7 +11,7 @@ Copyright (C) 2015 - eximus
 # Imports
 import urllib2, urllib, sys, re, requests, os
 from sgmllib import SGMLParser
-from bf4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 # Defines
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
@@ -35,7 +35,7 @@ class URL_lister(SGMLParser):
 # overload reset on SGMLParser
 	def reset(self):
 		SGMLParser.reset(self)
-		self.parsed= []
+		self.parsed = []
 	def start_a(self, attrs):
 		self.parsed.extend([y for (x,y) in attrs if x == 'href'])
 	def start_td(self, attrs):
@@ -45,28 +45,86 @@ class URL_lister(SGMLParser):
 Torrent data structure
 '''
 class Torrent():
-	def __init(self):
-		self.name = ""
-		self.magnet = ""
-		self.link = ""
-		self.host = KICKASS
-		self.seeds = 0
-		self.peers = 0
-		self.size = 0
+	def __init__(self, name, link, magnet, tor_file, seeds, peers, age, files, size, host = KICKASS):
+		self.name = name
+		self.link = link
+		self.magnet = magnet
+		self.tor_file = tor_file
+		self.size = size
+		self.files = files
+		self.age = age
+		self.seeds = seeds
+		self.peers = peers
+		self.host = host
+	def to_string(self):
+		print "name: %s" % self.name
+		print "link: %s" % self.link
+		print "magnet: %s" % self.magnet
+		print "torrent file: %s" % self.tor_file
+		print "size: %s" % self.size
+		print "files: %s" % self.files
+		print "age: %s" % self.age
+		print "seeds: %s" % self.seeds
+		print "peers: %s" % self.peers
+		print "host: %s" % self.host
+		print " ==== "
+
 
 '''
 Beautiful Soup 4
 Parser for BeautifulSoup 4
 Returns a tuple with Torrent class
+Maybe slower compared to URL_lister but the information is already processed and ready to be used
 '''
-class BF4():
+class BS4():
 	def __init__(self):
-		pass
-	def feed(self, content):
-		pass
+		self.parsed = []
+		self.btree = None # not an actual btree but a 'beautiful tree'
+
+	''' Receives the content to parse, or the open filedescriptor and how to parse it '''
+	def feed(self, html, query_for='torrent'):
+		self.btree = BeautifulSoup(html, "lxml") # parse the webpage with lxml parser
+		if query_for == 'torrent': self._torrent_parsing(host = KICKASS) # TODO pass another host if needed
+		else: raise ValueError("Unknown parser option given")
+
+	''' Prepare for parsing according to host structure '''
+	def _torrent_parsing(self, host = None):
+		if not host: raise ValueError("No valid host was given")
+		elif host == KICKASS: self._torrent_parsing_kat() # host is kickass so call a function to handle it
+		else : raise ValueError("Unknown host given")
+
+	''' Parse acording to Kickass structure '''
+	def _torrent_parsing_kat(self):
+		# looking at the html all the information about the torrent can be found as follows
+		# torrent_name comes as a list of names
+		# links comes as: link to page, magnet link, torrent file link. Repeated for each torrent
+		# torrent_info comes as: size, files, age, seeds, peers. Repeated for each torrent
+		torrent_names = [r.get_text() for r in self.btree.find_all('a', attrs = {'class', 'cellMainLink'})]
+		links = [r.get('href') for r in self.btree.find_all('a', {'class', 'icon16'})]
+		torrent_info = [r.get_text() for r in self.btree.find_all('td', {'class', 'center'})]
+
+		# get everything nice and sorted as list of Torrent structures
+		# compensate the fact that links and info are sequentialy on the list
+		for i, n in enumerate(torrent_names):
+			to_add = Torrent(name = n,
+							 link = links[3*i + 0],
+							 magnet = links[3*i + 1],
+							 tor_file = links[3*i + 2],
+							 size = torrent_info[5*i + 0],
+							 files = torrent_info[5*i + 1],
+							 age = torrent_info[5*i + 2],
+							 seeds= torrent_info[5*i + 3],
+							 peers = torrent_info[5*i + 4])
+			self.parsed.append(to_add)
+		return self.parsed
+
+	''' Reset class attributes '''
+	def reset(self):
+		self.parsed = None
+		self.btree = None
+
 	def close(self):
 		pass
-
 
 '''
 Build Search URL
