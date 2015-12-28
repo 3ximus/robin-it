@@ -37,14 +37,19 @@ for url in fd:
 	req = urllib2.Request(url, headers=HEADER)
 	page = urllib2.urlopen(req)
 	content = page.read() # Retrieve HTML
-	print content
 	try: parser_instance = parser() # create new instance of parser classobj
 	except TypeError: sys.exit("%s Given parser is not an instanceable object" % ERROR_MSG)
 	try: chewed = parser_instance.feed(content) # call feed method with the html to be parsed
-	except NameError: sys.exit("%s Given parser does not contain feed() method" % ERROR_MSG)
+	except NameError as n_error: sys.exit("%s Given parser does not contain feed() method: %s" % (ERROR_MSG, n_error))
 	parser_instance.close() # close parser object is called
-	if not chewed: chewed = parser_instance.parsed
-	#for bit in chewed: print bit # retrived parsed content stored in the parsed variable attribute of the parser class
+	try:
+		if not chewed: chewed = parser_instance.parsed
+	except AttributeError: sys.exit("%s Parser doesn't return any value" % ERROR_MSG)
+	if chewed:
+		for bit in chewed:
+			if isinstance(bit, module.Torrent): bit.to_string()
+			else:  print bit # retrived parsed content stored in the parsed variable attribute of the parser class
+	if hasattr(parser_instance, 'reset') : parser_instance.reset # if exists call reset method
 	break # for testing only one link
 fd.close()
 if log_fd: log_fd.close()
