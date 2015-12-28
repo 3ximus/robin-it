@@ -1,13 +1,11 @@
-#Web Crawler#
-================================
-
-*MAIN README FILE
+**Web Crawler**
+================
 
 Python web crawler to automaticly search and gather web resources.
 
 --------------------------------
 
-##TV Show Search Engine v1.0##
+##TV Show Search Engine v1.0.1##
 
 Searches for available tv shows given keyword, quality (optional), season and episodeS (optional)
 
@@ -30,16 +28,14 @@ Benchmark Page parsers
 
 --------------------------------
 
-##TODO##
-
-###TV SHOWS:###
+## TODO:
 
 v1.1: (Speed and Usability Upgrades)
 
-	- Implement a beautiful soup parser
-	- Implement custom parser
+	- Implement a beautiful soup parser (DONE)
+	- Implement custom parser (DISCONTINUED)
 	- Remove the get download links and use the search algorithm to retrive the magnets and torrent links
-	- Implement `parse_page_links_2` to use with any parser. Also make it receive content instead of making it get the page
+	- Implement `parse_page_links_2` to use with any parser. Also make it receive content instead of making it get the page (DONE)
 
 v1.2: (Info Display)
 
@@ -62,7 +58,4 @@ v2.0:
 
 ##Known Limitations##
 
-- `build_search_url` and `get_download_links` only work for KICKASS
 
---------------------------------
-##Known Bugs##

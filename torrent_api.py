@@ -14,14 +14,10 @@ from sgmllib import SGMLParser
 
 # Defines
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Sa    fari/537.11'}
-
 KICKASS = "http://kickass.unblocked.la/"
 ORDER_SEEDS = "?field=seeders&sorder=desc"
 ORDER_AGE = "?field=time_add&sorder=desc"
 RESULTS_PER_PAGE = 25
-
-# Internal
-ERROR_MSG = "[\033[1;31ERROR\033[0m]"
 
 '''
 URL Parser Class
@@ -34,10 +30,100 @@ class URL_lister(SGMLParser):
 # overload reset on SGMLParser
 	def reset(self):
 		SGMLParser.reset(self)
-		self.parsed= []
+		self.url= []
 	def start_a(self, attrs):
-		self.parsed.extend([y for (x,y) in attrs if x == 'href'])
+		self.url.extend([y for (x,y) in attrs if x == 'href'])
 	def start_td(self, attrs):
+		pass
+
+'''
+Torrent data structure
+'''
+class Torrent():
+	def __init__(self, name = '', link = '', magnet = '', tor_file = '', seeds = '', peers = '', age = '', files = '', size = '', host = KICKASS):
+		self.name = name
+		self.link = link
+		self.magnet = magnet
+		self.tor_file = tor_file
+		self.size = size
+		self.files = files
+		self.age = age
+		self.seeds = seeds
+		self.peers = peers
+		self.host = host
+	def to_string(self):
+		print "name: %s" % self.name
+		print "link: %s" % self.link
+		print "magnet: %s" % self.magnet
+		print "torrent file: %s" % self.tor_file
+		print "size: %s" % self.size
+		print "files: %s" % self.files
+		print "age: %s" % self.age
+		print "seeds: %s" % self.seeds
+		print "peers: %s" % self.peers
+		print "host: %s" % self.host
+		print " ==== "
+
+
+'''
+Beautiful Soup 4
+Parser for BeautifulSoup 4
+Returns a tuple with Torrent class
+Maybe slower compared to URL_lister but the information is already processed and ready to be used
+'''
+class BS4():
+	
+	def __init__(self):
+		self.parsed = []
+		self.btree = None # not an actual btree but a 'beautiful tree'
+
+	''' 
+	Callable feed method
+	Receives the content to parse, or the open filedescriptor and how to parse it
+	'''
+	def feed(self, html, query_for='torrent'):
+		self.btree = BeautifulSoup(html, "lxml") # parse the webpage with lxml parser
+		if query_for == 'torrent': self._torrent_parsing(host = KICKASS) # TODO pass another host if needed
+		else: raise ValueError("Unknown parser option given")
+
+	''' Prepare for parsing according to host structure '''
+	def _torrent_parsing(self, host = None):
+		if not host: raise ValueError("No valid host was given")
+		elif host == KICKASS: self._torrent_parsing_kat() # host is kickass so call a function to handle it
+		else : raise ValueError("Unknown host given")
+
+	''' Parse acording to Kickass structure '''
+	def _torrent_parsing_kat(self):
+		tm_pattern = re.compile('Download torrent file|Torrent magnet link') # torrent and magnets pattern
+		# looking at the html all the information about the torrent can be found as follows
+		# torrent_ids comes as a list of tuples being the first element the torrent name and the last its link
+		# torren_files and magnets is a list of torrent links and magnets respectivly
+		# torrent_info comes as: size, files, age, seeds, peers. Repeated for each torrent
+		torrent_ids = [(r.get_text(), r.get('href')) for r in self.btree.find_all('a', attrs = {'class', 'cellMainLink'})]
+		tm_links = [r.get('href') for r in self.btree.find_all('a', {'title' : tm_pattern})]
+		torrent_info = [r.get_text() for r in self.btree.find_all('td', {'class', 'center'})]
+
+		# get everything nice and sorted as list of Torrent structures
+		# compensate the fact that links and info are sequentialy on the list
+		for i, n in enumerate(torrent_ids):
+			to_add = Torrent(name = n[0],
+							 link = n[1],
+							 magnet = tm_links[2*i + 0],
+							 tor_file = tm_links[2*i + 1],
+							 size = torrent_info[5*i + 0],
+							 files = torrent_info[5*i + 1],
+							 age = torrent_info[5*i + 2],
+							 seeds= torrent_info[5*i + 3],
+							 peers = torrent_info[5*i + 4])
+			self.parsed.append(to_add)
+		return self.parsed
+
+	''' Reset class attributes '''
+	def reset(self):
+		self.parsed = None
+		self.btree = None
+
+	def close(self):
 		pass
 
 '''
@@ -49,50 +135,29 @@ NOTE: Currently only works for KICKASS Torrents page.
 def build_search_url(main_url, search_term, page = 1, order_results = 'seeds', verbose = True):
 	if order_results == 'seeds': order_results = ORDER_SEEDS
 	elif order_results == 'age': order_results = ORDER_AGE
-	else: raise TypeError('%s Unknown order_resutls parameter' % ERROR_MSG)
+	else: raise TypeError('\033[1;31mUnknown order_results parameter\033[0m')
 	search_url = '%susearch/%s/%d/%s' % (main_url, urllib2.quote(search_term, safe=''), page, order_results)
 	return search_url
 
 
 '''
-Get Page HTML
-Returns the html index given a source url
-'''
-def get_page_html(url):
-	request = urllib2.Request(url, headers=HEADER) # make a request for the html
-	try: page = urllib2.urlopen(request) # open the html file
-	except urllib2.URLError: sys.exit( "%s Name or service Unknown: %s" % (ERROR_MSG, url))
-	content = page.read() # Return HTML
-	page.close() # close the retrieved html
-	return content
-
-'''
-Parse Page Links v1
-Deprecated
+Parse Page Links
 Receives a page and uses the received parser (defaults to the URL_lister) to parse the page content.
 Returns a list with the parsed content.
 '''
 def parse_page_links(url, parser=URL_lister()):
-	content = get_page_html(url) # get html page
+	request = urllib2.Request(url, headers=HEADER)
+	try: page = urllib2.urlopen(request)
+	except urllib2.URLError:
+		print "\033[1;31mName or Service Unknown:\033[0m %s" % url
+		return
+	content = page.read() # Retrieve HTML
 	parser.feed(content) # Parse content
-	parser.close() # close parser TODO needed for url lister
-	returned_urls = parser.parsed # get all the parsed content
-	parser.reset() # parser must reset to avoid maintaining its value after sucessive calls
+	parser.close()
+	page.close()
+	returned_urls = parser.url
+	parser.reset()
 	return returned_urls
-
-'''
-Parse Page Links v2
-Improve on the heavily parser dependant v1 ang give more abstraction
-'''
-def parse_page_links_2(html_page, parser=None):
-	if not parser: return
-	parsed = parser.feed(html_page) # TODO choose feed parameters to get expected results from parser
-	try: # some parsers need this workaround
-		if not parsed: parsed = parser.parsed
-		parser.close()
-		parser.reset()
-	except NameError: pass
-	return parsed
 
 '''
 Search
@@ -102,23 +167,23 @@ NOTE: Magnets will not be correctly interpreted by other functions.
 '''
 def search(main_url, search_term, parser=URL_lister(), use_magnets = False, max_results_amount = RESULTS_PER_PAGE, verbose = True, order_results = 'seeds'):
 	link_list = []
-	regex = '.*\.html' + ('|magnet:?.*' if use_magnets else '') # what to search for
+	regex = '.*\.html' + ('|magnet:?.*' if use_magnets else '')
 	max_count = 0
 	current_page = 0
 	if verbose: print "\033[0;32mSearching...\033[0m"
 	while 1:
-		added = False # initialize loop control variable
-		current_page += 1 # iterate page results
+		added = False
+		current_page += 1
 		url = build_search_url(main_url, search_term, page=current_page, order_results=order_results, verbose=verbose)
-		links = parse_page_links(url, parser) # get all the links from the page
+		links = parse_page_links(url, parser)
 # search links
 		if not links: break
 		for link in links:
-			if re.search(regex, link) and link not in link_list: # find all links matching the pattern
-				added = True # loop control, mark found result
-				link_list.append(main_url + link.split('/')[-1]) # add result to list
-				max_count += 1 # count results found
-			if max_count >= max_results_amount: break # inner loop control
+			if re.search(regex, link) and link not in link_list:
+				added = True
+				link_list.append(main_url + link.split('/')[-1])
+				max_count += 1
+			if max_count >= max_results_amount: break # loop control
 		if added == False: break # loop control
 	if verbose: print "\033[0;32mFound: \033[0m%d results on %d pages" % (max_count, current_page)
 	return link_list
@@ -131,24 +196,25 @@ Returns a list with download links found.
 NOTE: Only works for torrents.
 '''
 def get_download_links(host_url_list, verbose = True):
-# convert to list if only a single url is given
+# convert to list if has a single element
 	if type(host_url_list) is not list: host_url_list = [host_url_list,]
 	link_list = []
 	links = []
-	select_pattern = 'https.*torcache.*' # pattern to look for, TODO this only works for torrents
+	select_pattern = 'https.*torcache.*'
 	for cont, host_page in enumerate(host_url_list): # go through all supllied links
 		if verbose: print "\033[0;32m\rFetching [%d / %d]...\033[0m" % (cont + 1, len(host_url_list)),
 		sys.stdout.flush()
-		links = parse_page_links(host_page) # find hiperlinks on this page
-		match = False # set break condition
-		for link in links: # go through all links to find one matching the pattern
+		links = parse_page_links(host_page)
+		match = False
+		for link in links:
+# search for link matching https://torcache
 			if re.search(select_pattern, link):
 				link_list.append(link)
 				match = True
-				break # only one needed, break when found
+				break
 # no matches found
-		if verbose and not match: print "%s No download links in page: %s" % (ERROR_MSG, host_url)
-# fix links to be in the file format
+		if verbose and not match: print "\033[1;31mNo download links in page:\033[0m %s" % host_url
+# fix links
 	for i in range (len(link_list)): link_list[i] += '.torrent'
 	if verbose: print "\r%d links fetched sucessfully." % (cont + 1)
 	return link_list
@@ -164,14 +230,13 @@ The force_show string is a regex pattern to not ignore and make uppercase
 '''
 def parse_name(name, url = False, remove_useless = False, tv_show = False, split_char = '.', capitalize = True, force_show = None, ignore = None):
 	new_name = ''
-# known patterns
 	tv_show_pattern = 's[0-9]*e[0-9]*'
 	useless = '^torrent$|^fum$|^x[0-9]*|^fleet$|^avi$'
 	if url and split_char == '.':
 		name = name.split("/")[-1].split("]")[-1]
 		split_char = '-'
 		useless += '|.*html'
-	for string in name.split(split_char): # build name depending on the various values supplied
+	for string in name.split(split_char):
 		if force_show and re.search(force_show, string): new_name += ' ' + string.upper()
 		elif remove_useless and re.search(useless,string): continue
 		elif ignore and re.search(ignore, string): continue
@@ -192,16 +257,16 @@ Download a file from a given URL holding the file.
 By default it saves the file in './cache' by another path can be specified.
 '''
 def download_file(url, fname, location = './cache/', name_parser = False):
-	if not os.path.exists(location): os.mkdir(location) # check for folder existence
-	if name_parser: fname = name_parser(fname) # use a name parser to generate a better filename
-	fname = location + fname # complete the filename with the full path
+	if not os.path.exists(location): os.mkdir(location)
+	if name_parser: fname = name_parser(fname)
+	fname = location + fname
 	try:
-		r = requests.get(url, stream=True, headers=HEADER) # open connection to remote file
-		with open(fname, 'wb') as f: # open new file
-			for chunk in r.iter_content(chunk_size=1024): # download chuncks of content from the website
+		r = requests.get(url, stream=True, headers=HEADER)
+		with open(fname, 'wb') as f:
+			for chunk in r.iter_content(chunk_size=1024):
 				if chunk:
-					f.write(chunk) # write to new file
-					f.flush() # flush content
+					f.write(chunk)
+					f.flush()
 	except requests.exceptions.RequestException as e:
 		print '\n' + str(e)
 		sys.exit(1)
@@ -214,14 +279,14 @@ Downloads all files hosted on the given URL's
 NOTE: Website adress formating bound, may not work everywere
 '''
 def download_url_list(link_list, verbose = True, name_parser = False, location = './cache/'):
-	if type(link_list) is not list: link_list = [link_list,] # convert to list
+# convert to list
+	if type(link_list) is not list: link_list = [link_list,]
 	file_list = []
 	for cont, link in enumerate(link_list):
-		filename = link.split("]")[-1] # filename contains only the last part of the name after the ']' char
+		filename = link.split("]")[-1]
 		if verbose: print "\r\033[0;32mDownloading File [%d / %d]\033[0m" % (cont + 1, len(link_list)),
-		sys.stdout.flush() # flush stdout due to carriage return usage
-		filename = download_file(link, filename, location=location, name_parser=name_parser) # download the file
-		file_list.append(filename) # add the new downloaded filename to the file list
+		sys.stdout.flush()
+		file_list.append(download_file(link, filename, location=location, name_parser=name_parser))
 	if verbose: print "\r%d files downloaded sucessfully." % (cont + 1)
 	return file_list
 
@@ -231,7 +296,9 @@ Test program
 '''
 if __name__ == '__main__':
 	try: search_terms = sys.argv[1]
-	except IndexError: sys.exit("No search term given")
+	except IndexError:
+		print "No search term given"
+		sys.exit()
 	search_me = build_search_url(KICKASS, search_terms)
 	search_results = search(search_me)
 	download_links = get_download_links(search_results)

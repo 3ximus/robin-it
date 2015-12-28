@@ -74,7 +74,7 @@ for s in seasons:
 		search_term = '%s %s %s' % (tv_show, ep_id, quality)
 		print '\033[0;33mSearching: \033[0m%s' % search_term
 # Search and disply results
-		search_results = torrent_api.search(torrent_api.KICKASS, search_term, max_results_amount = BIAS, verbose = False)
+		search_results = torrent_api.search(torrent_api.KICKASS, search_term, max_results_amount = BIAS, verbose = False, use_magnets = True)
 		selected_links = decision(search_results, print_results = False)
 		if not selected_links: continue
 		if type(selected_links) is not list: print '\033[1;32mDownloading: \033[0m%s' % torrent_api.parse_name(selected_links, url=True, remove_useless=True, tv_show = True, capitalize = True, force_show = TRUSTED_SOURCES + TRUSTED_FORMAT)
