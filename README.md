@@ -75,7 +75,6 @@ Benchmark Page parsers
 
 ##Known Limitations##
 
-- `build_search_url` and `get_download_links` only work for KICKASS
 
 --------------------------------
 ##Known Bugs##

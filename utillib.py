@@ -11,6 +11,11 @@ import re, os, sys
 
 
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
+ERROR_MSG = "[\033[1;31mERROR\033[0m]"
+
+''' Custom Error class '''
+class UtillibError(Exception):
+	pass
 
 '''
 Build Search URL
@@ -36,7 +41,7 @@ Returns the html index given a source url
 def get_page_html(url):
 	request = urllib2.Request(url, headers=HEADER) # make a request for the html
 	try: page = urllib2.urlopen(request) # open the html file
-	except urllib2.URLError: sys.exit( "%s Name or service Unknown: %s" % (ERROR_MSG, url))
+	except urllib2.URLError: raise UtillibError("%s Name or service Unknown: %s" % (ERROR_MSG, url))
 	content = page.read() # Return HTML
 	page.close() # close the retrieved html
 	return content

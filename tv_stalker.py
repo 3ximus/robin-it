@@ -6,6 +6,7 @@ Created - 11.12.15
 Copyright (C) 2015 - eximus
 '''
 import torrent_api
+from utillib import UtillibError
 import sys, re
 
 BIAS = 2
@@ -37,7 +38,10 @@ for s in seasons:
 			sys.exit(-1)
 		search_term = '%s %s %s' % (tv_show, ep_id, quality)
 		print '\033[0;33mSearching: \033[0m%s' % search_term
-		search_results = torrent_api.search(torrent_api.KICKASS, search_term)
+		try: search_results = torrent_api.search(torrent_api.KICKASS, search_term)
+		except utillib.UtillibError:
+			print "No results found"
+			continue
 		torrent_api.present_results(search_results)
 
 		downloads = []
