@@ -17,13 +17,10 @@ import utillib
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 
 KICKASS = "http://kickass.unblocked.la/"
-
 TRUSTED_SOURCES = 'killers|rartv|immerse|publichd|rarbg|'
 TRUSTED_SOURCES += TRUSTED_SOURCES.upper()
 TRUSTED_FORMAT = 'web-dl|hdtv|eztv|ettv|'
 TRUSTED_FORMAT += TRUSTED_FORMAT.upper()
-
-# Internal
 ERROR_MSG = "[\033[1;31mERROR\033[0m]"
 
 '''
@@ -48,7 +45,8 @@ Gives a Trust flag to torrents
 '''
 def search(main_url, search_term, parser=parserlib.BS4(), page = 1, order_results = 'seeds'):
 	url = utillib.build_search_url(main_url, search_term, page=page, order_results=order_results)
-	html = utillib.get_page_html(url)
+	try: html = utillib.get_page_html(url)
+	except utillib.UtillibError: raise # re-raise the exception
 	return parse_page_links(html, parser) # get all the links from the page
 
 '''
@@ -104,7 +102,8 @@ Test program
 if __name__ == '__main__':
 	try: search_terms = sys.argv[1]
 	except IndexError: sys.exit("No search term given")
-	results = search(KICKASS, search_terms)
+	try: results = search(KICKASS, search_terms)
+	except utillib.UtillibError: sys.exit("No results found")
 	present_results(results)
 	try: choice = eval(raw_input("\nSelection: "))
 	except (NameError, SyntaxError): sys.exit("%s Use a number" % ERROR_MSG)
