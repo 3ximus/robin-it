@@ -38,12 +38,12 @@ v1.1: (Speed and Usability Upgrades)
 
 	- Implement a beautiful soup parser (DONE)
 	- Implement custom parser (DISCONTINUED)
-	- Remove the get download links and use the search algorithm to retrive the magnets and torrent links
+	- Remove the get download links and use the search algorithm to retrive the magnets and torrent links (DONE)
 	- Implement `parse_page_links_2` to use with any parser. Also make it receive content instead of making it get the page (DONE)
 
 v1.2: (Info Display)
 
-	- Get TV show info from a web page
+	- Get TV show info
 
 v1.3: (Traking System)
 
@@ -55,6 +55,7 @@ v1.4: (Big Release)
 
 v2.0:
 	- Implement GUI
+	- Use Kickass API instead of parsing
 
 ###MOVIES###
 
