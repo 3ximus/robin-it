@@ -1,19 +1,36 @@
-**Web Crawler**
-================
+#Web Crawler#
+================================
+
+*MAIN README FILE
 
 Python web crawler to automaticly search and gather web resources.
 
 --------------------------------
 
-##TV Show Search Engine v1.0.1##
+##TV Show Search Engine v1.1##
 
 Searches for available tv shows given keyword, quality (optional), season and episodeS (optional)
 
-Usage:
+*Usage*:
 
 	. `$ ./tv_crawler.py`
 	. If Quality left blank defaults to 720p
 	. If Episodes left blank defaults to 10 episodes `range(11)[1:]`
+	
+
+*Changelog*:
+
+**v1.1**: (Speed and Usability Upgrades)
+
+	- Implement a beautiful soup parser (DONE)
+	- Implement custom parser (DISCONTINUED)
+	- Remove the get download links and use the search algorithm to retrive the magnets and torrent links (DONE)
+	- Implement `parse_page_links_2` to use with any parser. Also make it receive content instead of making it get the page (DONE)
+
+**v1.0**: (First Run)
+	- Basic Search and Download functionality
+
+
 *Multiprocess Test version on another branch*
 
 --------------------------------
@@ -28,34 +45,37 @@ Benchmark Page parsers
 
 --------------------------------
 
-## TODO:
+##TODO##
 
-v1.1: (Speed and Usability Upgrades)
+###TV SHOWS:###
 
-	- Implement a beautiful soup parser (DONE)
-	- Implement custom parser (DISCONTINUED)
-	- Remove the get download links and use the search algorithm to retrive the magnets and torrent links
-	- Implement `parse_page_links_2` to use with any parser. Also make it receive content instead of making it get the page (DONE)
+**v1.2**: (Info Display)
 
-v1.2: (Info Display)
+	- Get TV show info
 
-	- Get TV show info from a web page
-
-v1.3: (Traking System)
+**v1.3**: (Traking System)
 
 	- Tv Show tracking 
 
-v1.4: (Big Release)
+**v1.4**: (Big Release)
 
 	- Incorporate Traking with Search/Download engine
 
-v2.0:
+**v2.0**:
 	- Implement GUI
+	- Use Kickass API instead of parsing
+
+
+--------------------------------
 
 ###MOVIES###
+
 
 --------------------------------
 
 ##Known Limitations##
 
+- `build_search_url` and `get_download_links` only work for KICKASS
 
+--------------------------------
+##Known Bugs##
