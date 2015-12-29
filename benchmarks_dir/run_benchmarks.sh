@@ -20,7 +20,7 @@ echo -e "[\033[32m*\033[0m] \033[3;29m Running $sample tests on\033[0m $parser_c
 date=$(date +%d-%b-%y-%T) # get date
 cpu_info=$(cat /proc/cpuinfo | grep -m1 "model name" | cut -d' ' -f5) # get info on the processor
 uname=$(uname -rm) # get info os and kernel
-parser_module="$(dirname $(pwd))/torrent_api.py" # module containing parser (TODO change here if needed)
+parser_module="$(dirname $(pwd))/parserlib.py" # module containing parser (TODO change here if needed)
 url_file="url_x10_kickass_usearch.txt" # file containing urls to parse (TODO change here if needed)
 log_path="outJunk/$date"
 mkdir -p $log_path 	# make directory to create log files

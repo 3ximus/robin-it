@@ -3,7 +3,7 @@
 '''
 Small script for testing diferent parser effects and speed
 v1.0.0
-Usage example: ./parser_test_suite.py url_x10_kickass_usearch.txt "$(dirname $(pwd))/torrent_api.py" URL_lister
+Usage example: ./parser_test_suite.py url_x10_kickass_usearch.txt "$(dirname $(pwd))/parserlib.py" URL_lister
 Created - 16.12.15
 Copyright (C) 2015 - eximus
 '''
@@ -16,7 +16,7 @@ try: # get arguments
 	url_file = sys.argv[1]
 	import_path = sys.argv[2]
 	parser = sys.argv[3]
-except IndexError: sys.exit("%s Missing arguments\nUsage ./parser_test_suite.py <url_file> <module_path> <parser_name>.\nExample: ./parser_test_suite.py url_x10_kickass_usearch.txt $(dirname $(pwd))/torrent_api.py URL_lister log.txt" % ERROR_MSG)
+except IndexError: sys.exit("%s Missing arguments\nUsage ./parser_test_suite.py <url_file> <module_path> <parser_name>.\nExample: ./parser_test_suite.py url_x10_kickass_usearch.txt $(dirname $(pwd))/parserlib.py URL_lister log.txt" % ERROR_MSG)
 else:
 	import_path = import_path.rsplit('/',1) # strip path and select the path to import directory
 	sys.path.insert(0, import_path[0]) # add path to system path variable
@@ -37,6 +37,7 @@ for url in fd:
 	req = urllib2.Request(url, headers=HEADER)
 	page = urllib2.urlopen(req)
 	content = page.read() # Retrieve HTML
+	page.close()
 	try: parser_instance = parser() # create new instance of parser classobj
 	except TypeError: sys.exit("%s Given parser is not an instanceable object" % ERROR_MSG)
 	try: chewed = parser_instance.feed(content) # call feed method with the html to be parsed
