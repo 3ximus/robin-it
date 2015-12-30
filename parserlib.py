@@ -62,7 +62,7 @@ class BS4():
 		self.parsed = []
 		self.btree = None # not an actual btree but a 'beautiful tree'
 
-	''' 
+	'''
 	Callable feed method
 	Receives the content to parse, or the open filedescriptor and how to parse it
 	'''
@@ -92,14 +92,14 @@ class BS4():
 		# compensate the fact that links and info are sequentialy on the list
 		for i, n in enumerate(torrent_ids):
 			to_add = Torrent(name = n[0],
-							 link = n[1],
-							 magnet = tm_links[2*i + 0],
-							 tor_file = tm_links[2*i + 1],
-							 size = torrent_info[5*i + 0],
-							 files = torrent_info[5*i + 1],
-							 age = torrent_info[5*i + 2],
-							 seeds= torrent_info[5*i + 3],
-							 peers = torrent_info[5*i + 4])
+					link = n[1],
+					magnet = tm_links[2*i + 0],
+					tor_file = tm_links[2*i + 1],
+					size = torrent_info[5*i + 0],
+					files = torrent_info[5*i + 1],
+					age = torrent_info[5*i + 2],
+					seeds= torrent_info[5*i + 3],
+					peers = torrent_info[5*i + 4])
 			self.parsed.append(to_add)
 		return self.parsed
 
