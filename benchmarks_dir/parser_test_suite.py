@@ -1,4 +1,4 @@
-#! /usr/bin/python2
+#! /usr/bin/env python
 
 '''
 Small script for testing diferent parser effects and speed
@@ -47,9 +47,7 @@ for url in fd:
 		if not chewed: chewed = parser_instance.parsed
 	except AttributeError: sys.exit("%s Parser doesn't return any value" % ERROR_MSG)
 	if chewed:
-		for bit in chewed:
-			if isinstance(bit, module.Torrent): bit.to_string()
-			else:  print bit # retrived parsed content stored in the parsed variable attribute of the parser class
+		for bit in chewed: print bit
 	if hasattr(parser_instance, 'reset') : parser_instance.reset # if exists call reset method
 	#break # for testing only one link
 fd.close()

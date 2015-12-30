@@ -63,7 +63,9 @@ Benchmark Page parsers
 
 **v2.0**:
 	- Implement GUI
-	- Use Kickass API instead of parsing
+
+
+*Notes* : Use Kickass API instead of parsing when/if available
 
 
 --------------------------------

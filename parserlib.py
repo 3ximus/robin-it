@@ -1,5 +1,3 @@
-#! /usr/bin/python2
-
 '''
 Library conatining parser to scrap web pages
 Created - 28.12.15
@@ -15,6 +13,19 @@ KICKASS = "http://kickass.unblocked.la/"
 Torrent data structure
 '''
 class Torrent():
+	'''
+	Note that all items in the constructor are strings
+	name : Contains the torrent Name
+	link : Contains the link to the torrent page
+	magnet : Manget link
+	tor_file : partial torrent file link
+				(must be preceded with 'https:' and appended with '.torrent' to be a usable link
+	seeds = Torrent seeds
+	peers = Torrent peers
+	age = Simple representation of torrent age (hours, days, months, years)
+	files = Number of files a torrent contains
+	host = torrent host page (defaults to kickass)
+	'''
 	def __init__(self, name = '', link = '', magnet = '', tor_file = '', seeds = '', peers = '', age = '', files = '', size = '', host = KICKASS):
 		self.name = name
 		self.link = link
@@ -26,7 +37,7 @@ class Torrent():
 		self.seeds = seeds
 		self.peers = peers
 		self.host = host
-	def to_string(self):
+	def __str__(self):
 		print "name: %s" % self.name
 		print "link: %s" % self.link
 		print "magnet: %s" % self.magnet

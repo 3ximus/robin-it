@@ -1,5 +1,3 @@
-#! /usr/bin/python2
-
 '''
 Library Containing various utility functions
 Created - 28.12.15
