@@ -48,7 +48,7 @@ class Show:
 # Methods
 	'''
 	Class constructor
-	This show will containg the first match in the database
+	This show will containg the first match in the database based on the name given
 	'''
 	def __init__(self, name, watched = False):
 			self.name = name # placeholder updated in the update search
@@ -171,7 +171,7 @@ class Season():
 		episodes_list = database[self.tv_show.name][s_id].keys()
 		self.episodes = [] # reset cached values
 		for i in episodes_list: # generate the episodes list
-			new_episode = Episode(e_id = i, tv_show = self.tv_show, watched = True if self.watched else False)
+			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show, watched = True if self.watched else False)
 			self.episodes.append(new_episode)
 		
 		# update episode info and set watched state
@@ -206,10 +206,12 @@ class Episode:
 
 # Attributes
 	e_id = 0
+	s_id = 0
 	name = ''
 	description = ''
 	episode_number = ''
 	director = ''
+	writer = ''
 	rating = ''
 	season = ''
 	image = ''
@@ -219,8 +221,9 @@ class Episode:
 	tv_show = None # show instance
 
 # Methods
-	def __init__(self, e_id, tv_show, watched = False):
+	def __init__(self, e_id, s_id, tv_show, watched = False):
 		self.e_id = e_id
+		self.s_id = s_id
 		self.watched = watched
 		if tv_show: self.tv_show = tv_show
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
@@ -228,18 +231,28 @@ class Episode:
 
 	'''Print this class information'''
 	def to_string(self):
-		print "<Episode %s - %s>" % (ep_id, name)
+		print "\t Episode info:\nName: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s:\nSeason: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.episode_number, self.director, self.writer, self.rating, self.season, self.image, self.airdate, self.imdb_id, self.description)
 
-	def update_info(self):
-		pass
+	def update_info(self, cache = CACHE):
+		database = Tvdb(cache = cache)
+		self.name = database[self.tv_show.name][e_id][e_id]['episodename']
+		self.description = database[self.tv_show.name][e_id][e_id]['overview']
+		self.episode_number = database[self.tv_show.name][e_id][e_id]['episodenumebr']
+		self.director = database[self.tv_show.name][e_id][e_id]['director']
+		self.writer = database[self.tv_show.name][e_id][e_id]['writer']
+		self.rating = database[self.tv_show.name][e_id][e_id]['rating']
+		self.season = database[self.tv_show.name][e_id][e_id]['seasonnumber']
+		self.image = database[self.tv_show.name][e_id][e_id]['filename']
+		self.imdb_id = IMDB_TITLE + database[self.tv_show.name][e_id][e_id]['imdb_id']
+		self.airdate = database[self.tv_show.name][e_id][e_id]['firstaired']
 
 	''' Toogle the watched state '''
 	def toogle_watched(self):
-		pass
+		self.set_watched(not self.watched)
 
 	''' Set the watched state '''
 	def set_watched(Self):
-		pass
+		self.watched = value
 
 	''' Update watched state according to its content'''
 	def update_watched(self):
