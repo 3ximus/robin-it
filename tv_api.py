@@ -3,6 +3,14 @@
 Api for Getting TV Shows date
 Queries http://thetvdb.com/ using  tvdb_api: https://github.com/dbr/tvdb_api
 Updates are cached in cache folder
+Usage:
+	s = Show('game of thrones')
+	s.to_string() # print show info
+	s.seasons[0].to_string() # print season info
+	s.seasons[0].poster # get list of season posters (use poster_wide for wide posters)
+	s.seasons[0].episodes[0].to_string() # print episode info
+# note that seasons and episodes are indexed with zero base
+
 Created - 30.12.15
 Copyright (C) 2015 - eximus
 '''
@@ -57,7 +65,7 @@ class Show:
 
 	'''Print this class information'''
 	def to_string(self):
-		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s:\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.imdb_id, self.description)
+		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.imdb_id, self.description)
 
 	'''
 	Searches thetvdb.com and updates class attributes
@@ -158,28 +166,23 @@ class Season():
 		self.poster = [] # clear ceched value
 		for entry in posters['season']:
 			misc = posters['season'][entry]
-			if misc['language'] == 'en' and misc['season'] == str(s_id):
+			if misc['language'] == 'en' and misc['season'] == str(self.s_id):
 				self.poster.append(misc['_bannerpath'])
 		# update wide posters
 		self.poster_wide = [] # clear ceched value
 		for entry in posters['seasonwide']:
 			misc = posters['seasonwide'][entry]
-			if misc['language'] == 'en' and misc['season'] == str(s_id):
+			if misc['language'] == 'en' and misc['season'] == str(self.s_id):
 				self.poster_wide.append(misc['_bannerpath'])
 
 		# update episodes list
-		episodes_list = database[self.tv_show.name][s_id].keys()
+		episodes_list = database[self.tv_show.name][self.s_id].keys()
 		self.episodes = [] # reset cached values
 		for i in episodes_list: # generate the episodes list
 			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show, watched = True if self.watched else False)
 			self.episodes.append(new_episode)
-		
-		# update episode info and set watched state
-		watched_count = 0
-		for episode in episodes:
-			episode.update_info()
-			if episode.watched: watched_count += 1
-		if watched_count == len(self.episodes): self.watched = True
+
+		self.update_watched()
 
 	''' Toogle the watched state '''
 	def toogle_watched(self):
@@ -231,20 +234,20 @@ class Episode:
 
 	'''Print this class information'''
 	def to_string(self):
-		print "\t Episode info:\nName: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s:\nSeason: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.episode_number, self.director, self.writer, self.rating, self.season, self.image, self.airdate, self.imdb_id, self.description)
+		print "\t Episode info:\nName: %s\nSeason: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.season, self.episode_number, self.director, self.writer, self.rating, self.image, self.airdate, self.imdb_id, self.description)
 
 	def update_info(self, cache = CACHE):
 		database = Tvdb(cache = cache)
-		self.name = database[self.tv_show.name][e_id][e_id]['episodename']
-		self.description = database[self.tv_show.name][e_id][e_id]['overview']
-		self.episode_number = database[self.tv_show.name][e_id][e_id]['episodenumebr']
-		self.director = database[self.tv_show.name][e_id][e_id]['director']
-		self.writer = database[self.tv_show.name][e_id][e_id]['writer']
-		self.rating = database[self.tv_show.name][e_id][e_id]['rating']
-		self.season = database[self.tv_show.name][e_id][e_id]['seasonnumber']
-		self.image = database[self.tv_show.name][e_id][e_id]['filename']
-		self.imdb_id = IMDB_TITLE + database[self.tv_show.name][e_id][e_id]['imdb_id']
-		self.airdate = database[self.tv_show.name][e_id][e_id]['firstaired']
+		self.name = database[self.tv_show.name][self.s_id][self.e_id]['episodename']
+		self.description = database[self.tv_show.name][self.s_id][self.e_id]['overview']
+		self.episode_number = database[self.tv_show.name][self.s_id][self.e_id]['episodenumber']
+		self.director = database[self.tv_show.name][self.s_id][self.e_id]['director']
+		self.writer = database[self.tv_show.name][self.s_id][self.e_id]['writer']
+		self.rating = database[self.tv_show.name][self.s_id][self.e_id]['rating']
+		self.season = database[self.tv_show.name][self.s_id][self.e_id]['seasonnumber']
+		self.image = database[self.tv_show.name][self.s_id][self.e_id]['filename']
+		self.imdb_id = IMDB_TITLE + database[self.tv_show.name][self.s_id][self.e_id]['imdb_id']
+		self.airdate = database[self.tv_show.name][self.s_id][self.e_id]['firstaired']
 
 	''' Toogle the watched state '''
 	def toogle_watched(self):
