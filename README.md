@@ -47,8 +47,6 @@ Benchmark Page parsers
 
 ##TODO##
 
-###TV SHOWS:###
-
 **v1.2**: (Info Display)
 
 	- Get TV show info
@@ -64,13 +62,21 @@ Benchmark Page parsers
 **v2.0**:
 	- Implement GUI
 
+**v2.1**:
+	- Custom tvdb_api
+
+**v2.2**:
+	- Multiple devices
+
+**v2.3**:
+	- Multiple device persistence
+
+###OTHER TODO###
+
+- Add a torrent url and magnet to an episode / movie so that it gets saved
 
 *Notes* : Use Kickass API instead of parsing when/if available
 
-
---------------------------------
-
-###MOVIES###
 
 
 --------------------------------
