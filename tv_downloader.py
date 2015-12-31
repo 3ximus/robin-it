@@ -39,7 +39,7 @@ for s in seasons:
 		search_term = '%s %s %s' % (tv_show, ep_id, quality)
 		print 'Searching: %s' % search_term
 		try: search_results = torrent_api.search(torrent_api.KICKASS, search_term)
-		except utillib.UtillibError:
+		except UtillibError:
 			print "No results found"
 			continue
 		torrent_api.present_results(search_results)
