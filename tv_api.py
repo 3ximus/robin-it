@@ -8,10 +8,19 @@ Copyright (C) 2015 - eximus
 '''
 
 from tvdb_api import Tvdb
+import os
 
 IMDB_TITLE = "http://www.imdb.com/title/"
 CACHE = "cache/"
-if not os.path.exists(CACHE): os.mkdir(CACHE)
+if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
+
+'''Main Error Class'''
+class TVError(Exception):
+	pass
+
+'''Unknown tv show error'''
+class UnknownTVError(TVError):
+	pass
 
 '''
 Class Containing Show information
@@ -41,14 +50,14 @@ class Show:
 	Class constructor
 	This show will containg the first match in the database
 	'''
-	def __init__(self, name, watched = False)
+	def __init__(self, name, watched = False):
 			self.name = name # placeholder updated in the update search
 			self.watched = watched
 			self.update_info()
 
-	'''Make this class printable'''
-	def __str__(self):
-		return "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s:\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.imdb_id, self.description)
+	'''Print this class information'''
+	def to_string(self):
+		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s:\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.imdb_id, self.description)
 
 	'''
 	Searches thetvdb.com and updates class attributes
@@ -56,51 +65,86 @@ class Show:
 	'''
 	def update_info(self, cache = CACHE):
 		database = Tvdb(cache = cache)
-		self.name = database[self.name]['seriesname'] # update tv show name
-		seasons_list = database[self.name] # retrieve list of available seasons
+		try: self.name = database[self.name]['seriesname'] # update tv show name
+		except tvdb_shownotfound: raise UnknownTVError("Unexistent tv_show \"%s\"" % self.name)
+		
+		# updates seasons list
+		seasons_list = database[self.name].keys() # retrieve list of available seasons
+		if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
+		self.seasons = []
+		for i in seasons_list: # generates the seasons list
+			new_season = Season(s_id = i, tv_show = self, watched = True if self.watched else False)
+			self.seasons.append(new_season)
 
-# TODO update TV Show info
+		# update TV Show info
+		self.description = database[self.name]['overview']
+		self.genre = database[self.name]['genre']
+		self.runtime = database[self.name]['runtime']
+		self.status = database[self.name]['status']
+		self.network = database[self.name]['network']
+		self.air_dayofweek = database[self.name]['airs_dayofweek']
+		self.air_time = database[self.name]['airs_time']
+		self.rating = database[self.name]['rating']
+		self.actors = database[self.name]['actors']
+		self.poster = database[self.name]['poster']
+		self.banner = database[self.name]['banner']
+		self.imdb_id = IMDB_TITLE + database[self.name]['imdb_id']
 
-# TODO update seasons list generating the correct instances of Season so they can be self updatable
-		sc = 0
-		for season in self.seasons:
-			if season.watched: sc+=1 # increment number of watched seasons
-			season.update_info() # update each season
-		if sc == len(self.seasons): # verify if we watched all the seasons
-			self.watched = True
+		self.update_watched()
 
 	''' Toogle the watched state '''
 	def toogle_watched(self):
 		self.watched = not self.watched # toogle watched
 		for season in self.seasons: # replicate action to every season
 			season.set_watched(self.watched)
-			
+
+	'''
+	Update watched on the entire tv show
+	Propagates decisions to entire show tree
+	'''
+	def update_watched(self):
+		seasons_watched = 0
+		for season in self.seasons: # for every season on this show
+			episodes_watched = 0
+			for episode in season.episodes: # for every episode in this show season
+				if episode.watched: episodes_watched += 1
+			if episodes_watched == len(season.episodes): # all episodes watched ?
+				season.watched = True # if yes season is watched
+				seasons_watched += 1
+		# all seasons watched then this show is watched
+		if seasons_watched == len(self.seasons): self.watched = True
 
 '''
 Class defining a TV Show Season
-Its is self updatable with method update_info, this updates every episode information
+Its self updatable with method update_info, this updates every episode information
 Update function generates cache on CACHE directory by default
 '''
-class Season(list):
+class Season():
 
 #Attributes
 	s_id = 0 # season numeric id
 	tv_show = None # Show instance
+	episodes = []
 	poster = [] # list of season poster
 	poster_wide = [] # list of season wide posters
-	episodes = 0 # number of episodes
 
 # Methods
+	'''
+	Cosntructor method
+	Muste receive a season id number and a tv_show from where this season belongs to
+	'''
 	def __init__(self, s_id, tv_show, watched = False):
 		self.s_id = s_id
 		if tv_show: self.tv_show = tv_show
-		else raise ValueError("No Tv Show assigned")
+		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.watched = watched
-	
-	'''Make this class printable'''
-	def __str__(self):
-		for episode in self: return_string = return_string = episode.__str__()
-		return return_string
+		self.update_info()
+
+	'''Print this class information'''
+	def to_string(self):
+		return_string = ''
+		for episode in self.episodes: return_string += "%s - %s\n" % (episode.episode_number, episode.name)
+		print return_string
 
 	'''
 	Searches thetvdb.com and updates all episodes it contains
@@ -109,39 +153,59 @@ class Season(list):
 	def update_info(self, cache = CACHE):
 		# update posters
 		database = Tvdb(cache = cache, banners = True)
-		posters = database[self.tv_show.name]['_banners']['season']:
-		for entry in posters['season']: # update posters
+		posters = database[self.tv_show.name]['_banners']['season']
+		# update posters
+		self.poster = [] # clear ceched value
+		for entry in posters['season']:
 			misc = posters['season'][entry]
 			if misc['language'] == 'en' and misc['season'] == str(s_id):
 				self.poster.append(misc['_bannerpath'])
-
-		for entry in posters['seasonwide']: # update wide posters
+		# update wide posters
+		self.poster_wide = [] # clear ceched value
+		for entry in posters['seasonwide']:
 			misc = posters['seasonwide'][entry]
 			if misc['language'] == 'en' and misc['season'] == str(s_id):
 				self.poster_wide.append(misc['_bannerpath'])
 
-		self.episodes = len(self)
-		for episode in self:
-			episode.update_info() # TODO verify if episode its the reference to this list element or just a copy
+		# update episodes list
+		episodes_list = database[self.tv_show.name][s_id].keys()
+		self.episodes = [] # reset cached values
+		for i in episodes_list: # generate the episodes list
+			new_episode = Episode(e_id = i, tv_show = self.tv_show, watched = True if self.watched else False)
+			self.episodes.append(new_episode)
+		
+		# update episode info and set watched state
+		watched_count = 0
+		for episode in episodes:
+			episode.update_info()
+			if episode.watched: watched_count += 1
+		if watched_count == len(self.episodes): self.watched = True
 
 	''' Toogle the watched state '''
-	def toogle_watched(self, value):
-		pass
-	
+	def toogle_watched(self):
+		self.set_watched(not self.watched)
+
 	''' Set the watched state '''
 	def set_watched(self, value):
 		self.watched = value
-		for episode in self:
-			
-	
+		for episode in episodes:
+			episode.watched = value
+		self.update_watched() # after setting the value call update_watched to propagate change
+
+	''' Update watched state according to its content'''
+	def update_watched(self):
+		# update watched on tv show this runs on the entire tv show, updating everything
+		self.tv_show.update_watched()
+
 '''
 Class defining a Season Episode
-Its is self updatable with method update_info updating episode information
+Its self updatable with method update_info updating episode information
 Update function generates cache on CACHE directory by default
 '''
 class Episode:
 
 # Attributes
+	e_id = 0
 	name = ''
 	description = ''
 	episode_number = ''
@@ -152,15 +216,33 @@ class Episode:
 	imdb_id = ''
 	airdate = ''
 	watched = False
+	tv_show = None # show instance
 
 # Methods
-	def __init(self, watched = False):
+	def __init__(self, e_id, tv_show, watched = False):
+		self.e_id = e_id
 		self.watched = watched
+		if tv_show: self.tv_show = tv_show
+		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
+		self.update_info()
 
-	'''Make this class printable'''
-	def __str__(self):
-		return "<Episode %s - %s>" % (ep_id, name)
+	'''Print this class information'''
+	def to_string(self):
+		print "<Episode %s - %s>" % (ep_id, name)
 
 	def update_info(self):
 		pass
+
+	''' Toogle the watched state '''
+	def toogle_watched(self):
+		pass
+
+	''' Set the watched state '''
+	def set_watched(Self):
+		pass
+
+	''' Update watched state according to its content'''
+	def update_watched(self):
+		# update watched on tv show this runs on the entire tv show, updating everything
+		self.tv_show.update_watched()
 
