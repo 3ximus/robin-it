@@ -68,7 +68,8 @@ class Show:
 
 	'''Print this class information'''
 	def to_string(self):
-		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %sBanner: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.banner, self.imdb_id, self.description)
+		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %sBanner: %s\nIMDB Link: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.banner, self.imdb_id)
+		print "Description: %s" % self.description.encode('utf-8')
 
 	def _handle_multiple_results(self, search_results):
 		# TODO set self.name upon selection and call self.update_info()
@@ -85,7 +86,7 @@ class Show:
 		if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
 		self.seasons = []
 		for i in seasons_list: # generates the seasons list
-			new_season = Season(s_id = i, tv_show = self, watched = True if self.watched else False)
+			new_season = Season(s_id = i, tv_show = self)
 			self.seasons.append(new_season)
 
 		# update TV Show info
@@ -185,7 +186,7 @@ class Season():
 		episodes_list = database[self.tv_show.name][self.s_id].keys()
 		self.episodes = [] # reset cached values
 		for i in episodes_list: # generate the episodes list
-			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show, watched = True if self.watched else False)
+			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show)
 			self.episodes.append(new_episode)
 
 		self.update_watched()
@@ -239,7 +240,8 @@ class Episode:
 
 	'''Print this class information'''
 	def to_string(self):
-		print "\t Episode info:\nName: %s\nSeason: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.season, self.episode_number, self.director, self.writer, self.rating, self.image, self.airdate, self.imdb_id, self.description)
+		print "\t Episode info:\nName: %s\nSeason: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s" % (self.name, self.season, self.episode_number, self.director, self.writer, self.rating, self.image, self.airdate, self.imdb_id)
+		print "Description: %s" % self.description.encode('utf-8') # fix encoding
 
 	def update_info(self, cache = CACHE):
 		database = Tvdb(cache = cache)
@@ -270,7 +272,8 @@ class Episode:
 
 ''' Example Run '''
 if __name__ == '__main__':
-	s = Show('game of thrones')
+	name = raw_input('Select a show: ')
+	s = Show(name)
 	s.to_string() # print show info
 	s.seasons[0].to_string() # print season info
 	s.seasons[0].poster # get list of season posters (use poster_wide for wide posters)
