@@ -16,9 +16,21 @@ Searches for available tv shows given keyword, quality (optional), season and ep
 	. `$ ./tv_crawler.py`
 	. If Quality left blank defaults to 720p
 	. If Episodes left blank defaults to 10 episodes `range(11)[1:]`
+
+##TV API - get show information v1.2##
+
+Searches thetvdb.com nd gathers TV show information
+
+*Usage*:
+	
+	. Follow example usage at the end of the api
 	
 
 *Changelog*:
+
+**v1.2**: (Info Display)
+
+	- Get TV show info (DONE)
 
 **v1.1**: (Speed and Usability Upgrades)
 
@@ -47,12 +59,6 @@ Benchmark Page parsers
 
 ##TODO##
 
-###TV SHOWS:###
-
-**v1.2**: (Info Display)
-
-	- Get TV show info
-
 **v1.3**: (Traking System)
 
 	- Tv Show tracking 
@@ -63,18 +69,27 @@ Benchmark Page parsers
 
 **v2.0**:
 	- Implement GUI
-	- Use Kickass API instead of parsing
 
+**v2.1**:
+	- Custom tvdb_api
 
---------------------------------
+**v2.2**:
+	- Multiple devices
 
-###MOVIES###
+**v2.3**:
+	- Multiple device persistence
+
+###OTHER TODO###
+
+- Add a torrent url and magnet to an episode / movie so that it gets saved
+
+*Notes* : Use Kickass API instead of parsing when/if available
+
 
 
 --------------------------------
 
 ##Known Limitations##
-
 
 --------------------------------
 ##Known Bugs##
