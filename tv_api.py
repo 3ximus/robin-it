@@ -25,6 +25,10 @@ class TVError(Exception):
 class UnknownTVError(TVError):
 	pass
 
+'''Unhandled error'''
+class UnhandledTVError(TVError):
+	pass
+
 '''
 Class Containing Show information
 This class is self updated, once the method update_info is called it updates itself
@@ -48,37 +52,66 @@ class Show:
 	banner = '' # banner
 	imdb_id = '' # imdb id
 	watched = False
+	search_results = [] # store search results
 
 # Methods
 	'''
 	Class constructor
 	This show will containg the first match in the database based on the name given
+	The console flag should be set to True when running on console mode,
+		it is used to prompt the user to choose between one of the available search results
+	The graphical flag overrides the console flag and it stops the TV show generation,
+		the search_results are stored in self.search_results and should be acessed
+		to make the result decision. After that the method build_with_result(int) should be called
+		to complete the build process.
 	'''
-	def __init__(self, name):
-			# search for available TV Shows
-			search_results = Tvdb(cache = CACHE).search(name)
-			results_amount = len(search_results)
-			if results_amount == 0: raise UnknownTVError("Unexistent tv_show \"%s\"" % name)
-			if results_amount > 1:
-				self._handle_multiple_results(search_results)
-				return # dont do anything else
-			self.name = search_results[0]['seriesname'] # placeholder updated in the update search
+	def __init__(self, name, console = True, graphical = False):
+		# search for available TV Shows
+		self.search_results = Tvdb(cache = CACHE, banners = True).search(name)
+		results_amount = len(self.search_results)
+		if results_amount == 0: raise UnknownTVError("Unexistent tv_show \"%s\"" % name)
+		if results_amount == 1:
+			self.name = self.search_results[0]['seriesname'] # placeholder updated in the update search
 			self.update_info()
-			return None # all ok
+		else:
+			if graphical: return # abort tv show info generation
+			elif console: self._handle_console_results()
+			else: raise UnhandledTVError("Multiple search results unhandled")
 
 	'''Print this class information'''
 	def to_string(self):
 		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %sBanner: %s\nIMDB Link: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.banner, self.imdb_id)
 		print "Description: %s" % self.description.encode('utf-8')
 
-	def _handle_multiple_results(self, search_results):
-		# TODO set self.name upon selection and call self.update_info()
-		return # return something in this case to give the option to select a result
 	'''
-	Searches thetvdb.com and updates class attributes
+	This handles multiple results in the console
+	For Graphical interaction use the graphical flag in the constructor and call
+		build_with_result method directly
+	'''
+	def _handle_console_results(self):
+		print "Multiple Results found when building, select one:"
+		for i, result in enumerate(self.search_results):
+			print "%i. %s" % (i, result['seriesname'])
+		choice = eval(raw_input("Selection: "))
+		self.build_with_result(choice) # use choise to build content
+
+	'''
+	This handles multiple results in the console
+	For Graphical interaction use the graphical flag in the constructor wich sets the self.options
+	'''
+	def build_with_result(self, option):
+		self.name = self.search_results[option]['seriesname']
+		self.update_info() # generate content
+
+	'''
+	Searches thetvdb.com and generates class attributes
 	If cache is False, update from the database is forced
+	It is mandatory that self.name is set otherwise build will fail
 	'''
 	def update_info(self, cache = CACHE):
+		if self.name == '': # error check
+			raise UnknownTVError("TV Show name not set, build class correctly")
+
 		database = Tvdb(cache = cache)
 
 		# updates seasons list
@@ -101,7 +134,8 @@ class Show:
 		self.actors = database[self.name]['actors']
 		self.poster = database[self.name]['poster']
 		self.banner = database[self.name]['banner']
-		self.imdb_id = IMDB_TITLE + database[self.name]['imdb_id']
+		imdb_id = database[self.name]['imdb_id']
+		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 
 		self.update_watched()
 
@@ -273,8 +307,10 @@ class Episode:
 ''' Example Run '''
 if __name__ == '__main__':
 	name = raw_input('Select a show: ')
-	s = Show(name)
+	s = Show(name, console = True)
 	s.to_string() # print show info
 	s.seasons[0].to_string() # print season info
-	s.seasons[0].poster # get list of season posters (use poster_wide for wide posters)
+	print "Posters:"
+	for a in s.seasons[0].poster: # get list of season posters (use poster_wide for wide posters)
+		print a
 	s.seasons[0].episodes[0].to_string() # print episode info
