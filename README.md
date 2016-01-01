@@ -16,9 +16,21 @@ Searches for available tv shows given keyword, quality (optional), season and ep
 	. `$ ./tv_crawler.py`
 	. If Quality left blank defaults to 720p
 	. If Episodes left blank defaults to 10 episodes `range(11)[1:]`
+
+##TV API - get show information v1.2##
+
+Searches thetvdb.com nd gathers TV show information
+
+*Usage*:
+	
+	. Follow example usage at the end of the api
 	
 
 *Changelog*:
+
+**v1.2**: (Info Display)
+
+	- Get TV show info (DONE)
 
 **v1.1**: (Speed and Usability Upgrades)
 
@@ -46,10 +58,6 @@ Benchmark Page parsers
 --------------------------------
 
 ##TODO##
-
-**v1.2**: (Info Display)
-
-	- Get TV show info
 
 **v1.3**: (Traking System)
 
@@ -82,7 +90,6 @@ Benchmark Page parsers
 --------------------------------
 
 ##Known Limitations##
-
 
 --------------------------------
 ##Known Bugs##
