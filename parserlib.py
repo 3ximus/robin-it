@@ -1,7 +1,6 @@
-#! /usr/bin/python2
-
 '''
-Library conatining parser to scrap web pages
+Library containing parser to scrap web pages
+Latest Update - v1.1
 Created - 28.12.15
 Copyright (C) 2015 - eximus
 '''
@@ -15,6 +14,19 @@ KICKASS = "http://kickass.unblocked.la/"
 Torrent data structure
 '''
 class Torrent():
+	'''
+	Note that all items in the constructor are strings
+	name : Contains the torrent Name
+	link : Contains the link to the torrent page
+	magnet : Manget link
+	tor_file : partial torrent file link
+				(must be preceded with 'https:' and appended with '.torrent' to be a usable link
+	seeds = Torrent seeds
+	peers = Torrent peers
+	age = Simple representation of torrent age (hours, days, months, years)
+	files = Number of files a torrent contains
+	host = torrent host page (defaults to kickass)
+	'''
 	def __init__(self, name = '', link = '', magnet = '', tor_file = '', seeds = '', peers = '', age = '', files = '', size = '', host = KICKASS):
 		self.name = name
 		self.link = link
@@ -26,7 +38,7 @@ class Torrent():
 		self.seeds = seeds
 		self.peers = peers
 		self.host = host
-	def to_string(self):
+	def __str__(self):
 		print "name: %s" % self.name
 		print "link: %s" % self.link
 		print "magnet: %s" % self.magnet
@@ -41,23 +53,22 @@ class Torrent():
 
 
 '''
-Beautiful Soup 4
-Parser for BeautifulSoup 4
-Returns a tuple with Torrent class
-Maybe slower compared to URL_lister but the information is already processed and ready to be used
+Beautiful Soup 4 Custom parser
+Parser class derivation of BeautifulSoup4
+Returns a tuple with Torrent class instances
 '''
 class BS4():
 	def __init__(self):
 		self.parsed = []
 		self.btree = None # not an actual btree but a 'beautiful tree'
 
-	''' 
+	'''
 	Callable feed method
 	Receives the content to parse, or the open filedescriptor and how to parse it
 	'''
-	def feed(self, html, query_for='torrent'):
+	def feed(self, html, parse_for='torrent'):
 		self.btree = BeautifulSoup(html, "lxml") # parse the webpage with lxml parser
-		if query_for == 'torrent': self._torrent_parsing(host = KICKASS) # TODO pass another host if needed
+		if parse_for == 'torrent': self._torrent_parsing(host = KICKASS) # TODO pass another host if needed
 		else: raise ValueError("Unknown parser option given")
 
 	''' Prepare for parsing according to host structure '''
@@ -81,14 +92,14 @@ class BS4():
 		# compensate the fact that links and info are sequentialy on the list
 		for i, n in enumerate(torrent_ids):
 			to_add = Torrent(name = n[0],
-							 link = n[1],
-							 magnet = tm_links[2*i + 0],
-							 tor_file = tm_links[2*i + 1],
-							 size = torrent_info[5*i + 0],
-							 files = torrent_info[5*i + 1],
-							 age = torrent_info[5*i + 2],
-							 seeds= torrent_info[5*i + 3],
-							 peers = torrent_info[5*i + 4])
+					link = n[1],
+					magnet = tm_links[2*i + 0],
+					tor_file = tm_links[2*i + 1],
+					size = torrent_info[5*i + 0],
+					files = torrent_info[5*i + 1],
+					age = torrent_info[5*i + 2],
+					seeds= torrent_info[5*i + 3],
+					peers = torrent_info[5*i + 4])
 			self.parsed.append(to_add)
 		return self.parsed
 

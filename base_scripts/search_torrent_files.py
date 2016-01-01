@@ -1,4 +1,4 @@
-#! /usr/bin/python2
+#! /usr/bin/env python
 
 ''' 
 Search Kickass for torrents/magnets of given keyword

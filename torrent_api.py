@@ -1,9 +1,10 @@
-#! /usr/bin/python2
+#! /usr/bin/env python
 
 '''
-Module containing methods to search and download web pages or web hosted files
+Module containing methods to search and download torrents / get magnet links
+Also containts function to return torrents from the page in the form of a list of Torrent instances
 It can be executed using ./torrent_api <search-terms> to search and download torrents from KICKASS by default
-Automaticly prints progress
+Latest Update - v1.1
 Created - 24.11.15
 Copyright (C) 2015 - eximus
 '''
@@ -17,13 +18,10 @@ import utillib
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 
 KICKASS = "http://kickass.unblocked.la/"
-
 TRUSTED_SOURCES = 'killers|rartv|immerse|publichd|rarbg|'
 TRUSTED_SOURCES += TRUSTED_SOURCES.upper()
 TRUSTED_FORMAT = 'web-dl|hdtv|eztv|ettv|'
 TRUSTED_FORMAT += TRUSTED_FORMAT.upper()
-
-# Internal
 ERROR_MSG = "[\033[1;31mERROR\033[0m]"
 
 '''
@@ -39,7 +37,7 @@ def parse_page_links(html_page, parser=parserlib.BS4):
 	if not parsed: parsed = parser.parsed # get content through parsed class atribute
 	try: parser.reset() # some parsers need this workaround
 	except NameError: pass
-	return parsed
+	return parsed # return list of Torrent instances
 
 '''
 Search
@@ -48,10 +46,12 @@ Gives a Trust flag to torrents
 '''
 def search(main_url, search_term, parser=parserlib.BS4(), page = 1, order_results = 'seeds'):
 	url = utillib.build_search_url(main_url, search_term, page=page, order_results=order_results)
-	html = utillib.get_page_html(url)
-	return parse_page_links(html, parser) # get all the links from the page
+	try: html = utillib.get_page_html(url)
+	except utillib.UtillibError: raise # re-raise the exception
+	return parse_page_links(html, parser) # return list of Torrent instances
 
 '''
+Present Results
 Receives a list with Torrent instances and outputs it in presentable form
 '''
 def present_results(torrent_list):
@@ -78,7 +78,8 @@ def present_results(torrent_list):
 
 '''
 Download URL List
-Downloads all files hosted on the given URL's
+Downloads all torrents passed as a list of Torrent instances
+Name parser is used to determine the names of the downloaded torrents
 '''
 def download_torrents(torrent_list, name_parser = False, location = './storage/'):
 	if type(torrent_list) is not list: torrent_list = [torrent_list,] # convert to list
@@ -90,7 +91,9 @@ def download_torrents(torrent_list, name_parser = False, location = './storage/'
 	return file_list
 
 '''
+Get Magnets
 Get magnet links from a Torrent list
+Returns list with magnet links
 '''
 def get_magnets(torrent_list):
 	magnets = []
@@ -104,7 +107,8 @@ Test program
 if __name__ == '__main__':
 	try: search_terms = sys.argv[1]
 	except IndexError: sys.exit("No search term given")
-	results = search(KICKASS, search_terms)
+	try: results = search(KICKASS, search_terms)
+	except utillib.UtillibError: sys.exit("No results found")
 	present_results(results)
 	try: choice = eval(raw_input("\nSelection: "))
 	except (NameError, SyntaxError): sys.exit("%s Use a number" % ERROR_MSG)
@@ -113,3 +117,4 @@ if __name__ == '__main__':
 	for d in downloads:
 		print "Downloaded: %s" % d
 	print "\nDONE"
+

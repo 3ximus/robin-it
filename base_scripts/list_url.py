@@ -1,4 +1,4 @@
-#! /usr/bin/python2
+#! /usr/bin/env python
 
 ''' 
 Small script for listing href's in a given URL
