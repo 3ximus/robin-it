@@ -1,7 +1,9 @@
 #! /usr/bin/env python
 
 '''
-Frontend apllication to search and download tv shows
+Frontend console aplication to search tv show torrents
+Uses Kickass torrents
+Latest Update - v1.2
 Created - 11.12.15
 Copyright (C) 2015 - eximus
 '''

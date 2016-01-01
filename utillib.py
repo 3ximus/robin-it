@@ -1,5 +1,7 @@
 '''
 Library Containing various utility functions
+Containts Exception class UtillibError
+Latest Update - v1.1
 Created - 28.12.15
 Copyright (C) 2015 - eximus
 '''
@@ -19,7 +21,7 @@ class UtillibError(Exception):
 Build Search URL
 Receives a string and the page URL to do the search and builds the search url for that page.
 Receives the order in wich you want the results to be returned, accepted values are 'seeds' and 'age'.
-NOTE: Currently only works for KICKASS Torrents page.
+Note: building search url uses a keyword 'usearch' wich may not work in most websites ( works for KICKASS )
 '''
 def build_search_url(main_url, search_term, page = 1, order_results = 'seeds'):
 
@@ -34,7 +36,8 @@ def build_search_url(main_url, search_term, page = 1, order_results = 'seeds'):
 
 '''
 Get Page HTML
-Returns the html index given a source url
+Returns the html index given a page url
+Throws UtillibError Exception when host is unknown
 '''
 def get_page_html(url):
 	request = urllib2.Request(url, headers=HEADER) # make a request for the html

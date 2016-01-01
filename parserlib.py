@@ -1,5 +1,6 @@
 '''
-Library conatining parser to scrap web pages
+Library containing parser to scrap web pages
+Latest Update - v1.1
 Created - 28.12.15
 Copyright (C) 2015 - eximus
 '''
@@ -52,10 +53,9 @@ class Torrent():
 
 
 '''
-Beautiful Soup 4
-Parser for BeautifulSoup 4
-Returns a tuple with Torrent class
-Maybe slower compared to URL_lister but the information is already processed and ready to be used
+Beautiful Soup 4 Custom parser
+Parser class derivation of BeautifulSoup4
+Returns a tuple with Torrent class instances
 '''
 class BS4():
 	def __init__(self):
@@ -66,9 +66,9 @@ class BS4():
 	Callable feed method
 	Receives the content to parse, or the open filedescriptor and how to parse it
 	'''
-	def feed(self, html, query_for='torrent'):
+	def feed(self, html, parse_for='torrent'):
 		self.btree = BeautifulSoup(html, "lxml") # parse the webpage with lxml parser
-		if query_for == 'torrent': self._torrent_parsing(host = KICKASS) # TODO pass another host if needed
+		if parse_for == 'torrent': self._torrent_parsing(host = KICKASS) # TODO pass another host if needed
 		else: raise ValueError("Unknown parser option given")
 
 	''' Prepare for parsing according to host structure '''

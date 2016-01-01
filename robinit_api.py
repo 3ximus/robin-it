@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 
 '''
-Api for traking tvShows
+Api for traking TVShows and Movies
 User state is persistent across runs
+Latest Update - v1.2
 Created - 29.12.15
 Copyright (C) 2015 - eximus
 '''

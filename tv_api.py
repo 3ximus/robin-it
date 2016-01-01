@@ -1,11 +1,12 @@
 
 '''
-Api for Getting TV Shows date
+API for getting TV Shows information
 Queries http://thetvdb.com/ using  tvdb_api: https://github.com/dbr/tvdb_api
 Updates are cached in cache folder
 Example usage program in the end
 # note that seasons and episodes are indexed with zero base
 
+Latest Update - v1.2
 Created - 30.12.15
 Copyright (C) 2015 - eximus
 '''
