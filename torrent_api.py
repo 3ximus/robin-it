@@ -1,4 +1,4 @@
-#! /usr/bin/python2
+#! /usr/bin/env python
 
 '''
 Module containing methods to search and download web pages or web hosted files
@@ -112,3 +112,4 @@ if __name__ == '__main__':
 	for d in downloads:
 		print "Downloaded: %s" % d
 	print "\nDONE"
+

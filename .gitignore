@@ -1,5 +1,6 @@
 *.pyc
 *.swp
 *.pyc
+*.vim
 cache/*
 benchmarks_dir/outjunk/*

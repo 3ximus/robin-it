@@ -1,10 +1,11 @@
-#! /usr/bin/python2
+#! /usr/bin/env python
 
 '''
 Frontend apllication to search and download tv shows
 Created - 11.12.15
 Copyright (C) 2015 - eximus
 '''
+
 import torrent_api
 from utillib import UtillibError
 import sys, re
@@ -13,7 +14,6 @@ BIAS = 2
 SEASON_MAX = 10
 QUALITY_PRESET = '720p'
 DOWNLOAD_PATH = './storage/'
-
 
 tv_show = raw_input("\033[1;33mTV Show name > \033[0m")
 
@@ -37,9 +37,9 @@ for s in seasons:
 			print 'How hard could it possibly be? The numbers Mason!! Give me NUMBERS!!'
 			sys.exit(-1)
 		search_term = '%s %s %s' % (tv_show, ep_id, quality)
-		print '\033[0;33mSearching: \033[0m%s' % search_term
+		print 'Searching: %s' % search_term
 		try: search_results = torrent_api.search(torrent_api.KICKASS, search_term)
-		except utillib.UtillibError:
+		except UtillibError:
 			print "No results found"
 			continue
 		torrent_api.present_results(search_results)
@@ -51,5 +51,4 @@ for s in seasons:
 
 		files_downloaded = torrent_api.download_torrents(downloads, location=DOWNLOAD_PATH)
 		print 'Files Downloaded: %d, to %s' % (len(files_downloaded), DOWNLOAD_PATH)
-
 
