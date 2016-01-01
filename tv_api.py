@@ -1,4 +1,3 @@
-
 '''
 API for getting TV Shows information
 Queries http://thetvdb.com/ using  tvdb_api: https://github.com/dbr/tvdb_api
@@ -76,7 +75,9 @@ class Show:
 			self.update_info()
 		else:
 			if graphical: return # abort tv show info generation
-			elif console: self._handle_console_results()
+			elif console:
+				try: self._handle_console_results()
+				except ValueError: raise ValueError("Invalid Option")
 			else: raise UnhandledTVError("Multiple search results unhandled")
 
 	'''Print this class information'''
@@ -93,14 +94,20 @@ class Show:
 		print "Multiple Results found when building, select one:"
 		for i, result in enumerate(self.search_results):
 			print "%i. %s" % (i, result['seriesname'])
-		choice = eval(raw_input("Selection: "))
+		try: choice = int(raw_input("Selection: "))
+		except ValueError: raise # re-raise ValueError
+		else:
+			if choice < 0 or choice >= len(self.search_results): raise ValueError("Invalid option")
 		self.build_with_result(choice) # use choise to build content
 
 	'''
-	This handles multiple results in the console
-	For Graphical interaction use the graphical flag in the constructor wich sets the self.options
+	This function builds class with a given self.search_results index
+	Its intended is is to be called by a graphical interface after it checks the
+		self.search_results and prompts the user if multiple ones are found and builds with the
+		selected option
 	'''
 	def build_with_result(self, option):
+		if option < 0 or option >= len(self.search_results): raise ValueError("Invalid option when generating class")
 		self.name = self.search_results[option]['seriesname']
 		self.update_info() # generate content
 
@@ -201,21 +208,22 @@ class Season():
 	def update_info(self, cache = CACHE):
 		# update posters
 		database = Tvdb(cache = cache, banners = True)
-		posters = database[self.tv_show.name]['_banners']['season']
-		# update posters
-		self.poster = [] # clear ceched value
-		if 'season' in posters: # check for existance
-			for entry in posters['season']:
-				misc = posters['season'][entry]
-				if misc['language'] == 'en' and misc['season'] == str(self.s_id):
-					self.poster.append(misc['_bannerpath'])
-		# update wide posters
-		self.poster_wide = [] # clear ceched value
-		if 'seasonwide' in posters: # check for existence
-			for entry in posters['seasonwide']:
-				misc = posters['seasonwide'][entry]
-				if misc['language'] == 'en' and misc['season'] == str(self.s_id):
-					self.poster_wide.append(misc['_bannerpath'])
+		try: posters = database[self.tv_show.name]['_banners']['season']
+		except KeyError: pass # no posters, so don't update them
+		else: # update posters
+			self.poster = [] # clear ceched value
+			if 'season' in posters: # check for existance
+				for entry in posters['season']:
+					misc = posters['season'][entry]
+					if misc['language'] == 'en' and misc['season'] == str(self.s_id):
+						self.poster.append(misc['_bannerpath'])
+			# update wide posters
+			self.poster_wide = [] # clear ceched value
+			if 'seasonwide' in posters: # check for existence
+				for entry in posters['seasonwide']:
+					misc = posters['seasonwide'][entry]
+					if misc['language'] == 'en' and misc['season'] == str(self.s_id):
+						self.poster_wide.append(misc['_bannerpath'])
 
 		# update episodes list
 		episodes_list = database[self.tv_show.name][self.s_id].keys()
