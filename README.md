@@ -59,7 +59,7 @@ Benchmark Page parsers
 
 --------------------------------
 
-##TODO##
+##FUTURE##
 
 **v1.3**: (Traking System)
 
@@ -97,7 +97,7 @@ Benchmark Page parsers
 
 - Multiple device persistence
 
-###OTHER TODO###
+###TODO###
 
 - Add a torrent url and magnet to an episode / movie so that it gets saved
 

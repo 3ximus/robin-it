@@ -1,7 +1,7 @@
 '''
 API for getting TV Shows information
 Queries http://thetvdb.com/ using  tvdb_api: https://github.com/dbr/tvdb_api
-Updates are cached in cache folder
+Updates are cached in ./cache/ directory
 Example usage program in the end
 # note that seasons and episodes are indexed with zero base
 
@@ -15,7 +15,6 @@ import os
 
 IMDB_TITLE = "http://www.imdb.com/title/"
 CACHE = "cache/"
-if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
 
 '''Main Error Class'''
 class TVError(Exception):
@@ -70,6 +69,7 @@ class Show:
 		self.search_results = Tvdb(cache = CACHE, banners = True).search(name)
 		results_amount = len(self.search_results)
 		if results_amount == 0: raise UnknownTVError("Unexistent tv_show \"%s\"" % name)
+		if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
 		if results_amount == 1:
 			self.name = self.search_results[0]['seriesname'] # placeholder updated in the update search
 			self.update_info()
