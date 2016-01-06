@@ -13,71 +13,54 @@ import tv_shows
 Wrapper class for all user interaction and data handling
 '''
 class UserContent:
-	user_name = ''
-	shows = None
-	movies = None
 
 	def __init__(self, uname):
 		self.user_name = uname
+		self.shows = {}
+		self.movies = {}
 
-	'''Defines the pickling behavior when save state is called'''
-	def __getstate__(self):
-		pass
-
-	'''Defines the unpickling behavior when load state is called'''
-	def __setstate__(self, dict):
-		pass
-
-	'''Saves the current class state to a file'''
+	'''
+	Saves the current class state to a file
+	This method closes the file if given
+	'''
 	def save_state(self, path = None, fd = None):
-		pass
+		if path: fd = open(path + self.user_name + '.pkl', 'wb')
+		if not fd: raise ValueError("No path or file passed to save method")
+		cPickle.dump(self.__dict__, fd, cPickle.HIGHEST_PROTOCOL)
+		fd.close()
 
-	'''Loads the current class state to a file'''
+	'''Loads the current class state from a file'''
 	def load_state(self, path = None, fd = None):
-		pass
+		if path: fd = open(path + self.user_name + '.pkl', 'rb')
+		if not fd: raise ValueError("No path or file passed to load method")
+		tmp_dict = cPickle.load(fd)
+		fd.close()
+		self.__dict__.update(tmp_dict)
 
-	def add_show(self, name):
-		pass
+	'''
+	----
+	verbose will cancel the unknown tv show excpetion by just printing a message
+
+	'''
+	def add_show(self, name, verbose = False):
+		try: new_show = tv_shows.Show(name, console = True)
+		except tv_shows.UnknownTVError:
+			if verbose:
+				print "Unknown TV show %s" % name
+				return
+			else:
+				raise
+		self.shows.update({new_show.name:new_show})
+		if verbose: print "Show added %s" % new_show.name
 
 	def remove_show(self, name):
-		pass
+		del(shows[name])
+		
 
-	def add_movie(self, name):
+	def add_movie(self, name, verbose = False):
+		#self.movies.update()
 		pass
 
 	def remove_movie(self, name):
 		pass
-
-'''
-This class tv show information
-The class state is saved to a file frequently and at the end os usage
-Class state is also loaded at the begining of the program
-'''
-class _tv_user_content:
-# Attributes
-	following = []
-# Methods
-	def __init__(self):
-		pass
-
-	'''Add a new show to the following list'''
-	def add_show(self, show):
-		pass
-
-	'''Remove show from following list'''
-	def remove_show(self, show):
-		pass
-
-	'''Updates entire library'''
-	def _update(self):
-		pass
-
-
-'''
-This class Contains all user information
-The class state is saved to a file frequently and at the end os usage
-Class state is also loaded at the begining of the program
-'''
-class _movie_user_content:
-	pass
 

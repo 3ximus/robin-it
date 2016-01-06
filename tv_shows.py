@@ -35,25 +35,6 @@ Tv database is cached to its default location of CACHE
 '''
 class Show:
 
-# Attributes
-	name = '' # tv show name
-	description = '' # tv show description
-	seasons = [] # seasons
-	genre = '' # genre
-	runtime = '' # episode times
-	status = '' # show status (continuing, stopped)
-	network = '' # airing network
-	air_dayofweek = '' # week day of hairing
-	air_time = '' # hour it airs
-	rating = '' # imdb rating
-	actors = '' # actors list
-	poster = '' # tv show poster
-	banner = '' # banner
-	imdb_id = '' # imdb id
-	watched = False
-	search_results = [] # store search results
-
-# Methods
 	'''
 	Class constructor
 	This show will containg the first match in the database based on the name given
@@ -65,6 +46,25 @@ class Show:
 		to complete the build process.
 	'''
 	def __init__(self, name, console = True, graphical = False):
+
+		# define class atributes
+		self.name = '' # tv show name
+		self.description = '' # tv show description
+		self.seasons = [] # seasons
+		self.genre = '' # genre
+		self.runtime = '' # episode times
+		self.status = '' # show status (continuing, stopped)
+		self.network = '' # airing network
+		self.air_dayofweek = '' # week day of hairing
+		self.air_time = '' # hour it airs
+		self.rating = '' # imdb rating
+		self.actors = '' # actors list
+		self.poster = '' # tv show poster
+		self.banner = '' # banner
+		self.imdb_id = '' # imdb id
+		self.watched = False
+		self.search_results = [] # store search results
+
 		# search for available TV Shows
 		self.search_results = Tvdb(cache = CACHE, banners = True).search(name)
 		results_amount = len(self.search_results)
@@ -87,7 +87,6 @@ class Show:
 
 	'''
 	This handles multiple results in the console
-	For Graphical interaction use the graphical flag in the constructor and call
 		build_with_result method directly
 	'''
 	def _handle_console_results(self):
@@ -113,6 +112,7 @@ class Show:
 
 	'''
 	Searches thetvdb.com and generates class attributes
+	This method function is responsible for building the entire data structure of a TV Show
 	If cache is False, update from the database is forced
 	It is mandatory that self.name is set otherwise build will fail
 	'''
@@ -176,22 +176,17 @@ Update function generates cache on CACHE directory by default
 '''
 class Season():
 
-#Attributes
-	s_id = 0 # season numeric id
-	tv_show = None # Show instance
-	episodes = []
-	poster = [] # list of season poster
-	poster_wide = [] # list of season wide posters
-	watched = False
-
-# Methods
 	'''
 	Cosntructor method
 	Muste receive a season id number and a tv_show from where this season belongs to
 	'''
 	def __init__(self, s_id, tv_show):
 		self.s_id = s_id
-		if tv_show: self.tv_show = tv_show
+		self.episodes = []
+		self.poster = [] # list of season poster
+		self.poster_wide = [] # list of season wide posters
+		self.watched = False
+		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.update_info()
 
@@ -257,27 +252,25 @@ Update function generates cache on CACHE directory by default
 '''
 class Episode:
 
-# Attributes
-	e_id = 0
-	s_id = 0
-	name = ''
-	description = ''
-	episode_number = ''
-	director = ''
-	writer = ''
-	rating = ''
-	season = ''
-	image = ''
-	imdb_id = ''
-	airdate = ''
-	watched = False
-	tv_show = None # show instance
-
-# Methods
+	'''
+	Cosntructor method
+	Muste receive an episode id numeber, a season id number and a tv_show from where this episode belongs to
+	'''
 	def __init__(self, e_id, s_id, tv_show):
 		self.e_id = e_id
 		self.s_id = s_id
-		if tv_show: self.tv_show = tv_show
+		self.name = ''
+		self.description = ''
+		self.episode_number = ''
+		self.director = ''
+		self.writer = ''
+		self.rating = ''
+		self.season = ''
+		self.image = ''
+		self.imdb_id = ''
+		self.airdate = ''
+		self.watched = False
+		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.update_info()
 
