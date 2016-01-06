@@ -64,6 +64,8 @@ Benchmark Page parsers
 **v1.3**: (Traking System)
 
 - Tv Show tracking
+- Persistent User Status
+- Watched / unwatched states for tv shows
 
 **v1.4**: (Big Release)
 
@@ -87,7 +89,7 @@ Benchmark Page parsers
 
 **v2.1**:
 
-- Custom tvdb_api
+- Custom tvdb_api gatherer
 
 **v2.2**:
 
@@ -99,7 +101,9 @@ Benchmark Page parsers
 
 ###TODO###
 
+- Maintain a version control over tv_shows.py classes in order to load correctly, same for user content ( possibly later add multiple ways to convert user saved data to current releases )
 - Add a torrent url and magnet to an episode / movie so that it gets saved
+- Get apikey for thetvdb API for the user (prompt user to register the website) - later implementation of this is to get a login screen that gets the apikey)
 
 *Notes* : Use Kickass API instead of parsing when/if available
 
