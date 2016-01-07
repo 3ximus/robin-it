@@ -10,7 +10,6 @@ Copyright (C) 2015 - eximus
 USER_STATE_DIR = "user/"
 
 import os, sys
-import cPickle
 from robinit_api import UserContent
 
 '''
@@ -28,9 +27,11 @@ def first_use(user_name, path):
 		if answer == 'y': break
 		elif answer == 'n': return new_user_state
 		else: print "Please use \"y\" or \"n\"."
-# prompt user to add movies or tv shows
+	return user_interaction(new_user_state)
+
+def user_interaction(new_user_state):
 	while(1):
-		print "\n\033[1;33;40mChoose an action:\033[0m\n| 1. Add Movies\t\t\t| 4. Remove Movie\n| 2. Add TV Shows\t\t| 5. Remove Show\n| 3. List already added\t\t| 6. Done\n\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
+		print "\n\033[1;33;40mChoose an action:\033[0m\n| 1. Add Movies\t\t\t| 4. Remove Movie\n| 2. Add TV Shows\t\t| 5. Remove Show\n| 3. List already added\t\t| 6. Save and Exit\n\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
 		try: option = int(raw_input("> "))
 		except ValueError:
 			print "Invalid Option"
@@ -45,11 +46,13 @@ def first_use(user_name, path):
 			print "\033[3;33mMovies:\033[0m"
 # TODO print movies
 		elif option == 4: pass
-		elif option == 5: pass
+		elif option == 5: # remove shows
+			for s in raw_input("Show name: ").split(','): new_user_state.remove_show(s, verbose = True)
 		elif option == 6: break # end insertion loop
 		else: print "Invalid Option"
 	new_user_state.save_state(path = USER_STATE_DIR)
 	return new_user_state
+
 
 # ==========================================
 # 	               MAIN
@@ -67,6 +70,7 @@ if not os.path.exists(user_state_file):
 else: # exists then load the previous state
 	User_State = UserContent(user_name)
 	User_State.load_state(USER_STATE_DIR)
+	user_interaction(User_State)
 
 #DUMP USER STATE
 print "Dumping..."

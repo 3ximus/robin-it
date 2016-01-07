@@ -99,6 +99,10 @@ Benchmark Page parsers
 
 - Multiple device persistence
 
+**v3.0**
+
+- Add Games!
+
 ###TODO###
 
 - Maintain a version control over tv_shows.py classes in order to load correctly, same for user content ( possibly later add multiple ways to convert user saved data to current releases )
