@@ -74,8 +74,8 @@ else: # exists then load the previous state
 
 #DUMP USER STATE
 print "Dumping..."
-for a in User_State.following_shows:
-	print "Name: %s\n\t%s" % (a,User_State.following_shows[a])
+for a in User_State.shows:
+	print "Name: %s\n\t%s" % (a,User_State.shows[a])
 print "End dump..."
 #END DUMP USER STATE
 

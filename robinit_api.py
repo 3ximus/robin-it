@@ -12,8 +12,7 @@ import tv_shows
 '''
 User TV Shows Content Class
 This class contains all user content
-Contains list with following shows being Show instances and watched Shows
-Both lists are updated based on the watched variable they contain
+Contains list with following shows being Show instances
 '''
 class UserContent:
 
@@ -21,11 +20,13 @@ class UserContent:
 		self.user_name = uname
 		self.tvdb_apikey = '' # TODO API KEY
 		# tv shows
-		self.following_shows = {} # following tv shows
-		self.watched_shows = {} # watched tv shows
+		self.shows = {} # following tv shows
 		# movies
-		self.schedule_movies = {} # scheduled movies
-		self.watched_movies = {} # watched movies
+		self.movies = {} # scheduled movies
+
+# ==========================================
+# 	          GENERIC METHODS
+# ==========================================
 
 	'''
 	Saves the current class state to a file
@@ -48,6 +49,47 @@ class UserContent:
 		fd.close()
 		self.__dict__.update(tmp_dict)
 
+	'''
+	Find a key in a dictionry using a partial name
+	Basicly search for the correct name
+	For multiple matches promp user to choose from found results
+	Returns correct key name
+	'''
+	def find_item(self, name, given_list):
+		matches = []
+		for name_key in given_list: # build match list
+			if name.lower() in name_key.lower(): matches.append(name_key)
+		if len(matches) == 0: return None # no matches found
+		elif len(matches) == 1: return matches[0] # return only match found
+		else: # multiple results, present choice
+			print "Multiple results found:"
+			for i, s in enumerate(matches): # present matches
+				print "%d. %s" % (i, s)
+			while(1): # prompt user to choose correct show
+				try: choice = int(raw_input("Select: "))
+				except ValueError: print "Invalid Option"
+				else:
+					if choice < len(matches) and choice >= 0: return matches[choice]
+					else: print "Invalid Option"
+
+	'''
+	Force update
+	The were paramater must be one of the following 'all', 'shows' or 'movies'
+	If name is not given the where parameter is used to update everything in that category,
+		if where is not given either everything will be updated by default
+	Note: this may take a long time because it updates all the information contained
+	'''
+	def force_update(self, name = None, where = 'all'):
+		if where == 'shows' or 'all':
+			if name: # if name was given
+				show = find_item(name, self.shows)
+				if show: self.shows[show].update_info()
+				else: return # show not found
+			else:
+				for show in self.shows: self.shows[show].update_info() # update everything
+		elif where == 'movies' or where == 'all':
+			pass
+		else: raise ValueError("Where parameter in force update not accepatble")
 
 # ==========================================
 # 	             TV SHOWS
@@ -66,41 +108,9 @@ class UserContent:
 			if verbose:
 				print "Unknown TV show %s" % name
 				return
-			else:
-				raise
-		self.following_shows.update({new_show.name:new_show})
+			else: raise
+		self.shows.update({new_show.name:new_show})
 		if verbose: print "\033[32mShow added:\033[0m %s" % new_show.name
-
-	'''
-	Find a key for a tv shows
-	Basicly search for the correct name
-	For multiple matches promp user to choose from found results
-	Returns show name
-	'''
-	def find_show(self, name, show_list):
-		matches = []
-		for name_key in show_list: # build match list
-			if name.lower() in name_key.lower():
-				matches.append(name_key)
-		if len(matches) == 0: # no matches found
-			return ''
-		elif len(matches) == 1:
-			return matches[0]
-		else: # multiple results, present choice
-			print "Multiple results found:"
-			for i, s in enumerate(matches): # present matches
-				print "%d. %s" % (i, s)
-			while(1): # prompt user to choose correct show
-				try: choice = int(raw_input("Select: "))
-				except ValueError:
-					print "Invalid Option"
-					continue
-				else:
-					if choice <= len(matches):
-						return matches[choice]
-					else:
-						print "Invalid Option"
-						continue
 
 	'''
 	Remove show by name
@@ -108,52 +118,40 @@ class UserContent:
 	Intended use for verbose is CLI
 	'''
 	def remove_show(self, name, verbose = False):
-		show_to_delete = self.find_show(name, self.following_shows)
-		if show_to_delete == '': # didnt find show in following list, try watched list
-			show_to_delete = self.find_show(name, self.watched_shows)
-		if show_to_delete != '': # didnt find show in following list, try watched list
-			del(self.following_shows[show_to_delete])
+		show_to_delete = self.find_item(name, self.shows)
+		if show_to_delete: # didnt find show
+			del(self.shows[show_to_delete])
 			if verbose: print "\033[31mDeleted Show:\033[0m %s" % show_to_delete
-		else:
-			print "No Show found"
+		else: print "No Show found"
 
 	'''
-	Toogles watched value for a show
-	This recursivly sets all seasons and episodes to watched/unwatched
-		and updates following_shows and watched_shows dictionaries
+	Toogles watched value
+	If an item with watch state is given name is ignored
+	If name is given only updates that name otherwise update every show being followed
+	This recursivly sets all seasons and episodes to watched/unwatched if its a show
 	'''
-	def toogle_watched(self, name):
-		show_ref = None
-		tshow = self.find_show(name, self.following_shows)
-		if tshow == '': # didnt find show in following list, try watched list
-			tshow = self.find_show(name, self.watched_shows)
-			show_ref = self.watched_shows[tshow]
-			show_ref.toogle_watched()
-			# remove from one list add to the other
-			self.following_shows.update({tshow:show_ref})
-			del(self.watched_shows[tshow])
-		else:
-			show_ref = self.following_shows[tshow]
-			show_ref.toogle_watched()
-			# remove from one list add to the other
-			self.watched_shows.update({tshow:show_ref})
-			del(self.following_shows[tshow])
+	def toogle_watched_show(self, name = None, item = None):
+		if item:
+			try: item.toogle_watched() # if valid item
+			except AttributeError: raise ValueError("Invalid item passed to toogle_watched_show")
+		elif name: # by name
+			show = find_item(name, self.shows)
+			if show: self.shows[show].toogle_watched()
+			else: print "No Show found"
+		else: raise ValueError("No parameters passed to toogle_watched_show")
 
 	'''
-	Forces watched and following tv shows list to be update
+	Forces show watched states to be updated
+	If name is given only updates that name otherwise update every show being followed
 	Note: This only updates TV Shows
 	'''
-	def force_watched_update(self, name):
-		pass
-# TODO ACTALLY NEEDED ?
-
-	'''
-	Force update
-	The were paramater show state one of the following 'all', 'shows' or 'movies'
-	Updates information of everything
-	'''
-	def force_update(self, where = 'all'):
-		pass
+	def update_watched_show(self, name = None):
+		if name:
+			show = find_item(name, self.shows)
+			if show: self.shows[show].update_watched()
+			else: print "No Show found"
+		else:
+			for show in self.shows: self.shows[show].update_watched()
 
 	'''
 	Print following shows
@@ -162,17 +160,16 @@ class UserContent:
 	def shows_to_string(self):
 		s = False
 		print "Following Shows:"
-		for key in self.following_shows:
+		for key in [t for t in self.shows if not self.shows[t].watched]: # iterate over unwatched shows
 			s = True
 			print '\t' + key
 		if not s: print "\t- No Shows added yet"
 		s = False
 		print "\nWatched Shows:"
-		for key in self.watched_shows:
+		for key in [t for t in self.shows if self.shows[t].watched]: # iterate over watched shows
 			s = True
 			print '\t' + key
 		if not s: print "\t- No Shows watched yet"
-
 
 # ==========================================
 # 	             MOVIES

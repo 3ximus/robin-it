@@ -44,8 +44,10 @@ class Show:
 		the search_results are stored in self.search_results and should be acessed
 		to make the result decision. After that the method build_with_result(int) should be called
 		to complete the build process.
+	The header only flag only builds the class with Show information and doesn't retrieve seasons
+		and episodes info
 	'''
-	def __init__(self, name, console = True, graphical = False):
+	def __init__(self, name, console = True, graphical = False, header_only = False):
 
 		# define class atributes
 		self.name = '' # tv show name
@@ -72,11 +74,11 @@ class Show:
 		if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
 		if results_amount == 1:
 			self.name = self.search_results[0]['seriesname'] # placeholder updated in the update search
-			self.update_info()
+			self.update_info(header_only = header_only) # Build class
 		else:
 			if graphical: return # abort tv show info generation
 			elif console:
-				try: self._handle_console_results()
+				try: self._handle_console_results(header_only = header_only)
 				except ValueError: raise ValueError("Invalid Option")
 			else: raise UnhandledTVError("Multiple search results unhandled")
 
@@ -89,7 +91,7 @@ class Show:
 	This handles multiple results in the console
 		build_with_result method directly
 	'''
-	def _handle_console_results(self):
+	def _handle_console_results(self, header_only = False):
 		print "Multiple Results found when building, select one:"
 		for i, result in enumerate(self.search_results):
 			print "%i. %s" % (i, result['seriesname'])
@@ -97,7 +99,7 @@ class Show:
 		except ValueError: raise # re-raise ValueError
 		else:
 			if choice < 0 or choice >= len(self.search_results): raise ValueError("Invalid option")
-		self.build_with_result(choice) # use choise to build content
+		self.build_with_result(choice, header_only = header_only) # use choise to build content
 
 	'''
 	This function builds class with a given self.search_results index
@@ -105,10 +107,10 @@ class Show:
 		self.search_results and prompts the user if multiple ones are found and builds with the
 		selected option
 	'''
-	def build_with_result(self, option):
+	def build_with_result(self, option, header_only = False):
 		if option < 0 or option >= len(self.search_results): raise ValueError("Invalid option when generating class")
 		self.name = self.search_results[option]['seriesname']
-		self.update_info() # generate content
+		self.update_info(header_only = header_only) # generate content
 
 	'''
 	Searches thetvdb.com and generates class attributes
@@ -116,19 +118,20 @@ class Show:
 	If cache is False, update from the database is forced
 	It is mandatory that self.name is set otherwise build will fail
 	'''
-	def update_info(self, cache = CACHE):
+	def update_info(self, cache = CACHE, header_only = False):
 		if self.name == '': # error check
 			raise UnknownTVError("TV Show name not set, build class correctly")
 
 		database = Tvdb(cache = cache)
 
-		# updates seasons list
-		seasons_list = database[self.name].keys() # retrieve list of available seasons
-		if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
-		self.seasons = []
-		for i in seasons_list: # generates the seasons list
-			new_season = Season(s_id = i, tv_show = self)
-			self.seasons.append(new_season)
+		if not header_only:
+			# updates seasons list
+			seasons_list = database[self.name].keys() # retrieve list of available seasons
+			if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
+			self.seasons = []
+			for i in seasons_list: # generates the seasons list
+				new_season = Season(s_id = i, tv_show = self)
+				self.seasons.append(new_season)
 
 		# update TV Show info
 		self.description = database[self.name]['overview']
@@ -145,7 +148,7 @@ class Show:
 		imdb_id = database[self.name]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 
-		self.update_watched()
+		if not header_only: self.update_watched()
 
 	''' Toogle the watched state '''
 	def toogle_watched(self):

@@ -66,6 +66,7 @@ Benchmark Page parsers
 - Tv Show tracking
 - Persistent User Status
 - Watched / unwatched states for tv shows
+- Add header build option on Show class to only generate header information for the show and not load episode information to save time
 
 **v1.4**: (Big Release)
 
