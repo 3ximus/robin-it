@@ -17,7 +17,7 @@ Searches for available tv shows torrents at given a show name, quality (optional
 - If Quality left blank defaults to 720p
 - If Episodes left blank defaults to 10 episodes `range(11)[1:]` , in the
 
-##TV API - get show information (latest v1.2)##
+##TV API - get show information (latest v1.3)##
 
 Searches thetvdb.com and gathers TV show information
 
@@ -25,7 +25,32 @@ Searches thetvdb.com and gathers TV show information
 
 - Follow example usage at the end of the api
 
+##RobinIt API - User Information and Contnet (latest v1.3)##
+
+Stores user information such as following shows and movies (movies not added as of v1.3)
+It can be made persistent saving its state to a file and loading it back (loading and saving must be called manually anytime you want the action to take place)
+
+##RobinIt Console [CLI] - Track/Manage User Information and Contnet (latest v1.3)##
+
+In this version its is possible to add and remove tv shows to following list, list them and checks wich episodes are unwatched
+It is not possible with this CLI to set the watched states os episodes/season/shows, it may be added in the future in the CLI version
+
+*Usage*:
+
+- `$ ./robinit_console.py`
+- Type username, if save file exists it will try to load it ( default location at ./user/ directory )
+- Follow menu interaction and try not to blow it up
+
+---------------------
+
 *General Changelog*:
+
+**v1.3**: (Traking System)
+
+- Tv Show tracking system system
+- *API* Persistent User Status
+- *API* Watched / unwatched states for tv shows
+- *API* Possible to generate a tv show header build if needed for less cluttering or faster loads (only contain basic info and nothing about seasons/episodes) 
 
 **v1.2**: (Info Display)
 
@@ -60,13 +85,6 @@ Benchmark Page parsers
 --------------------------------
 
 ##FUTURE##
-
-**v1.3**: (Traking System)
-
-- Tv Show tracking
-- Persistent User Status
-- Watched / unwatched states for tv shows
-- Add header build option on Show class to only generate header information for the show and not load episode information to save time
 
 **v1.4**: (Big Release)
 

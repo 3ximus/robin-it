@@ -1,10 +1,11 @@
 '''
 Api for traking TVShows and Movies
 User state is persistent across runs and saved in ./user/ directory
-Latest Update - v1.2
+Latest Update - v1.3
 Created - 29.12.15
 Copyright (C) 2015 - eximus
 '''
+__version__ = '1.3'
 
 import cPickle
 import tv_shows
@@ -33,7 +34,9 @@ class UserContent:
 	This method closes the file if given
 	'''
 	def save_state(self, path = None, fd = None):
-		if path: fd = open(path + self.user_name + '.pkl', 'wb')
+		if path:
+			path = "%srobinit_%s_%s%s" % (path, __version__, self.user_name, '.pkl')
+			fd = open(path, 'wb')
 		if not fd: raise ValueError("No path or file passed to save method")
 		cPickle.dump(self.__dict__, fd, cPickle.HIGHEST_PROTOCOL)
 		fd.close()
@@ -43,7 +46,9 @@ class UserContent:
 	This method closes the file if given
 	'''
 	def load_state(self, path = None, fd = None):
-		if path: fd = open(path + self.user_name + '.pkl', 'rb')
+		if path:
+			path = "%srobinit_%s_%s%s" % (path, __version__, self.user_name, '.pkl')
+			fd = open(path, 'rb')
 		if not fd: raise ValueError("No path or file passed to load method")
 		tmp_dict = cPickle.load(fd)
 		fd.close()
@@ -89,6 +94,7 @@ class UserContent:
 				for show in self.shows: self.shows[show].update_info() # update everything
 		elif where == 'movies' or where == 'all':
 			pass
+# TODO MOVIES
 		else: raise ValueError("Where parameter in force update not accepatble")
 
 # ==========================================
@@ -152,6 +158,28 @@ class UserContent:
 			else: print "No Show found"
 		else:
 			for show in self.shows: self.shows[show].update_watched()
+	
+	'''
+	Get all episodes unwatched
+	Returns a dictionary where keys are shows and the values are lists, these are lists
+		of pairs, being the first element the season id and the second a list with instances
+		of episode class:
+		{ <show_name> : { <season_id> : [ <episode>, <episode>, ... ] , ... }, ... }
+	'''
+	def unwatched_episodes(self):
+		unwatched_dict = {}
+		for show in self.shows:
+			seasons_dict = {}
+			for season in self.shows[show].seasons:
+				episodes_list = []
+				if not season.watched:
+					seasons_dict.update({str(season.s_id):season.episodes})
+					continue
+				for episode in season.episodes:
+					if not episode.watched: episodes_list.append(episode)
+				if episodes_list != []: seasons_dict.update({str(season.s_id):episodes_list})
+			if seasons_dict != {}: unwatched_dict.update({show:seasons_dict})
+		return unwatched_dict
 
 	'''
 	Print following shows
@@ -181,4 +209,25 @@ class UserContent:
 
 	def remove_movie(self, name):
 		pass
+
+	'''
+	Print scheduled movies
+	Intended for CLI
+	'''
+	def movies_to_string(self):
+		s = False
+		print "Scheduled Movies:"
+		for key in [t for t in self.movies if not self.movies[t].watched]: # iterate over unwatched shows
+			s = True
+			print '\t' + key
+		if not s: print "\t- No Movies added yet"
+		s = False
+		print "\nWatched Shows:"
+		for key in [t for t in self.movies if self.movies[t].watched]: # iterate over watched shows
+			s = True
+			print '\t' + key
+		if not s: print "\t- No Movies watched yet"
+
+
+
 

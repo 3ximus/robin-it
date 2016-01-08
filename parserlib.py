@@ -66,9 +66,9 @@ class BS4():
 	Callable feed method
 	Receives the content to parse, or the open filedescriptor and how to parse it
 	'''
-	def feed(self, html, parse_for='torrent'):
+	def feed(self, html, parse_for='torrent', host = KICKASS):
 		self.btree = BeautifulSoup(html, "lxml") # parse the webpage with lxml parser
-		if parse_for == 'torrent': self._torrent_parsing(host = KICKASS) # TODO pass another host if needed
+		if parse_for == 'torrent': self._torrent_parsing(host = host) # TODO pass another host if needed
 		else: raise ValueError("Unknown parser option given")
 
 	''' Prepare for parsing according to host structure '''

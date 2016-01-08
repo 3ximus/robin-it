@@ -5,7 +5,7 @@ Updates are cached in ./cache/ directory
 Example usage program in the end
 # note that seasons and episodes are indexed with zero base
 
-Latest Update - v1.2
+Latest Update - v1.3
 Created - 30.12.15
 Copyright (C) 2015 - eximus
 '''
@@ -148,8 +148,6 @@ class Show:
 		imdb_id = database[self.name]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 
-		if not header_only: self.update_watched()
-
 	''' Toogle the watched state '''
 	def toogle_watched(self):
 		self.watched = not self.watched # toogle watched
@@ -163,13 +161,7 @@ class Show:
 	def update_watched(self):
 		seasons_watched = 0
 		for season in self.seasons: # for every season on this show
-			episodes_watched = 0
-			for episode in season.episodes: # for every episode in this show season
-				if episode.watched: episodes_watched += 1
-			if episodes_watched == len(season.episodes): # all episodes watched ?
-				season.watched = True # if yes season is watched
-				seasons_watched += 1
-		# all seasons watched then this show is watched
+			if season.watched: seasons_watched += 1
 		if seasons_watched == len(self.seasons): self.watched = True
 
 '''
@@ -184,7 +176,7 @@ class Season():
 	Muste receive a season id number and a tv_show from where this season belongs to
 	'''
 	def __init__(self, s_id, tv_show):
-		self.s_id = s_id
+		self.s_id = s_id # 1 based
 		self.episodes = []
 		self.poster = [] # list of season poster
 		self.poster_wide = [] # list of season wide posters
@@ -230,23 +222,25 @@ class Season():
 			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show)
 			self.episodes.append(new_episode)
 
-		self.update_watched()
-
 	''' Toogle the watched state '''
 	def toogle_watched(self):
 		self.set_watched(not self.watched)
+		self.update_watched() # after setting the value call update_watched to propagate change
 
 	''' Set the watched state '''
 	def set_watched(self, value):
 		self.watched = value
-		for episode in episodes:
+		for episode in self.episodes:
 			episode.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
 
 	''' Update watched state according to its content'''
 	def update_watched(self):
-		# update watched on tv show this runs on the entire tv show, updating everything
-		self.tv_show.update_watched()
+		cont = 0
+		for episode in self.episodes: # for every episode on this season
+			if episode.watched: cont += 1
+		if cont == len(self.episodes): self.watched = True
+		self.tv_show.update_watched() # call update on tv show
 
 '''
 Class defining a Season Episode
@@ -256,7 +250,7 @@ Update function generates cache on CACHE directory by default
 class Episode:
 
 	'''
-	Cosntructor method
+	Constructor method
 	Muste receive an episode id numeber, a season id number and a tv_show from where this episode belongs to
 	'''
 	def __init__(self, e_id, s_id, tv_show):
@@ -299,15 +293,17 @@ class Episode:
 	''' Toogle the watched state '''
 	def toogle_watched(self):
 		self.set_watched(not self.watched)
+		self.update_watched() # after setting the value call update_watched to propagate change
 
 	''' Set the watched state '''
 	def set_watched(Self):
 		self.watched = value
+		self.update_watched() # after setting the value call update_watched to propagate change
 
 	''' Update watched state according to its content'''
 	def update_watched(self):
-		# update watched on tv show this runs on the entire tv show, updating everything
-		self.tv_show.update_watched()
+		# call update on the belonging season
+		self.tv_show.seasons[s_id].update_watched()
 
 ''' Example Run '''
 if __name__ == '__main__':
