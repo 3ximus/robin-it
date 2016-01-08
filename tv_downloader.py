@@ -8,7 +8,7 @@ Created - 11.12.15
 Copyright (C) 2015 - eximus
 '''
 
-import torrent_api
+import torrents as torrent_api
 from utillib import UtillibError
 import sys, re
 
@@ -17,17 +17,18 @@ SEASON_MAX = 10
 QUALITY_PRESET = '720p'
 DOWNLOAD_PATH = './storage/'
 
-tv_show = raw_input("\033[1;33mTV Show name > \033[0m")
-
-# TODO Search tv show repository for availbale ep/sn
-
-quality = raw_input("\033[1;33mQuality > \033[0m")
-quality = (quality if quality else QUALITY_PRESET)
-seasons = raw_input("\033[1;33mSeasons > \033[0m").split(' ')
-if seasons == ['']:
-	print 'What fucking season am I suposed to look for uh?? Season 0??'
-	sys.exit(-1)
-episodes = raw_input("\033[1;33mEpisodes > \033[0m").split(' ')
+try:
+	tv_show = raw_input("\033[1;33mTV Show name > \033[0m")
+	quality = raw_input("\033[1;33mQuality (1080p, 720p, other)> \033[0m")
+	quality = (quality if quality else QUALITY_PRESET)
+	seasons = raw_input("\033[1;33mSeasons > \033[0m").split(' ')
+	if seasons == ['']:
+		print 'Please insert correct number of seasons'
+		sys.exit(-1)
+	episodes = raw_input("\033[1;33mEpisodes > \033[0m").split(' ')
+except KeyboardInterrupt:
+	print "\033[1;31m\nExiting...\033[0m"
+	sys.exit()
 for s in seasons:
 	if episodes == [''] and seasons != ['']:
 # download all season episodes

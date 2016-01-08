@@ -32,7 +32,7 @@ The feed method should return the content or store it in a class attribute named
 '''
 def parse_page_links(html_page, parser=parserlib.BS4):
 	if not parser: raise ValueError("No parser specified")
-	parsed = parser.feed(html_page) #  choose feed parameters to get expected results from parser
+	parsed = parser.feed(html_page, parse_for = 'torrent', host = KICKASS) #  choose feed parameters to get expected results from parser
 	parser.close()
 	if not parsed: parsed = parser.parsed # get content through parsed class atribute
 	try: parser.reset() # some parsers need this workaround

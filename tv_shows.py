@@ -1,12 +1,11 @@
-
 '''
 API for getting TV Shows information
 Queries http://thetvdb.com/ using  tvdb_api: https://github.com/dbr/tvdb_api
-Updates are cached in cache folder
+Updates are cached in ./cache/ directory
 Example usage program in the end
 # note that seasons and episodes are indexed with zero base
 
-Latest Update - v1.2
+Latest Update - v1.3
 Created - 30.12.15
 Copyright (C) 2015 - eximus
 '''
@@ -16,7 +15,6 @@ import os
 
 IMDB_TITLE = "http://www.imdb.com/title/"
 CACHE = "cache/"
-if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
 
 '''Main Error Class'''
 class TVError(Exception):
@@ -37,25 +35,6 @@ Tv database is cached to its default location of CACHE
 '''
 class Show:
 
-# Attributes
-	name = '' # tv show name
-	description = '' # tv show description
-	seasons = [] # seasons
-	genre = '' # genre
-	runtime = '' # episode times
-	status = '' # show status (continuing, stopped)
-	network = '' # airing network
-	air_dayofweek = '' # week day of hairing
-	air_time = '' # hour it airs
-	rating = '' # imdb rating
-	actors = '' # actors list
-	poster = '' # tv show poster
-	banner = '' # banner
-	imdb_id = '' # imdb id
-	watched = False
-	search_results = [] # store search results
-
-# Methods
 	'''
 	Class constructor
 	This show will containg the first match in the database based on the name given
@@ -65,18 +44,42 @@ class Show:
 		the search_results are stored in self.search_results and should be acessed
 		to make the result decision. After that the method build_with_result(int) should be called
 		to complete the build process.
+	The header only flag only builds the class with Show information and doesn't retrieve seasons
+		and episodes info
 	'''
-	def __init__(self, name, console = True, graphical = False):
+	def __init__(self, name, console = True, graphical = False, header_only = False):
+
+		# define class atributes
+		self.name = '' # tv show name
+		self.description = '' # tv show description
+		self.seasons = [] # seasons
+		self.genre = '' # genre
+		self.runtime = '' # episode times
+		self.status = '' # show status (continuing, stopped)
+		self.network = '' # airing network
+		self.air_dayofweek = '' # week day of hairing
+		self.air_time = '' # hour it airs
+		self.rating = '' # imdb rating
+		self.actors = '' # actors list
+		self.poster = '' # tv show poster
+		self.banner = '' # banner
+		self.imdb_id = '' # imdb id
+		self.watched = False
+		self.search_results = [] # store search results
+
 		# search for available TV Shows
 		self.search_results = Tvdb(cache = CACHE, banners = True).search(name)
 		results_amount = len(self.search_results)
 		if results_amount == 0: raise UnknownTVError("Unexistent tv_show \"%s\"" % name)
+		if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
 		if results_amount == 1:
 			self.name = self.search_results[0]['seriesname'] # placeholder updated in the update search
-			self.update_info()
+			self.update_info(header_only = header_only) # Build class
 		else:
 			if graphical: return # abort tv show info generation
-			elif console: self._handle_console_results()
+			elif console:
+				try: self._handle_console_results(header_only = header_only)
+				except ValueError: raise ValueError("Invalid Option")
 			else: raise UnhandledTVError("Multiple search results unhandled")
 
 	'''Print this class information'''
@@ -86,42 +89,49 @@ class Show:
 
 	'''
 	This handles multiple results in the console
-	For Graphical interaction use the graphical flag in the constructor and call
 		build_with_result method directly
 	'''
-	def _handle_console_results(self):
+	def _handle_console_results(self, header_only = False):
 		print "Multiple Results found when building, select one:"
 		for i, result in enumerate(self.search_results):
 			print "%i. %s" % (i, result['seriesname'])
-		choice = eval(raw_input("Selection: "))
-		self.build_with_result(choice) # use choise to build content
+		try: choice = int(raw_input("Selection: "))
+		except ValueError: raise # re-raise ValueError
+		else:
+			if choice < 0 or choice >= len(self.search_results): raise ValueError("Invalid option")
+		self.build_with_result(choice, header_only = header_only) # use choise to build content
 
 	'''
-	This handles multiple results in the console
-	For Graphical interaction use the graphical flag in the constructor wich sets the self.options
+	This function builds class with a given self.search_results index
+	Its intended is is to be called by a graphical interface after it checks the
+		self.search_results and prompts the user if multiple ones are found and builds with the
+		selected option
 	'''
-	def build_with_result(self, option):
+	def build_with_result(self, option, header_only = False):
+		if option < 0 or option >= len(self.search_results): raise ValueError("Invalid option when generating class")
 		self.name = self.search_results[option]['seriesname']
-		self.update_info() # generate content
+		self.update_info(header_only = header_only) # generate content
 
 	'''
 	Searches thetvdb.com and generates class attributes
+	This method function is responsible for building the entire data structure of a TV Show
 	If cache is False, update from the database is forced
 	It is mandatory that self.name is set otherwise build will fail
 	'''
-	def update_info(self, cache = CACHE):
+	def update_info(self, cache = CACHE, header_only = False):
 		if self.name == '': # error check
 			raise UnknownTVError("TV Show name not set, build class correctly")
 
 		database = Tvdb(cache = cache)
 
-		# updates seasons list
-		seasons_list = database[self.name].keys() # retrieve list of available seasons
-		if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
-		self.seasons = []
-		for i in seasons_list: # generates the seasons list
-			new_season = Season(s_id = i, tv_show = self)
-			self.seasons.append(new_season)
+		if not header_only:
+			# updates seasons list
+			seasons_list = database[self.name].keys() # retrieve list of available seasons
+			if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
+			self.seasons = []
+			for i in seasons_list: # generates the seasons list
+				new_season = Season(s_id = i, tv_show = self)
+				self.seasons.append(new_season)
 
 		# update TV Show info
 		self.description = database[self.name]['overview']
@@ -138,8 +148,6 @@ class Show:
 		imdb_id = database[self.name]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 
-		self.update_watched()
-
 	''' Toogle the watched state '''
 	def toogle_watched(self):
 		self.watched = not self.watched # toogle watched
@@ -153,13 +161,7 @@ class Show:
 	def update_watched(self):
 		seasons_watched = 0
 		for season in self.seasons: # for every season on this show
-			episodes_watched = 0
-			for episode in season.episodes: # for every episode in this show season
-				if episode.watched: episodes_watched += 1
-			if episodes_watched == len(season.episodes): # all episodes watched ?
-				season.watched = True # if yes season is watched
-				seasons_watched += 1
-		# all seasons watched then this show is watched
+			if season.watched: seasons_watched += 1
 		if seasons_watched == len(self.seasons): self.watched = True
 
 '''
@@ -169,22 +171,17 @@ Update function generates cache on CACHE directory by default
 '''
 class Season():
 
-#Attributes
-	s_id = 0 # season numeric id
-	tv_show = None # Show instance
-	episodes = []
-	poster = [] # list of season poster
-	poster_wide = [] # list of season wide posters
-	watched = False
-
-# Methods
 	'''
 	Cosntructor method
 	Muste receive a season id number and a tv_show from where this season belongs to
 	'''
 	def __init__(self, s_id, tv_show):
-		self.s_id = s_id
-		if tv_show: self.tv_show = tv_show
+		self.s_id = s_id # 1 based
+		self.episodes = []
+		self.poster = [] # list of season poster
+		self.poster_wide = [] # list of season wide posters
+		self.watched = False
+		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.update_info()
 
@@ -201,21 +198,22 @@ class Season():
 	def update_info(self, cache = CACHE):
 		# update posters
 		database = Tvdb(cache = cache, banners = True)
-		posters = database[self.tv_show.name]['_banners']['season']
-		# update posters
-		self.poster = [] # clear ceched value
-		if 'season' in posters: # check for existance
-			for entry in posters['season']:
-				misc = posters['season'][entry]
-				if misc['language'] == 'en' and misc['season'] == str(self.s_id):
-					self.poster.append(misc['_bannerpath'])
-		# update wide posters
-		self.poster_wide = [] # clear ceched value
-		if 'seasonwide' in posters: # check for existence
-			for entry in posters['seasonwide']:
-				misc = posters['seasonwide'][entry]
-				if misc['language'] == 'en' and misc['season'] == str(self.s_id):
-					self.poster_wide.append(misc['_bannerpath'])
+		try: posters = database[self.tv_show.name]['_banners']['season']
+		except KeyError: pass # no posters, so don't update them
+		else: # update posters
+			self.poster = [] # clear ceched value
+			if 'season' in posters: # check for existance
+				for entry in posters['season']:
+					misc = posters['season'][entry]
+					if misc['language'] == 'en' and misc['season'] == str(self.s_id):
+						self.poster.append(misc['_bannerpath'])
+			# update wide posters
+			self.poster_wide = [] # clear ceched value
+			if 'seasonwide' in posters: # check for existence
+				for entry in posters['seasonwide']:
+					misc = posters['seasonwide'][entry]
+					if misc['language'] == 'en' and misc['season'] == str(self.s_id):
+						self.poster_wide.append(misc['_bannerpath'])
 
 		# update episodes list
 		episodes_list = database[self.tv_show.name][self.s_id].keys()
@@ -224,23 +222,25 @@ class Season():
 			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show)
 			self.episodes.append(new_episode)
 
-		self.update_watched()
-
 	''' Toogle the watched state '''
 	def toogle_watched(self):
 		self.set_watched(not self.watched)
+		self.update_watched() # after setting the value call update_watched to propagate change
 
 	''' Set the watched state '''
 	def set_watched(self, value):
 		self.watched = value
-		for episode in episodes:
+		for episode in self.episodes:
 			episode.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
 
 	''' Update watched state according to its content'''
 	def update_watched(self):
-		# update watched on tv show this runs on the entire tv show, updating everything
-		self.tv_show.update_watched()
+		cont = 0
+		for episode in self.episodes: # for every episode on this season
+			if episode.watched: cont += 1
+		if cont == len(self.episodes): self.watched = True
+		self.tv_show.update_watched() # call update on tv show
 
 '''
 Class defining a Season Episode
@@ -249,27 +249,25 @@ Update function generates cache on CACHE directory by default
 '''
 class Episode:
 
-# Attributes
-	e_id = 0
-	s_id = 0
-	name = ''
-	description = ''
-	episode_number = ''
-	director = ''
-	writer = ''
-	rating = ''
-	season = ''
-	image = ''
-	imdb_id = ''
-	airdate = ''
-	watched = False
-	tv_show = None # show instance
-
-# Methods
+	'''
+	Constructor method
+	Muste receive an episode id numeber, a season id number and a tv_show from where this episode belongs to
+	'''
 	def __init__(self, e_id, s_id, tv_show):
 		self.e_id = e_id
 		self.s_id = s_id
-		if tv_show: self.tv_show = tv_show
+		self.name = ''
+		self.description = ''
+		self.episode_number = ''
+		self.director = ''
+		self.writer = ''
+		self.rating = ''
+		self.season = ''
+		self.image = ''
+		self.imdb_id = ''
+		self.airdate = ''
+		self.watched = False
+		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.update_info()
 
@@ -295,15 +293,17 @@ class Episode:
 	''' Toogle the watched state '''
 	def toogle_watched(self):
 		self.set_watched(not self.watched)
+		self.update_watched() # after setting the value call update_watched to propagate change
 
 	''' Set the watched state '''
 	def set_watched(Self):
 		self.watched = value
+		self.update_watched() # after setting the value call update_watched to propagate change
 
 	''' Update watched state according to its content'''
 	def update_watched(self):
-		# update watched on tv show this runs on the entire tv show, updating everything
-		self.tv_show.update_watched()
+		# call update on the belonging season
+		self.tv_show.seasons[s_id].update_watched()
 
 ''' Example Run '''
 if __name__ == '__main__':

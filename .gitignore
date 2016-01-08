@@ -3,4 +3,6 @@
 *.pyc
 *.vim
 cache/*
+storage/*
+user/*
 benchmarks_dir/outjunk/*
