@@ -3,6 +3,7 @@
 *.pyc
 *.vim
 cache/*
+kivy_lab/*
 storage/*
 user/*
 benchmarks_dir/outjunk/*

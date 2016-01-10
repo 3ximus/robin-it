@@ -1,0 +1,121 @@
+#:kivy 1.8.0
+
+# MAIN SCREEN
+<MainScreen>:
+	BoxLayout:
+		orientation: 'vertical'
+		# Background Color
+		canvas:
+			Color:
+				rgb: 0.15, 0.15, 0.15
+			Rectangle:
+				size: self.size
+		Label:
+			text: 'Robin It'
+			font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+			font_size: 150
+	
+		BoxLayout:
+			padding: [30, 70, 30, 70]
+			spacing: 30
+			# used to keep buttons in order
+			Label:
+			Button:
+				text: 'Movies'
+				background_normal: ''
+				background_disabled_down: ''
+				background_color: 0.3, 0.8, 0.2, 1
+				on_press: root.manager.current = 'movies_main_screen'
+				font_name: 'gui_style/fonts/GatsbyFLF.ttf'
+				font_size: 60
+				width: 150
+				size_hint: None, None
+				disabled: True
+			Button:
+				text: 'Shows'
+				background_normal: ''
+				background_disabled_down: ''
+				background_color: 0.3, 0.8, 0.2, 1
+				on_press: root.manager.current = 'shows_main_screen'
+				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+				width: 150
+				size_hint: None, None
+				font_size: 60
+			Button
+				text: 'Books'
+				background_normal: ''
+				background_disabled_down: ''
+				background_color: 0.3, 0.8, 0.2, 1
+				on_press: root.manager.current = 'books_main_screen'
+				font_name: 'gui_style/fonts/GatsbyFLF.ttf'
+				font_size: 60
+				width: 150
+				size_hint: None, None
+				disabled: True
+			Button:
+				text: 'Games'
+				background_normal: ''
+				background_disabled_down: ''
+				background_color: 0.3, 0.8, 0.2, 1
+				on_press: root.manager.current = 'games_main_screen'
+				font_name: 'gui_style/fonts/GatsbyFLF.ttf'
+				font_size: 60
+				width: 150
+				size_hint: None, None
+				disabled: True
+			# used to keep buttons in order
+			Label:
+
+# SHOWS SCREEN
+<ShowsMainScreen>:
+	FloatLayout:
+		# Background Color
+		canvas:
+			Color:
+				rgb: 0.15, 0.15, 0.15
+			Rectangle:
+				size: self.size
+		BokehLight:
+			canvas:
+				Color:
+					rgb: 0.2, 0.8, 0.2, 0.5
+				Ellipse:
+					size: 300, 300
+					pos: self.pos
+			opacity: 0.5
+		GridLayout:
+			size_hint: 0.5, 0.5
+			pos: 100, 100
+			cols: 10
+			rows: 1
+			Button:
+				text: 'Test'
+				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+				font_size: 30
+				size_hint: 0.2, 0.1
+				pos: 10, 10
+			Button:
+				text: 'Test'
+				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+				font_size: 30
+				size_hint: 0.2, 0.1
+				pos: 10, 10
+		Button:
+			text: 'Add new show'
+			background_normal: ''
+			background_color: 0.3, 0.8, 0.2, 1
+			font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+			font_size: 30
+			size_hint: 0.2, 0.1
+			pos: 10, 10
+
+
+# MOVIES SCREEN
+<MoviesMainScreen>:
+	FloatLayout:
+		# Background Color
+		canvas:
+			Color:
+				rgb: 0.15, 0.15, 0.15
+			Rectangle:
+				size: self.size
