@@ -33,8 +33,8 @@ theme_colors = [[0.98, 0.97, 0.08], # yellow
 # --- BACKGROUND BOKEH GLOBALS ---
 B_SPAWNED = 2 # set number of bokehs spawned each time
 B_SPAWN_TIME_INTERVAL = 1 # time interval between each spawn
-B_MAX_OPACITY = 0.2 # maximum opacity a bokeh can reach
-B_OPACITY_RATE = 0.03 # rate of opacity change, less == more screen time
+B_MAX_OPACITY = 0.3 # maximum opacity a bokeh can reach
+B_OPACITY_RATE = 0.04 # rate of opacity change, less == more screen time
 B_MIN_SIZE = 20 # minimum bookeh size
 B_MAX_SIZE = 150 # maximum bokeh size
 
@@ -73,7 +73,6 @@ class BokehLight(Widget):
 
 ''' Background containing moving bokeh lights spawned and moving randomly '''
 class Background(FloatLayout):
-
 	def __init__(self, **kwargs):
 		super(Background, self).__init__(**kwargs)
 # spawn bokeh lights in defined intervals
@@ -129,6 +128,12 @@ class ShowsGrid(GridLayout):
 				source='http://thetvdb.com/banners/graphical/262407-g11.jpg')
 			self.add_widget(img)
 
+	''' Sets amount of columns when layout streches '''
+	def on_size(self, *largs):
+		if self.right < 650: self.cols = 1
+		elif self.right < 980: self.cols = 2
+		else: self.cols = 3
+
 ''' Contains show information '''
 class ItemScroller(ScrollView):
 	def __init__(self, **kwargs):
@@ -139,8 +144,10 @@ class ItemScroller(ScrollView):
 # ------------------------------
 
 class ShowsMainScreen(Screen):
-	def __init__(self, **kwargs):
-		super(ShowsMainScreen, self).__init__(**kwargs)
+	pass
+
+class AllShowsScreen(Screen):
+	pass
 
 class MoviesMainScreen(Screen):
 	pass
@@ -160,14 +167,16 @@ Builder.load_file('gui_style/robinit.kv')
 # ------------------------------------
 #     SCREEN BEHAVIOR / SETTIGNS
 # ------------------------------------
-shows_screen = ShowsMainScreen(name = 'shows_main_screen')
+
+# EMPTY
 
 # ------------------------------------
 #           SCREEN MANAGER
 # ------------------------------------
 screen_manager = ScreenManager(transition=SlideTransition())
 screen_manager.add_widget(MainScreen(name = 'main_screen'))
-screen_manager.add_widget(shows_screen)
+screen_manager.add_widget(ShowsMainScreen(name = 'shows_main_screen'))
+screen_manager.add_widget(AllShowsScreen(name = 'all_shows_screen'))
 screen_manager.add_widget(MoviesMainScreen(name = 'movies_main_screen'))
 
 # ------------------------------------
