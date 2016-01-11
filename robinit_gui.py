@@ -51,7 +51,7 @@ class BokehLight(Widget):
 	r_width = NumericProperty(100) # bokeh width
 	r_height = NumericProperty(100) # bokeh size
 	max_opacity = NumericProperty(1) # maximum opacity a particle can reach
-	_opacity = NumericProperty(0.001) # starting opacity
+	_opacity = NumericProperty(0.01) # starting opacity
 	slope = B_OPACITY_RATE # rate that opacity changes
 	slope_invert = False # limit the inversion of the slope to happen only once
 
@@ -114,25 +114,33 @@ class ImagePoster(ButtonBehavior, AsyncImage):
 	pass
 
 class ImageBanner(ButtonBehavior, AsyncImage):
-	pass
+
+	''' Set on_press action'''
+	def on_press(self):
+		pass
+
+class ShowsGrid(GridLayout):
+	def __init__(self, **kwargs):
+		super(ShowsGrid, self).__init__(**kwargs)
+		# Make sure the height is such that there is something to scroll.
+		self.bind(minimum_height=self.setter('height'))
+		for i in range(30):
+			img = ImageBanner(
+				source='http://thetvdb.com/banners/graphical/262407-g11.jpg')
+			self.add_widget(img)
 
 ''' Contains show information '''
-class ShowsScroll(GridLayout):
-	def __inti__(self):
-		super(ShowsScroll, self).__init__(**kwargs)
+class ItemScroller(ScrollView):
+	def __init__(self, **kwargs):
+		super(ItemScroller, self).__init__(**kwargs)
+
+# ------------------------------
+#            SCREENS
+# ------------------------------
 
 class ShowsMainScreen(Screen):
 	def __init__(self, **kwargs):
 		super(ShowsMainScreen, self).__init__(**kwargs)
-		layout = ShowsScroll() # create a layout to be scrollable
-		# Make sure the height is such that there is something to scroll.
-		layout.bind(minimum_height=layout.setter('height'))
-		for i in range(30):
-			img = ImageBanner(source='http://thetvdb.com/banners/graphical/262407-g11.jpg')
-			layout.add_widget(img)
-		scroll = ScrollView(size_hint=(None, None), size=(400, 400), pos=(100, 100))
-		scroll.add_widget(layout)
-		self.add_widget(scroll)
 
 class MoviesMainScreen(Screen):
 	pass

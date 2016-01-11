@@ -1,7 +1,18 @@
 #:kivy 1.8.0
 
-# BokehLight rule definition
+
+#:set font 'gui_style/fonts/VertigoFLF.ttf'
+#:set title_font 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+## --- other options ---
+##:set title_font 'gui_style/fonts/TH3 MACHINE.ttf'
+##:set font 'gui_style/fonts/Park Tech CG.ttf'
+##:set font 'gui_style/fonts/Park Tech CG Light.ttf'
+
+# -------------------
+#    BACKGROUND
+# -------------------
 <BokehLight>:
+	# Bokeh settings
 	opacity: self._opacity
 	canvas:
 		Color:
@@ -9,7 +20,6 @@
 		Ellipse:
 			size: self.r_width, self.r_height
 			pos: self.pos
-
 <Background>:
 	# Background Color
 	canvas:
@@ -18,11 +28,16 @@
 		Rectangle:
 			size: self.size
 
-<ShowsScroll>:
-	cols: 1
-	spacing: 20
-	size_hint: None, None
-	width: 500
+# --------------------
+# SCROOLLERS AND GRIDS 
+# --------------------
+
+<ItemScroller>:
+	bar_color: 0.4, 0.8, 0.2, 1
+
+# -------------------
+# IMAGES AND BUTTONS
+# -------------------
 
 <ImageBanner>:
 	size_hint_y: None
@@ -33,7 +48,7 @@
 	background_normal: ''
 	background_disabled_down: ''
 	background_color: 0.4, 0.8, 0.2, 1
-	font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+	font_name: font
 
 # Button rule definition
 <MainMenuButton@RButton>:
@@ -42,13 +57,16 @@
 	size_hint: None, None
 	font_size: 60
 
-# MAIN SCREEN
+# -------------------
+#    MAIN SCREEN
+# -------------------
+
 <MainScreen>:
 	BoxLayout:
 		orientation: 'vertical'
 		Label:
 			text: 'Robin It'
-			font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+			font_name: title_font
 			font_size: 150
 		BoxLayout:
 			padding: [30, 70, 30, 70]
@@ -74,12 +92,26 @@
 				disabled: True
 			# used to keep buttons in order
 			Label:
-# SHOWS SCREEN
-<ShowsMainScreen>:
-	FloatLayout:
-		# Following TV Shows
 
-		# Bottom Buttons
+# -------------------
+#    SHOWS SCREEN
+# -------------------
+
+<ShowsMainScreen>:
+	# Following TV Shows
+	ItemScroller:
+		size_hint_y: None
+		height: self.parent.top - 200 # gets size of screen
+		pos: 0, 100
+		ShowsGrid:
+			# Is inside an ItemScroller
+			cols: 2
+			spacing: 20
+			size_hint_y: None
+			#width: 500
+
+	# Buttons
+	FloatLayout:
 		RButton:
 			text: 'Back'
 			font_size: 50
@@ -98,8 +130,10 @@
 			size_hint: None, None
 			pos: 10, 10
 
+# -------------------
+#    MOVIES SCREEN
+# -------------------
 
-# MOVIES SCREEN
 <MoviesMainScreen>:
 	FloatLayout:
 
