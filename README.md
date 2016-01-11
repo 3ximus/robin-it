@@ -1,7 +1,7 @@
 #Web Crawler#
 ================================
 
-*MAIN README FILE
+*Version 1.3*
 
 Python web crawler to automaticly search and gather web resources.
 

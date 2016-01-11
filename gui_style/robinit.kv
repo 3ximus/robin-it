@@ -1,70 +1,77 @@
 #:kivy 1.8.0
 
+
+# General Green Button rule
+<RButton@Button>:
+	background_normal: ''
+	background_disabled_down: ''
+	background_color: 0.4, 0.8, 0.2, 1
+	font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+
+# Button rule definition
+<MainMenuButton@RButton>:
+	width: 170
+	height: 90
+	size_hint: None, None
+	font_size: 60
+
+# BokehLight rule definition
+<BokehLight>:
+	opacity: self._opacity
+	canvas:
+		Color:
+			rgb: self.r_color
+			#rgb: 0.98, 0.97, 0.08 # yellow
+			# rgb: 0.78, 0.9, 0.21 # yellowish green
+			# rgb: 0.11, 0.95, 0.55 # greenish blue
+			# rgb: 0.2, 0.8, 0.2, 0.5 # light green
+
+		Ellipse:
+			size: self.r_width, self.r_height
+			pos: self.pos
+
+<Background>:
+	# Background Color
+	canvas:
+		Color:
+			rgb: 0.25, 0.25, 0.25
+		Rectangle:
+			size: self.size
+
 # MAIN SCREEN
 <MainScreen>:
 	BoxLayout:
 		orientation: 'vertical'
-		# Background Color
-		canvas:
-			Color:
-				rgb: 0.15, 0.15, 0.15
-			Rectangle:
-				size: self.size
 		Label:
 			text: 'Robin It'
 			font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
 			font_size: 150
-	
+		Label:
 		BoxLayout:
 			padding: [30, 70, 30, 70]
 			spacing: 30
 			# used to keep buttons in order
 			Label:
-			Button:
+			MainMenuButton:
 				text: 'Movies'
-				background_normal: ''
-				background_disabled_down: ''
-				background_color: 0.3, 0.8, 0.2, 1
 				on_press: root.manager.current = 'movies_main_screen'
-				font_name: 'gui_style/fonts/GatsbyFLF.ttf'
-				font_size: 60
-				width: 150
-				size_hint: None, None
 				disabled: True
-			Button:
+			MainMenuButton:
 				text: 'Shows'
-				background_normal: ''
-				background_disabled_down: ''
-				background_color: 0.3, 0.8, 0.2, 1
-				on_press: root.manager.current = 'shows_main_screen'
-				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
-				width: 150
-				size_hint: None, None
-				font_size: 60
-			Button
+				on_press:
+					root.manager.transition.direction = 'up'
+					root.manager.current = 'shows_main_screen'
+			MainMenuButton
 				text: 'Books'
-				background_normal: ''
-				background_disabled_down: ''
-				background_color: 0.3, 0.8, 0.2, 1
 				on_press: root.manager.current = 'books_main_screen'
-				font_name: 'gui_style/fonts/GatsbyFLF.ttf'
-				font_size: 60
-				width: 150
-				size_hint: None, None
 				disabled: True
-			Button:
+			MainMenuButton:
 				text: 'Games'
-				background_normal: ''
-				background_disabled_down: ''
-				background_color: 0.3, 0.8, 0.2, 1
 				on_press: root.manager.current = 'games_main_screen'
-				font_name: 'gui_style/fonts/GatsbyFLF.ttf'
-				font_size: 60
-				width: 150
-				size_hint: None, None
 				disabled: True
 			# used to keep buttons in order
 			Label:
+		Label:
 
 # SHOWS SCREEN
 <ShowsMainScreen>:
@@ -72,41 +79,46 @@
 		# Background Color
 		canvas:
 			Color:
-				rgb: 0.15, 0.15, 0.15
+				rgb: 0.25, 0.25, 0.25
 			Rectangle:
 				size: self.size
-		BokehLight:
-			canvas:
-				Color:
-					rgb: 0.2, 0.8, 0.2, 0.5
-				Ellipse:
-					size: 300, 300
-					pos: self.pos
-			opacity: 0.5
+
+		# Following TV Shows
 		GridLayout:
 			size_hint: 0.5, 0.5
 			pos: 100, 100
 			cols: 10
 			rows: 1
-			Button:
-				text: 'Test'
-				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
-				font_size: 30
-				size_hint: 0.2, 0.1
-				pos: 10, 10
-			Button:
-				text: 'Test'
-				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
-				font_size: 30
-				size_hint: 0.2, 0.1
-				pos: 10, 10
-		Button:
-			text: 'Add new show'
-			background_normal: ''
-			background_color: 0.3, 0.8, 0.2, 1
-			font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
-			font_size: 30
-			size_hint: 0.2, 0.1
+#			RButton:
+#				text: 'Test'
+#				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+#				font_size: 30
+#				size_hint: 0.2, 0.1
+#				pos: 10, 10
+#			RButton:
+#				text: 'Test'
+#				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+#				font_size: 30
+#				size_hint: 0.2, 0.1
+#				pos: 10, 10
+
+		# Bottom Buttons
+		RButton:
+			text: 'Back'
+			font_size: 40
+			on_press:
+				root.manager.transition.direction = 'down'
+				root.manager.current = 'main_screen'
+			width: 100
+			height: 50
+			size_hint: None, None
+			pos: 10, root.top - 60
+		RButton:
+			text: '+ Add'
+			font_size: 40
+			width: 120
+			height: 50
+			size_hint: None, None
 			pos: 10, 10
 
 
@@ -116,6 +128,6 @@
 		# Background Color
 		canvas:
 			Color:
-				rgb: 0.15, 0.15, 0.15
+				rgb: 0.25, 0.25, 0.25
 			Rectangle:
 				size: self.size

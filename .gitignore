@@ -6,4 +6,5 @@ cache/*
 kivy_lab/*
 storage/*
 user/*
+robinit/*
 benchmarks_dir/outjunk/*
