@@ -220,6 +220,12 @@ class ShowSelectionMenuBar(SelectionMenuBar):
 		self.add_widget(butt1)
 		self.add_widget(butt2)
 
+'''
+Allows item selection
+Note: A selector doesn't bind itself to the on_selection event,
+	due to possible conflicts events must be binded and unbinded manually
+	to the handle_selection method
+'''
 class Selector(FloatLayout):
 
 	selected_list = ListProperty(0) # amount of selected items
@@ -227,8 +233,6 @@ class Selector(FloatLayout):
 
 	def __init__(self, **kwargs):
 		super(Selector, self).__init__(**kwargs)
-		# on_selection event on the event_manager will trigger a handle_selection
-		event_manager.bind(on_selection=self.handle_selection)
 		# add a hidden selection menu
 		self.select_menu_bar = ShowSelectionMenuBar(pos=(0, -S_BAR_SIZE), size_hint_y=None, height=S_BAR_SIZE)
 		self.add_widget(self.select_menu_bar)
@@ -265,6 +269,7 @@ class Selector(FloatLayout):
 		value: new value
 	'''
 	def on_s_raised(self, instance, value):
+		print "haalo"
 		if value == True: self.raise_selection_menu()
 		else: self.lower_selection_menu()
 
@@ -323,14 +328,27 @@ class ToogleWatched(ThemeButton):
 class ShowsMainScreen(Screen):
 	def __init__(self, **kwargs):
 		super(ShowsMainScreen, self).__init__(**kwargs)
-		selector = Selector()
-		self.add_widget(selector)
+
+	def on_pre_enter(self):
+		self.selector = Selector()
+		# on_selection event on the event_manager will trigger a handle_selection
+		event_manager.bind(on_selection=self.selector.handle_selection)
+		self.add_widget(self.selector)
+	def on_pre_leave(self):
+		event_manager.unbind(on_selection=self.selector.handle_selection)
 
 class AllShowsScreen(Screen):
 	def __init__(self, **kwargs):
 		super(AllShowsScreen, self).__init__(**kwargs)
-		selector = SingleSelector()
-		self.add_widget(selector)
+
+	def on_pre_enter(self):
+		self.selector = SingleSelector()
+		# on_selection event on the event_manager will trigger a handle_selection
+		event_manager.bind(on_selection=self.selector.handle_selection)
+		self.add_widget(self.selector)
+
+	def on_pre_leave(self):
+		event_manager.unbind(on_selection=self.selector.handle_selection)
 
 class MoviesMainScreen(Screen):
 	pass
