@@ -1,5 +1,32 @@
 #:kivy 1.8.0
 
+# BokehLight rule definition
+<BokehLight>:
+	opacity: self._opacity
+	canvas:
+		Color:
+			rgb: self.r_color
+		Ellipse:
+			size: self.r_width, self.r_height
+			pos: self.pos
+
+<Background>:
+	# Background Color
+	canvas:
+		Color:
+			rgb: 0.25, 0.25, 0.25
+		Rectangle:
+			size: self.size
+
+<ShowsScroll>:
+	cols: 1
+	spacing: 20
+	size_hint: None, None
+	width: 500
+
+<ImageBanner>:
+	size_hint_y: None
+	height: 60
 
 # General Green Button rule
 <RButton@Button>:
@@ -15,29 +42,6 @@
 	size_hint: None, None
 	font_size: 60
 
-# BokehLight rule definition
-<BokehLight>:
-	opacity: self._opacity
-	canvas:
-		Color:
-			rgb: self.r_color
-			#rgb: 0.98, 0.97, 0.08 # yellow
-			# rgb: 0.78, 0.9, 0.21 # yellowish green
-			# rgb: 0.11, 0.95, 0.55 # greenish blue
-			# rgb: 0.2, 0.8, 0.2, 0.5 # light green
-
-		Ellipse:
-			size: self.r_width, self.r_height
-			pos: self.pos
-
-<Background>:
-	# Background Color
-	canvas:
-		Color:
-			rgb: 0.25, 0.25, 0.25
-		Rectangle:
-			size: self.size
-
 # MAIN SCREEN
 <MainScreen>:
 	BoxLayout:
@@ -46,7 +50,6 @@
 			text: 'Robin It'
 			font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
 			font_size: 150
-		Label:
 		BoxLayout:
 			padding: [30, 70, 30, 70]
 			spacing: 30
@@ -71,53 +74,27 @@
 				disabled: True
 			# used to keep buttons in order
 			Label:
-		Label:
-
 # SHOWS SCREEN
 <ShowsMainScreen>:
 	FloatLayout:
-		# Background Color
-		canvas:
-			Color:
-				rgb: 0.25, 0.25, 0.25
-			Rectangle:
-				size: self.size
-
 		# Following TV Shows
-		GridLayout:
-			size_hint: 0.5, 0.5
-			pos: 100, 100
-			cols: 10
-			rows: 1
-#			RButton:
-#				text: 'Test'
-#				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
-#				font_size: 30
-#				size_hint: 0.2, 0.1
-#				pos: 10, 10
-#			RButton:
-#				text: 'Test'
-#				font_name: 'gui_style/fonts/GatsbyFLF-Bold.ttf'
-#				font_size: 30
-#				size_hint: 0.2, 0.1
-#				pos: 10, 10
 
 		# Bottom Buttons
 		RButton:
 			text: 'Back'
-			font_size: 40
+			font_size: 50
 			on_press:
 				root.manager.transition.direction = 'down'
 				root.manager.current = 'main_screen'
 			width: 100
-			height: 50
+			height: 60
 			size_hint: None, None
-			pos: 10, root.top - 60
+			pos: 10, root.top - 70
 		RButton:
 			text: '+ Add'
-			font_size: 40
+			font_size: 50
 			width: 120
-			height: 50
+			height: 60
 			size_hint: None, None
 			pos: 10, 10
 
@@ -125,9 +102,4 @@
 # MOVIES SCREEN
 <MoviesMainScreen>:
 	FloatLayout:
-		# Background Color
-		canvas:
-			Color:
-				rgb: 0.25, 0.25, 0.25
-			Rectangle:
-				size: self.size
+
