@@ -38,27 +38,40 @@
 <ItemScroller>:
 	bar_color: green_color
 
-# -------------------
-# IMAGES AND BUTTONS
-# -------------------
+# ----------------------
+# IMAGES/BUTTONS/BUBBLES
+# ----------------------
 
 <ImageBanner>:
 	size_hint_y: None
-	height: 60
+	height: 80
 
 # General Green Button rule
-<RButton@Button>:
+<ThemeButton>:
 	background_normal: ''
 	background_disabled_down: ''
 	background_color: green_color
 	font_name: font
+	size_hint: None, None
 
 # Button rule definition
-<MainMenuButton@RButton>:
+<MainMenuButton@ThemeButton>:
 	width: 170
 	height: 90
-	size_hint: None, None
 	font_size: 60
+
+<RemoveShow>:
+	text: 'Remove'
+	font_size: 60
+	width: 120
+	height: 60
+	pos: self.pos
+
+<ToogleWatched>:
+	text: 'Toogle'
+	font_size: 60
+	width: 120
+	height: 60
 
 [CustomAccordionItem@Label]:
     text: ctx.title
@@ -85,6 +98,17 @@
     canvas.after:
         PopMatrix
 
+<SelectionMenuBar>:
+	canvas:
+		Color:
+			rgb: 0.5, 0.5, 0.5, 1
+		Rectangle:
+			source:
+			size: self.size
+			pos: self.pos
+	opacity: 0.6
+
+
 # -------------------
 #    MAIN SCREEN
 # -------------------
@@ -103,20 +127,20 @@
 			Label:
 			MainMenuButton:
 				text: 'Movies'
-				on_press: root.manager.current = 'movies_main_screen'
+				on_release: root.manager.current = 'movies_main_screen'
 				disabled: True
 			MainMenuButton:
 				text: 'Shows'
-				on_press:
+				on_release:
 					root.manager.transition.direction = 'up'
 					root.manager.current = 'shows_main_screen'
 			MainMenuButton
 				text: 'Books'
-				on_press: root.manager.current = 'books_main_screen'
+				on_release: root.manager.current = 'books_main_screen'
 				disabled: True
 			MainMenuButton:
 				text: 'Games'
-				on_press: root.manager.current = 'games_main_screen'
+				on_release: root.manager.current = 'games_main_screen'
 				disabled: True
 			# used to keep buttons in order
 			Label:
@@ -127,83 +151,76 @@
 
 <ShowsMainScreen>:
 	FloatLayout:
-		RButton:
+		ThemeButton:
 			text: 'Back'
 			font_size: 50
-			on_press:
+			on_release:
 				root.manager.transition.direction = 'down'
 				root.manager.current = 'main_screen'
 			width: 100
 			height: 60
-			size_hint: None, None
 			pos: 10, root.top - 70
-		RButton:
+		ThemeButton:
 			text: '+ Add'
 			font_size: 50
 			width: 120
 			height: 60
-			size_hint: None, None
 			pos: 10, 10
-		RButton:
+		ThemeButton:
 			text: 'All >>'
 			font_size: 50
-			on_press:
-				root.manager.transition.direction = 'down'
+			on_release:
+				root.manager.transition.direction = 'left'
 				root.manager.current = 'all_shows_screen'
 			width: 120
 			height: 60
-			size_hint: None, None
 			pos: root.right - 130, 10
 
 <AllShowsScreen>:
-	FloatLayout:
-		Accordion:
-			size_hint: None, None
-			pos: 50, 100
-			height: root.top - 200
-			width: root.right - 100
-			AccordionItem:
-				title_template: 'CustomAccordionItem'
-				background_normal: ''
-				background_color: green_color
-				title: 'Following'
-				ItemScroller:
-					ShowsGrid:
-						cols: 3
-						spacing: 5
-						size_hint_y: None
-			AccordionItem:
-				title_template: 'CustomAccordionItem'
-				background_normal: ''
-				background_color: green_color
-				title: 'Watched'
-				ItemScroller:
-					ShowsGrid:
-						cols: 3
-						spacing: 5
-						size_hint_y: None
-		RButton:
-			text: '<< Following'
-			font_size: 50
-			on_press:
-				root.manager.transition.direction = 'left'
-				root.manager.current = 'shows_main_screen'
-			width: 160
-			height: 60
-			size_hint: None, None
-			pos: 10, root.top - 70
-		RButton:
-			text: '+ Add'
-			font_size: 50
-			width: 120
-			height: 60
-			size_hint: None, None
-			pos: 10, 10
+	Accordion:
+		size_hint: None, None
+		pos: 50, 100
+		height: root.top - 200
+		width: root.right - 100
+		AccordionItem:
+			title_template: 'CustomAccordionItem'
+			background_normal: ''
+			background_color: green_color
+			title: 'Watched'
+			ItemScroller:
+				ShowsGrid:
+					cols: 3
+					spacing: 5
+					size_hint_y: None
+		AccordionItem:
+			title_template: 'CustomAccordionItem'
+			background_normal: ''
+			background_color: green_color
+			title: 'Following'
+			ItemScroller:
+				ShowsGrid:
+					cols: 3
+					spacing: 5
+					size_hint_y: None
+	ThemeButton:
+		text: '<< Following'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'right'
+			root.manager.current = 'shows_main_screen'
+		width: 160
+		height: 60
+		pos: 10, root.top - 70
+	ThemeButton:
+		text: '+ Add'
+		font_size: 50
+		width: 120
+		height: 60
+		pos: 10, 10
 
 # -------------------
 #    MOVIES SCREEN
 # -------------------
 
 <MoviesMainScreen>:
-	FloatLayout:
 
