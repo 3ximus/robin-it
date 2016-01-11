@@ -12,7 +12,7 @@ from kivy.clock import Clock
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition
+from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition, ScreenManagerException
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.bubble import Bubble
@@ -143,11 +143,12 @@ event_manager = MultiEventDispatcher()
 #             SHOWS GRID
 # ------------------------------------
 
-class ImagePoster(ButtonBehavior, AsyncImage):
-	pass
-
 class Placeholder:
 	pass
+
+class ImagePoster(ButtonBehavior, AsyncImage):
+	selected = BooleanProperty(False)
+	linked_content = Placeholder()
 
 class ImageBanner(ButtonBehavior, AsyncImage):
 	selected = BooleanProperty(False)
@@ -183,9 +184,9 @@ class ImageBanner(ButtonBehavior, AsyncImage):
 		self.color = [1, 1, 1, 1]
 
 
-class ShowsGrid(GridLayout):
+class ShowsVerticalGrid(GridLayout):
 	def __init__(self, **kwargs):
-		super(ShowsGrid, self).__init__(**kwargs)
+		super(ShowsVerticalGrid, self).__init__(**kwargs)
 		# Make sure the height is such that there is something to scroll.
 		self.bind(minimum_height=self.setter('height'))
 		# generate grid content
@@ -199,6 +200,24 @@ class ShowsGrid(GridLayout):
 		if self.right < 650: self.cols = 1
 		elif self.right < 980: self.cols = 2
 		else: self.cols = 3
+
+class ShowsHorizontalGrid(GridLayout):
+	def __init__(self, **kwargs):
+		super(ShowsHorizontalGrid, self).__init__(**kwargs)
+		# Make sure the height is such that there is something to scroll.
+		self.bind(minimum_width=self.setter('width'))
+		# generate grid content
+		for i in range(17):
+			img = ImagePoster(
+					source= "http://thetvdb.com/banners/posters/262407-7.jpg")
+			self.add_widget(img)
+
+	''' Sets amount of columns when layout size is changed (resize) '''
+#	def on_size(self, *largs):
+#		if self.right < 650: self.cols = 1
+#		elif self.right < 980: self.cols = 2
+#		else: self.cols = 3
+
 
 ''' Contains show information '''
 class ItemScroller(ScrollView):
@@ -215,10 +234,10 @@ class SelectionMenuBar(Widget):
 class ShowSelectionMenuBar(SelectionMenuBar):
 	def __init__(self, **kwargs):
 		super(ShowSelectionMenuBar, self).__init__(**kwargs)
-		butt1 = RemoveShow()
-		butt2 = ToogleWatched()
-		self.add_widget(butt1)
-		self.add_widget(butt2)
+		#butt1 = RemoveShow()
+		#butt2 = ToogleWatched()
+		#self.add_widget(butt1)
+		#self.add_widget(butt2)
 
 '''
 Allows item selection
@@ -269,7 +288,6 @@ class Selector(FloatLayout):
 		value: new value
 	'''
 	def on_s_raised(self, instance, value):
-		print "haalo"
 		if value == True: self.raise_selection_menu()
 		else: self.lower_selection_menu()
 
@@ -325,6 +343,52 @@ class ToogleWatched(ThemeButton):
 #            SCREENS
 # ------------------------------
 
+
+class AllShowsScreen(Screen):
+	def __init__(self, **kwargs):
+		super(AllShowsScreen, self).__init__(**kwargs)
+
+	''' Executed before entering '''
+	def on_pre_enter(self):
+		# catch selection events and handle by opening new screen with show view
+		event_manager.bind(on_selection=self.handle_selection)
+		# remove a view screen when returning
+		try: self.manager.remove_widget(self.manager.get_screen('view_show'))
+		except ScreenManagerException: print "No view_show screen"
+
+	'''
+	Triggered when a on_selection event ocurrs
+	Params:
+		event_instance: instance of MultiEventDispatcher
+		what_was_selected: instance of what was selected in the gui
+		linked_content: instance of linked content to gui element
+		value: selection value, True if selected, False if unselected
+		*args: should be empty
+	'''
+	def handle_selection(self, event_instance, what_was_selected, linked_content, value, *args):
+		if value:
+			what_was_selected.selected = False # unselect
+			self.new_screen(linked_content)
+		else: # not likely this will be triggered
+			pass
+
+	''' Executed before leaving '''
+	def on_pre_leave(self):
+		event_manager.unbind(on_selection=self.handle_selection)
+
+	'''
+	Create new view show screen with
+	'''
+	def new_screen(self, show):
+		screen = ShowViewScreen(name='view_show')
+		# TODO SETUP THE NEW SCREEN WITH SHOW INFO
+		self.manager.add_widget(screen)
+		self.manager.transition.direction = 'up'
+		self.manager.current = 'view_show'
+
+class ShowViewScreen(Screen):
+	pass
+
 class ShowsMainScreen(Screen):
 	def __init__(self, **kwargs):
 		super(ShowsMainScreen, self).__init__(**kwargs)
@@ -334,19 +398,6 @@ class ShowsMainScreen(Screen):
 		# on_selection event on the event_manager will trigger a handle_selection
 		event_manager.bind(on_selection=self.selector.handle_selection)
 		self.add_widget(self.selector)
-	def on_pre_leave(self):
-		event_manager.unbind(on_selection=self.selector.handle_selection)
-
-class AllShowsScreen(Screen):
-	def __init__(self, **kwargs):
-		super(AllShowsScreen, self).__init__(**kwargs)
-
-	def on_pre_enter(self):
-		self.selector = SingleSelector()
-		# on_selection event on the event_manager will trigger a handle_selection
-		event_manager.bind(on_selection=self.selector.handle_selection)
-		self.add_widget(self.selector)
-
 	def on_pre_leave(self):
 		event_manager.unbind(on_selection=self.selector.handle_selection)
 

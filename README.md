@@ -88,34 +88,28 @@ Benchmark Page parsers
 
 **v1.4**: (Big Release)
 
+- Implement GUI
+
+**v1.6**: (Auto downloads)
+
 - Incorporate Traking with Search/Download engine
 
-**v1.5**: (Movies)
+**v1.6**: (Movies)
 
 - Add Movie info gathering
 
-**v1.6**: (Schedule/Wait-release System)
+**v1.7**: (Schedule/Wait-release System)
 
 - Add a movie schedule system to allow movie releases to be notified
 
-**v1.7**: (Major Release)
+**v1.8**: (Major Release)
 
 - Incorporate movie schedule with download feature to download followed movie releases
 
 **v2.0**:
 
-- Implement GUI
-
-**v2.1**:
-
 - Custom tvdb_api gatherer
-
-**v2.2**:
-
 - Multiple devices
-
-**v2.3**:
-
 - Multiple device persistence
 
 **v3.0**

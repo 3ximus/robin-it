@@ -46,6 +46,10 @@
 	size_hint_y: None
 	height: 80
 
+<ImagePoster>:
+	size_hint_x: None
+	width: 300
+
 # General Green Button rule
 <ThemeButton>:
 	background_normal: ''
@@ -149,32 +153,16 @@
 #    SHOWS SCREEN
 # -------------------
 
-<ShowsMainScreen>:
-	FloatLayout:
-		ThemeButton:
-			text: 'Back'
-			font_size: 50
-			on_release:
-				root.manager.transition.direction = 'down'
-				root.manager.current = 'main_screen'
-			width: 100
-			height: 60
-			pos: 10, root.top - 70
-		ThemeButton:
-			text: '+ Add'
-			font_size: 50
-			width: 120
-			height: 60
-			pos: 10, 10
-		ThemeButton:
-			text: 'All >>'
-			font_size: 50
-			on_release:
-				root.manager.transition.direction = 'left'
-				root.manager.current = 'all_shows_screen'
-			width: 120
-			height: 60
-			pos: root.right - 130, 10
+<ShowViewScreen>:
+	ThemeButton:
+		text: '<< All'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'down'
+			root.manager.current = 'all_shows_screen'
+		width: 160
+		height: 60
+		pos: 10, root.top - 70
 
 <AllShowsScreen>:
 	Accordion:
@@ -188,7 +176,7 @@
 			background_color: green_color
 			title: 'Watched'
 			ItemScroller:
-				ShowsGrid:
+				ShowsVerticalGrid:
 					cols: 3
 					spacing: 5
 					size_hint_y: None
@@ -198,7 +186,7 @@
 			background_color: green_color
 			title: 'Following'
 			ItemScroller:
-				ShowsGrid:
+				ShowsVerticalGrid:
 					cols: 3
 					spacing: 5
 					size_hint_y: None
@@ -217,6 +205,42 @@
 		width: 120
 		height: 60
 		pos: 10, 10
+
+<ShowsMainScreen>:
+	BoxLayout:
+		size_hint_y: None
+		pos: 0, 100
+		height: root.top - 200
+		#width: root.right - 100
+		ItemScroller:
+			ShowsHorizontalGrid:
+				rows: 1
+				spacing: 5
+				size_hint_x: None
+	ThemeButton:
+		text: 'Back'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'down'
+			root.manager.current = 'main_screen'
+		width: 100
+		height: 60
+		pos: 10, root.top - 70
+	ThemeButton:
+		text: '+ Add'
+		font_size: 50
+		width: 120
+		height: 60
+		pos: 10, 10
+	ThemeButton:
+		text: 'All >>'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'left'
+			root.manager.current = 'all_shows_screen'
+		width: 120
+		height: 60
+		pos: root.right - 130, root.top - 70
 
 # -------------------
 #    MOVIES SCREEN
