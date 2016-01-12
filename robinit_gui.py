@@ -6,31 +6,45 @@ Created - 30.12.15
 Copyright (C) 2015 - eximus
 '''
 
+__version__ = '1.3'
+
 from kivy.app import App
 from kivy.lang import Builder # to import .kv file
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition, ScreenManagerException
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
-from kivy.uix.bubble import Bubble
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
 from kivy.uix.image import AsyncImage
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.event import EventDispatcher
-from kivy.input.motionevent import MotionEvent
 from kivy.animation import Animation
-from kivy.properties import ListProperty, NumericProperty, BooleanProperty
+from kivy.properties import ListProperty, NumericProperty, BooleanProperty, ObjectProperty
 from random import random, randint
 from functools import partial
+import os, sys
+from robinit_api import UserContent
 
 # yellow / green theme colors
-theme_colors = [[0.98, 0.97, 0.08], # yellow
+theme_colors = [[0.2, 0.8, 0.2, 0.5], # green
+				[0.98, 0.97, 0.08], # yellow
 				[0.78, 0.9, 0.21], # yellowish green
-				[0.11, 0.95, 0.55], # greenish blue
-				[0.2, 0.8, 0.2, 0.5]] # green
+				[0.11, 0.95, 0.55]] # greenish blue
+
+# default font
+theme_font = 'gui_style/fonts/VertigoFLF.ttf'
+
+# --- USER STATE ----
+User_State = None
+USER_STATE_DIR = "user/"
+USER_STATE_FILE = ''
 
 # --- BACKGROUND BOKEH GLOBALS ---
 B_SPAWNED = 2 # set number of bokehs spawned each time
@@ -44,6 +58,10 @@ B_MAX_SIZE = 150 # maximum bokeh size
 S_BAR_SIZE = 500
 S_MOVEMENT_TIME = 0.2
 S_BAR_OPACITY = 0.6
+
+'''  PLACEHOLDER CLASS '''
+class Placeholder:
+	pass
 
 # ------------------------------
 #         BACKGROUND
@@ -122,6 +140,7 @@ class Background(FloatLayout):
 class MultiEventDispatcher(EventDispatcher):
 	def __init__(self, **kwargs):
 		self.register_event_type('on_selection')
+		self.register_event_type('on_state_update')
 		super(MultiEventDispatcher, self).__init__(**kwargs)
 
 	'''
@@ -134,8 +153,15 @@ class MultiEventDispatcher(EventDispatcher):
 	def select(self, what_is_selected, linked_content , value):
 		self.dispatch('on_selection', what_is_selected, linked_content, value)
 
+	def update_gui(self, *args):
+		self.dispatch('on_state_update', *args)
+
 	''' Default handler for the on_selection event '''
 	def on_selection(self, what_is_selected, linked_content, value, *args):
+		pass
+
+	''' Default handler for the on_state_update event '''
+	def on_state_update(self, *args):
 		pass
 
 	# GENERATE EVENT DISPATCHERS
@@ -146,9 +172,6 @@ event_manager = MultiEventDispatcher()
 #             SHOWS GRID
 # ------------------------------------
 
-class Placeholder:
-	pass
-
 class ImagePoster(ButtonBehavior, AsyncImage):
 	selected = BooleanProperty(False)
 	linked_content = Placeholder()
@@ -157,10 +180,12 @@ class ImagePoster(ButtonBehavior, AsyncImage):
 	def on_press(self):
 		if self.selected > 0:
 			self.selected = False
-			event_manager.select(self, self.linked_content, False) # launch selected event
+			# launch selected event
+			event_manager.select(self, self.linked_content, False)
 		else:
 			self.selected = True
-			event_manager.select(self, self.linked_content, True) # launch selected event
+			# launch selected event
+			event_manager.select(self, self.linked_content, True)
 
 	'''
 	Catch self.selected change event
@@ -170,7 +195,7 @@ class ImagePoster(ButtonBehavior, AsyncImage):
 	'''
 	def on_selected(self, instance, value):
 # TODO instead of colouring use rectangle in the canves BUT DONT FUCKING FORGET TO PUT
-# pos: self.pos , OTHERWISE IT **FUCKING** WONT MOVE!!!
+# pos: self.pos , OTHERWISE IT WONT **FUCKING** MOVE!!!
 		if value: self.select_effect()
 		else: self.unselect_effect()
 
@@ -221,10 +246,20 @@ class ShowsVerticalGrid(GridLayout):
 		super(ShowsVerticalGrid, self).__init__(**kwargs)
 		# Make sure the height is such that there is something to scroll.
 		self.bind(minimum_height=self.setter('height'))
+		event_manager.bind(on_state_update=self.handle_state_update)
 		# generate grid content
-		for i in range(17):
-			img = ImageBanner(
-				source='http://thetvdb.com/banners/graphical/262407-g11.jpg')
+
+	'''
+	Called when update gui event is triggered
+	Default scenario displaying all shows
+	'''
+	def handle_state_update(self, *args):
+		self.clear_widgets()
+		# generate grid content
+		for show in User_State.shows:
+			source = User_State.shows[show].banner
+			img = ImageBanner(source= source)
+			img.linked_content = User_State.shows[show]
 			self.add_widget(img)
 
 	''' Sets amount of columns when layout size is changed (resize) '''
@@ -233,15 +268,47 @@ class ShowsVerticalGrid(GridLayout):
 		elif self.right < 980: self.cols = 2
 		else: self.cols = 3
 
+class WatchedShowsVerticalGrid(ShowsVerticalGrid):
+	'''
+	Called when update gui event is triggered
+	Displays only watched shows
+	'''
+	def handle_state_update(self, *args):
+		self.clear_widgets()
+		# generate grid content
+		for show in [show for show in User_State.shows if User_State.shows[show].watched]:
+			source = User_State.shows[show].banner
+			img = ImageBanner(source= source)
+			img.linked_content = User_State.shows[show]
+			self.add_widget(img)
+
+class FollowingShowsVerticalGrid(ShowsVerticalGrid):
+	'''
+	Called when update gui event is triggered
+	Displays only following shows
+	'''
+	def handle_state_update(self, *args):
+		self.clear_widgets()
+		# generate grid content
+		for show in [show for show in User_State.shows if not User_State.shows[show].watched]:
+			source = User_State.shows[show].banner
+			img = ImageBanner(source= source)
+			img.linked_content = User_State.shows[show]
+			self.add_widget(img)
+
 class ShowsHorizontalGrid(GridLayout):
 	def __init__(self, **kwargs):
 		super(ShowsHorizontalGrid, self).__init__(**kwargs)
 		# Make sure the height is such that there is something to scroll.
 		self.bind(minimum_width=self.setter('width'))
+		event_manager.bind(on_state_update=self.handle_state_update)
+
+	def handle_state_update(self, *args):
+		self.clear_widgets()
 		# generate grid content
-		for i in range(17):
-			img = ImagePoster(
-					source= "http://thetvdb.com/banners/posters/262407-7.jpg")
+		for show in User_State.unwatched_episodes():
+			source = User_State.shows[show].poster
+			img = ImagePoster(source= source)
 			self.add_widget(img)
 
 	''' Sets amount of columns when layout size is changed (resize) '''
@@ -260,8 +327,7 @@ class ItemScroller(ScrollView):
 # ------------------------------
 
 class SelectionMenuBar(Widget):
-	def __init__(self, **kwargs):
-		super(SelectionMenuBar, self).__init__(**kwargs)
+	pass
 
 class ShowSideBar(SelectionMenuBar):
 	def __init__(self, **kwargs):
@@ -281,14 +347,14 @@ class ShowSideBar(SelectionMenuBar):
 	''' Raise the side menu '''
 	def raise_bar(self):
 		Animation.cancel_all(self)
-		anim = Animation(x=root.right - S_BAR_SIZE, y=0, duration=S_MOVEMENT_TIME)
+		anim = Animation(x=root.right - S_BAR_SIZE, y=0, duration=S_MOVEMENT_TIME, transition = 'in_cubic')
 		anim.bind(on_start = self.on_start)
 		anim.start(self)
 
 	''' Lower the side menu '''
 	def lower_bar(self):
 		Animation.cancel_all(self)
-		anim = Animation(x=root.right, y=0, duration=S_MOVEMENT_TIME)
+		anim = Animation(x=root.right, y=0, duration=S_MOVEMENT_TIME, transition = 'out_cubic')
 		anim.bind(on_complete = self.on_complete)
 		anim.start(self)
 
@@ -384,8 +450,11 @@ class SingleSelector(Selector):
 		else: self.clear_selected()
 
 # ------------------------------
-#            BUTTONS
+#       BUTTONS & POPUPS
 # ------------------------------
+
+class ThemeTitle(Label):
+	pass
 
 class ThemeButton(Button):
 	pass
@@ -394,6 +463,43 @@ class RemoveShow(ThemeButton):
 	pass
 
 class ToogleWatched(ThemeButton):
+	pass
+
+class UsernamePopup(Popup):
+	def __init__(self, **kwargs):
+		super(UsernamePopup, self).__init__(**kwargs)
+		layout = BoxLayout(orientation='vertical')
+		self.username = TextInput(text='username', font_name=theme_font, font_size=30, multiline=False)
+		self.butt = ThemeButton(text='Validate', font_size=30)
+		layout.add_widget(self.username)
+		layout.add_widget(self.butt)
+		self.content=layout
+		# bind actions
+		self.username.bind(on_text_validate=self.load_user) # when 'enter' is pressed
+		self.butt.bind(on_release=self.load_user) # when button is clicked call load_user
+
+	''' Load user based on username input '''
+	def load_user(self, *args):
+		user_name = self.username.text
+		if  user_name != "":
+			USER_STATE_FILE = "%srobinit_%s_%s%s" % (USER_STATE_DIR, __version__, user_name, '.pkl') # Only used to look for state file
+			if not os.path.exists(USER_STATE_FILE): # no previous save file?
+				# TODO GENERATE NEW USER POPUP
+				pass
+			else:
+				global User_State # refer to the global User_State to make changes
+				# set global User State
+				User_State = UserContent(user_name)
+				User_State.load_state(USER_STATE_DIR)
+				event_manager.update_gui()
+				self.parent.remove_popups()
+
+	''' Generate a new user '''
+	def generate_new_user(self):
+		pass
+
+
+class PopupShade(FloatLayout):
 	pass
 
 # ------------------------------
@@ -437,6 +543,7 @@ class AllShowsScreen(Screen):
 	'''
 	def new_screen(self, show):
 		screen = ShowViewScreen(name='view_show')
+		screen.add_widget(ThemeTitle(text=show.name, pos=(self.center_x, self.top - 90)))
 		# TODO SETUP THE NEW SCREEN WITH SHOW INFO
 		self.manager.add_widget(screen)
 		self.manager.transition.direction = 'up'
@@ -461,7 +568,21 @@ class MoviesMainScreen(Screen):
 	pass
 
 class MainScreen(Screen):
-	pass
+	def __init__(self, **kwargs):
+		super(MainScreen, self).__init__(**kwargs)
+		self.popup_shade = PopupShade()
+		self.popup = UsernamePopup()
+		self.add_widget(self.popup_shade)
+		self.add_widget(self.popup)
+
+	def on_size(self, *args):
+		self.popup.center_x = self.right / 2
+		self.popup.center_y = self.top / 2
+
+	def remove_popups(self):
+		self.popup.dismiss()
+		self.remove_widget(self.popup)
+		self.remove_widget(self.popup_shade)
 
 ''' Version and author information '''
 class InfoContainer(FloatLayout):

@@ -17,8 +17,11 @@ Contains list with following shows being Show instances
 '''
 class UserContent:
 
-	def __init__(self, uname):
-		self.user_name = uname
+	def __init__(self, uname = '', empty = False):
+		if not empty:
+			if uname != '': self.user_name = uname
+			else: raise ValueError("Username cannot be empty")
+		else: self.user_name = ''
 		self.tvdb_apikey = '' # TODO API KEY
 		# tv shows
 		self.shows = {} # following tv shows
@@ -79,6 +82,7 @@ class UserContent:
 
 	'''
 	Force update
+	This is a generator function, so you to run it you must iterate over it, it will yieald the name of the show being update each time
 	The were paramater must be one of the following 'all', 'shows' or 'movies'
 	If name is not given the where parameter is used to update everything in that category,
 		if where is not given either everything will be updated by default
@@ -88,10 +92,14 @@ class UserContent:
 		if where == 'shows' or 'all':
 			if name: # if name was given
 				show = find_item(name, self.shows)
-				if show: self.shows[show].update_info()
+				if show:
+					yield show
+					self.shows[show].update_info()
 				else: return # show not found
 			else:
-				for show in self.shows: self.shows[show].update_info() # update everything
+				for show in self.shows:
+					yield show
+					self.shows[show].update_info() # update everything
 		elif where == 'movies' or where == 'all':
 			pass
 # TODO MOVIES
@@ -158,7 +166,7 @@ class UserContent:
 			else: print "No Show found"
 		else:
 			for show in self.shows: self.shows[show].update_watched()
-	
+
 	'''
 	Get all episodes unwatched
 	Returns a dictionary where keys are shows and the values are lists, these are lists
@@ -169,6 +177,8 @@ class UserContent:
 	def unwatched_episodes(self):
 		unwatched_dict = {}
 		for show in self.shows:
+			if self.shows[show].watched:
+				continue
 			seasons_dict = {}
 			for season in self.shows[show].seasons:
 				episodes_list = []
