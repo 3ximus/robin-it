@@ -50,6 +50,10 @@
 	size_hint_x: None
 	width: 300
 
+<EpisodeImage>:
+	size_hint_x: None
+	width: 300
+
 <ThemeTitle>:
 	font_name: title_font
 	font_size: 70
@@ -234,16 +238,6 @@
 		pos: 10, 10
 
 <ShowsMainScreen>:
-	BoxLayout:
-		size_hint_y: None
-		pos: 0, 100
-		height: root.top - 200
-		#width: root.right - 100
-		ItemScroller:
-			ShowsHorizontalGrid:
-				rows: 1
-				spacing: 5
-				size_hint_x: None
 	ThemeTitle:
 		text: 'To Watch'
 		pos: root.center_x, root.top - 90
@@ -291,6 +285,4 @@
 			text: 'adsfas'
 		ThemeButton:
 			text: 'other text'
-		
-
 

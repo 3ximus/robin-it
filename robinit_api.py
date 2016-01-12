@@ -182,9 +182,6 @@ class UserContent:
 			seasons_dict = {}
 			for season in self.shows[show].seasons:
 				episodes_list = []
-				if not season.watched:
-					seasons_dict.update({str(season.s_id):season.episodes})
-					continue
 				for episode in season.episodes:
 					if not episode.watched: episodes_list.append(episode)
 				if episodes_list != []: seasons_dict.update({str(season.s_id):episodes_list})
