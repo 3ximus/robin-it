@@ -110,8 +110,6 @@
 			source:
 			size: self.size
 			pos: self.pos
-	opacity: 0.6
-
 
 # -------------------
 #    MAIN SCREEN
@@ -190,6 +188,13 @@
 					cols: 3
 					spacing: 5
 					size_hint_y: None
+	Label:
+		text: 'All Shows'
+		font_name: title_font
+		font_size: 70
+		size_hint: None, None
+		height: 80
+		pos: root.center_x, root.top - 90
 	ThemeButton:
 		text: '<< Following'
 		font_size: 50
@@ -217,6 +222,13 @@
 				rows: 1
 				spacing: 5
 				size_hint_x: None
+	Label:
+		text: 'To Watch'
+		font_name: title_font
+		font_size: 70
+		size_hint: None, None
+		height: 80
+		pos: root.center_x, root.top - 90
 	ThemeButton:
 		text: 'Back'
 		font_size: 50

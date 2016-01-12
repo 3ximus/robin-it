@@ -9,6 +9,7 @@ Copyright (C) 2015 - eximus
 from kivy.app import App
 from kivy.lang import Builder # to import .kv file
 from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
@@ -19,6 +20,7 @@ from kivy.uix.bubble import Bubble
 from kivy.uix.image import AsyncImage
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.event import EventDispatcher
+from kivy.input.motionevent import MotionEvent
 from kivy.animation import Animation
 from kivy.properties import ListProperty, NumericProperty, BooleanProperty
 from random import random, randint
@@ -39,8 +41,9 @@ B_MIN_SIZE = 20 # minimum bookeh size
 B_MAX_SIZE = 150 # maximum bokeh size
 
 # --- SELECTION BAR GLOBALS ---
-S_BAR_SIZE = 80
+S_BAR_SIZE = 500
 S_MOVEMENT_TIME = 0.2
+S_BAR_OPACITY = 0.6
 
 # ------------------------------
 #         BACKGROUND
@@ -150,12 +153,41 @@ class ImagePoster(ButtonBehavior, AsyncImage):
 	selected = BooleanProperty(False)
 	linked_content = Placeholder()
 
+	''' When Image is pressed '''
+	def on_press(self):
+		if self.selected > 0:
+			self.selected = False
+			event_manager.select(self, self.linked_content, False) # launch selected event
+		else:
+			self.selected = True
+			event_manager.select(self, self.linked_content, True) # launch selected event
+
+	'''
+	Catch self.selected change event
+	Params:
+		instance: represents self
+		value: selection value, True if selected, False if unselected
+	'''
+	def on_selected(self, instance, value):
+# TODO instead of colouring use rectangle in the canves BUT DONT FUCKING FORGET TO PUT
+# pos: self.pos , OTHERWISE IT **FUCKING** WONT MOVE!!!
+		if value: self.select_effect()
+		else: self.unselect_effect()
+
+	''' Apply effect of selected '''
+	def select_effect(self):
+		self.color = [0.5, 0.5, 0.5, 1]
+
+	''' Apply effect of selected '''
+	def unselect_effect(self):
+		self.color = [1, 1, 1, 1]
+
 class ImageBanner(ButtonBehavior, AsyncImage):
 	selected = BooleanProperty(False)
 	linked_content = Placeholder()
 
 	''' When Image is pressed '''
-	def on_press(self):
+	def on_press(self, *args):
 		if self.selected > 0:
 			self.selected = False
 			event_manager.select(self, self.linked_content, False) # launch selected event
@@ -213,11 +245,11 @@ class ShowsHorizontalGrid(GridLayout):
 			self.add_widget(img)
 
 	''' Sets amount of columns when layout size is changed (resize) '''
+# TODO
 #	def on_size(self, *largs):
 #		if self.right < 650: self.cols = 1
 #		elif self.right < 980: self.cols = 2
 #		else: self.cols = 3
-
 
 ''' Contains show information '''
 class ItemScroller(ScrollView):
@@ -231,13 +263,42 @@ class SelectionMenuBar(Widget):
 	def __init__(self, **kwargs):
 		super(SelectionMenuBar, self).__init__(**kwargs)
 
-class ShowSelectionMenuBar(SelectionMenuBar):
+class ShowSideBar(SelectionMenuBar):
 	def __init__(self, **kwargs):
-		super(ShowSelectionMenuBar, self).__init__(**kwargs)
+		super(ShowSideBar, self).__init__(**kwargs)
+		self.size_hint_x = None
+		self.width = S_BAR_SIZE
+		self.opacity = 0
 		#butt1 = RemoveShow()
 		#butt2 = ToogleWatched()
 		#self.add_widget(butt1)
 		#self.add_widget(butt2)
+
+	''' Called to correctly set initial position on resize '''
+	def on_size(self, *args):
+		self.x = self.right
+
+	''' Raise the side menu '''
+	def raise_bar(self):
+		Animation.cancel_all(self)
+		anim = Animation(x=root.right - S_BAR_SIZE, y=0, duration=S_MOVEMENT_TIME)
+		anim.bind(on_start = self.on_start)
+		anim.start(self)
+
+	''' Lower the side menu '''
+	def lower_bar(self):
+		Animation.cancel_all(self)
+		anim = Animation(x=root.right, y=0, duration=S_MOVEMENT_TIME)
+		anim.bind(on_complete = self.on_complete)
+		anim.start(self)
+
+	''' Binded to the begining of the raise animation '''
+	def on_start(self, *args):
+		self.opacity = S_BAR_OPACITY # show bar
+
+	''' Binded to the completion of lower animation '''
+	def on_complete(self, *args):
+		self.opacity = 0 # hide bar after completion
 
 '''
 Allows item selection
@@ -252,9 +313,9 @@ class Selector(FloatLayout):
 
 	def __init__(self, **kwargs):
 		super(Selector, self).__init__(**kwargs)
-		# add a hidden selection menu
-		self.select_menu_bar = ShowSelectionMenuBar(pos=(0, -S_BAR_SIZE), size_hint_y=None, height=S_BAR_SIZE)
-		self.add_widget(self.select_menu_bar)
+		# add a hidden selection menu ( hardcoded 1920 to be after the screen edge
+		self.show_side_bar = ShowSideBar()
+		self.add_widget(self.show_side_bar)
 
 	'''
 	Triggered when a on_selection event ocurrs
@@ -293,15 +354,11 @@ class Selector(FloatLayout):
 
 	''' Raises the selection menu '''
 	def raise_selection_menu(self):
-		Animation.cancel_all(self.select_menu_bar)
-		anim = Animation(x=0, y=0, duration=S_MOVEMENT_TIME)
-		anim.start(self.select_menu_bar)
+		self.show_side_bar.raise_bar()
 
 	''' Raises the selection menu '''
 	def lower_selection_menu(self):
-		Animation.cancel_all(self.select_menu_bar)
-		anim = Animation(x=0, y=-S_BAR_SIZE, duration=S_MOVEMENT_TIME)
-		anim.start(self.select_menu_bar)
+		self.show_side_bar.lower_bar()
 
 	''' Clear everything selected selections '''
 	def clear_selected(self):
@@ -343,7 +400,6 @@ class ToogleWatched(ThemeButton):
 #            SCREENS
 # ------------------------------
 
-
 class AllShowsScreen(Screen):
 	def __init__(self, **kwargs):
 		super(AllShowsScreen, self).__init__(**kwargs)
@@ -354,7 +410,7 @@ class AllShowsScreen(Screen):
 		event_manager.bind(on_selection=self.handle_selection)
 		# remove a view screen when returning
 		try: self.manager.remove_widget(self.manager.get_screen('view_show'))
-		except ScreenManagerException: print "No view_show screen"
+		except ScreenManagerException: pass
 
 	'''
 	Triggered when a on_selection event ocurrs
@@ -392,12 +448,12 @@ class ShowViewScreen(Screen):
 class ShowsMainScreen(Screen):
 	def __init__(self, **kwargs):
 		super(ShowsMainScreen, self).__init__(**kwargs)
+		self.selector = SingleSelector()
+		self.add_widget(self.selector)
 
 	def on_pre_enter(self):
-		self.selector = Selector()
 		# on_selection event on the event_manager will trigger a handle_selection
 		event_manager.bind(on_selection=self.selector.handle_selection)
-		self.add_widget(self.selector)
 	def on_pre_leave(self):
 		event_manager.unbind(on_selection=self.selector.handle_selection)
 
@@ -415,12 +471,6 @@ class InfoContainer(FloatLayout):
 #             LOAD .kv FILE
 Builder.load_file('gui_style/robinit.kv')
 # ---------------------------------------------
-
-# ------------------------------------
-#     SCREEN BEHAVIOR / SETTIGNS
-# ------------------------------------
-
-# EMPTY
 
 # ------------------------------------
 #           SCREEN MANAGER
@@ -441,6 +491,7 @@ root.add_widget(InfoContainer())
 
 ''' APP CLASS '''
 class RobinItApp(App):
+
 	def build(self):
 		return root
 
