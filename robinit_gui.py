@@ -663,6 +663,7 @@ class InfoContainer(FloatLayout):
 # ---------------------------------------------
 #             LOAD .kv FILE
 Builder.load_file('gui_style/robinit.kv')
+Builder.load_file('gui_style/items.kv')
 # ---------------------------------------------
 
 # ------------------------------------

@@ -1,0 +1,137 @@
+#:kivy 1.8.0
+
+
+#:set font 'gui_style/fonts/VertigoFLF.ttf'
+#:set title_font 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+
+## --- other options ---
+#:set machine_font 'gui_style/fonts/TH3 MACHINE.ttf'
+#:set tech_font 'gui_style/fonts/Park Tech CG.ttf'
+#:set Ltech_font 'gui_style/fonts/Park Tech CG Light.ttf'
+
+#:set green_color 0.4, 0.8, 0.2, 1
+
+# -------------------
+#    BACKGROUND
+# -------------------
+<BokehLight>:
+	# Bokeh settings
+	opacity: self._opacity
+	canvas:
+		Color:
+			rgb: self.r_color
+		Ellipse:
+			size: self.r_width, self.r_height
+			pos: self.pos
+<Background>:
+	# Background Color
+	canvas:
+		Color:
+			rgb: 0.25, 0.25, 0.25
+		Rectangle:
+			size: self.size
+
+# --------------------
+# SCROOLLERS AND GRIDS
+# --------------------
+
+<ItemScroller>:
+	bar_color: green_color
+
+# ----------------------
+# IMAGES/BUTTONS/POPUPS
+# ----------------------
+
+<ImageBanner>:
+	size_hint_y: None
+	height: 80
+
+<ImagePoster>:
+	size_hint_x: None
+	width: 300
+
+<EpisodeImage>:
+	size_hint_x: None
+	width: 300
+
+<ThemeTitle>:
+	font_name: title_font
+	font_size: 70
+	size_hint: None, None
+	height: 80
+
+# General Green Button rule
+<ThemeButton>:
+	background_normal: ''
+	background_disabled_down: ''
+	background_color: green_color
+	font_name: font
+
+# Button rule definition
+<MainMenuButton@ThemeButton>:
+	width: 170
+	height: 90
+	font_size: 60
+	size_hint: None, None
+
+<RemoveShow>:
+	text: 'Remove'
+	font_size: 60
+	width: 120
+	height: 60
+	pos: self.pos
+
+<ToogleWatched>:
+	text: 'Toogle'
+	font_size: 60
+	width: 120
+	height: 60
+
+<UsernamePopup>:
+	title: 'Insert Username'
+	title_font: title_font
+	title_size: 30
+	separator_color: green_color
+	size_hint: None, None
+	size: 200, 200
+
+<PopupShade>:
+	canvas:
+		Color:
+			rgb: 0, 0, 0
+		Rectangle:
+			size: self.size
+	opacity: 0.8
+
+[CustomAccordionItem@Label]:
+    text: ctx.title
+	font_name: font
+	font_size: 35
+    canvas.before:
+        Color:
+			rgb: green_color
+        BorderImage:
+            source:
+                ctx.item.background_normal \
+                if ctx.item.collapse \
+                else ctx.item.background_selected
+            pos: self.pos
+            size: self.size
+        PushMatrix
+        Translate:
+            xy: self.center_x, self.center_y
+        Rotate:
+            angle: 90 if ctx.item.orientation == 'horizontal' else 0
+            axis: 0, 0, 1
+        Translate:
+            xy: -self.center_x, -self.center_y
+    canvas.after:
+        PopMatrix
+
+<SelectionMenuBar>:
+	canvas:
+		Color:
+			rgb: 0.5, 0.5, 0.5, 1
+		Rectangle:
+			size: self.size
+			pos: self.pos
