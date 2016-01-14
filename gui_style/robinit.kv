@@ -37,7 +37,7 @@
 				text: 'Shows'
 				on_release:
 					root.manager.transition.direction = 'up'
-					root.manager.current = 'shows_main_screen'
+					root.manager.current = 'all_shows_screen'
 			MainMenuButton
 				text: 'Books'
 				on_release: root.manager.current = 'books_main_screen'
@@ -53,16 +53,16 @@
 #    SHOWS SCREEN
 # -------------------
 
-<ShowsMainScreen>:
+<ToWatchScreen>:
 	ThemeTitle:
 		text: 'To Watch'
 		pos: root.center_x, root.top - 90
 	ThemeButton:
-		text: 'Back'
+		text: '< All'
 		font_size: 50
 		on_release:
-			root.manager.transition.direction = 'down'
-			root.manager.current = 'main_screen'
+			root.manager.transition.direction = 'right'
+			root.manager.current = 'all_shows_screen'
 		size_hint: None, None
 		width: 100
 		height: 60
@@ -74,54 +74,28 @@
 		width: 120
 		height: 60
 		pos: 10, 10
-	ThemeButton:
-		text: 'All >>'
-		font_size: 50
-		on_release:
-			root.manager.transition.direction = 'left'
-			root.manager.current = 'all_shows_screen'
-		size_hint: None, None
-		width: 120
-		height: 60
-		pos: root.right - 130, root.top - 70
 
 <AllShowsScreen>:
-	Accordion:
+	ItemScroller:
 		size_hint: None, None
-		pos: 50, 100
+		pos: 150 , 100
 		height: root.top - 200
-		width: root.right - 100
-		AccordionItem:
-			title_template: 'CustomAccordionItem'
-			background_normal: ''
-			background_color: green_color
-			title: 'Watched'
-			ItemScroller:
-				WatchedShowsVerticalGrid:
-					cols: 3
-					spacing: 5
-					size_hint_y: None
-		AccordionItem:
-			title_template: 'CustomAccordionItem'
-			background_normal: ''
-			background_color: green_color
-			title: 'Following'
-			ItemScroller:
-				FollowingShowsVerticalGrid:
-					cols: 3
-					spacing: 5
-					size_hint_y: None
+		width: root.right - 180
+		AllShowsGrid:
+			cols: 3
+			spacing: 15
+			size_hint_y: None
 	ThemeTitle:
 		text: 'All Shows'
 		pos: root.center_x, root.top - 90
 	ThemeButton:
-		text: '<< Following'
+		text: 'Back'
 		font_size: 50
 		on_release:
 			root.manager.transition.direction = 'right'
-			root.manager.current = 'shows_main_screen'
+			root.manager.current = 'main_screen'
 		size_hint: None, None
-		width: 160
+		width: 120
 		height: 60
 		pos: 10, root.top - 70
 	ThemeButton:
@@ -131,6 +105,16 @@
 		width: 120
 		height: 60
 		pos: 10, 10
+	ThemeButton:
+		text: 'To Watch >'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'left'
+			root.manager.current = 'to_watch_screen'
+		size_hint: None, None
+		width: 150
+		height: 60
+		pos: root.right - 160, root.top - 70
 
 <ShowViewScreen>:
 	ThemeButton:

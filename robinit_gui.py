@@ -60,80 +60,17 @@ S_BAR_SIZE = 500
 S_MOVEMENT_TIME = 0.2
 S_BAR_OPACITY = 0.6
 
-'''  PLACEHOLDER CLASS '''
 class Placeholder:
+	'''  PLACEHOLDER CLASS '''
 	pass
 
 # ------------------------------
 #         BACKGROUND
 # ------------------------------
 
-class BokehLight(Widget):
-	_timer_c = 0
-
-	# Set default values
-	velocity = ListProperty([0.1, 0.1]) # bokeh velocity
-	r_color = ListProperty([1, 1, 1]) # bokeh color
-	r_width = NumericProperty(100) # bokeh width
-	r_height = NumericProperty(100) # bokeh size
-	max_opacity = NumericProperty(1) # maximum opacity a particle can reach
-	_opacity = NumericProperty(0.01) # starting opacity
-	slope = B_OPACITY_RATE # rate that opacity changes
-	slope_invert = False # limit the inversion of the slope to happen only once
-
-	def __init__(self, **kwargs):
-		super(BokehLight, self).__init__(**kwargs)
-		Clock.schedule_interval(self.update, 1/60) # 60 times per sec
-
-	def update(self, dt):
-		self._timer_c += dt
-		# update position
-		self.x += self.velocity[0]
-		self.y += self.velocity[1]
-		# opacity control
-		if self._opacity >= self.max_opacity and not self.slope_invert:
-			self.slope = 0 - self.slope # invert slope
-			self.slope_invert = True # make invert only happen once
-		# calculate new opacity
-		self._opacity += self._timer_c * self.slope * 0.001
-
-''' Background containing moving bokeh lights spawned and moving randomly '''
 class Background(FloatLayout):
-	def __init__(self, **kwargs):
-		super(Background, self).__init__(**kwargs)
-# spawn bokeh lights in defined intervals
-# use a callback function with partial to set amount of spawned bokeh per clock time
-		Clock.schedule_interval(partial(self.chain_spawn, B_SPAWNED), B_SPAWN_TIME_INTERVAL)
-		Clock.schedule_interval(self.remove_hidden, 0.3) # 3.33 times per sec
-
-	def remove_hidden(self, dt):
-		# remove decayed bokehs
-		for bok in self.children:
-			if bok._opacity <= 0:
-				self.remove_widget(bok)
-
-	'''Spawn multiple'''
-	def chain_spawn(self, n, *largs):
-		for i in range(n):
-			self.spawn()
-
-	''' Spawns a bokeh light '''
-	def spawn(self):
-		new_bokeh = BokehLight()
-		# spawning position
-		new_bokeh.center_y = -10 # little bellow the screen
-		new_bokeh.center_x = self.center_x + randint(-10,10) * self.center_x/10
-		# since they spawn on the bottom, make them go up and to the sides
-		new_bokeh.velocity[0] = randint(-10, 10) * 0.02
-		new_bokeh.velocity[1] = 0.1 + random() * 0.2
-		new_bokeh.r_color = theme_colors[randint(0, len(theme_colors) -1 )]
-		new_bokeh.max_opacity = B_MAX_OPACITY - random() * 0.2 # max value opacity cna reach
-		size_val = randint(B_MIN_SIZE, B_MAX_SIZE)
-		# set size
-		new_bokeh.r_width = size_val
-		new_bokeh.r_height = size_val
-		self.add_widget(new_bokeh) # actually spawn the bockeh
-
+	'''Background configuration'''
+	pass
 
 # ------------------------------------
 #               EVENTS
@@ -144,67 +81,200 @@ class MultiEventDispatcher(EventDispatcher):
 		self.register_event_type('on_state_update')
 		super(MultiEventDispatcher, self).__init__(**kwargs)
 
-	'''
-	Function called on the event dispatcher to trigger a on_selection event
-	Params  should be a s follows:
-		what_was_selected: instance of GUI selection
-		linked_content: instance of content that the GUI "points" to
-		value: True if seleced, False if unselected
-	'''
 	def select(self, what_is_selected, linked_content , value):
+		'''Function to trigger on_selection event
+
+		Arguments:
+		what_was_selected -- instance of GUI selection
+		linked_content -- instance of content that the GUI "points" to
+		value -- True if seleced, False if unselected
+		'''
 		self.dispatch('on_selection', what_is_selected, linked_content, value)
 
 	def update_gui(self, *args):
+		'''Function to trigger on_state_update event'''
 		self.dispatch('on_state_update', *args)
 
-	''' Default handler for the on_selection event '''
 	def on_selection(self, what_is_selected, linked_content, value, *args):
+		'''Default handler for the on_selection event'''
 		pass
 
-	''' Default handler for the on_state_update event '''
 	def on_state_update(self, *args):
+		'''Default handler for the on_state_update event'''
 		pass
 
 	# GENERATE EVENT DISPATCHERS
 
 event_manager = MultiEventDispatcher()
 
+# ------------------------------
+#            SELECTOR
+# ------------------------------
+
+class Selector(FloatLayout):
+	'''Handles item selection
+
+	This is binded to on_selection event by default
+	but can be binded to a specific method with bind_to(<method>)
+	'''
+
+	selected_list = ListProperty(0) # amount of selected items
+	s_raised = BooleanProperty(False) # selection menu raised
+
+	def __init__(self, **kwargs):
+		super(Selector, self).__init__(**kwargs)
+		if side_bar: # add side_bar
+			self.show_side_bar = ShowSideBar()
+			self.add_widget(self.show_side_bar)
+		self.allow_side_bar=side_bar
+		event_manager.bind(on_selection=self.handle_selection)
+
+	def handle_selection(self, event_instance,
+						what_was_selected, linked_content, value, *args):
+		'''Adds selected item and its link to a list or removes them'''
+		if value: self.selected_list.append((what_was_selected, linked_content))
+		else: self.selected_list.remove((what_was_selected, linked_content))
+
+	def on_selected_list(self, instance, value):
+		'''Called when self.selected_list content is changed'''
+		if self.allow_side_bar: # if side bar is allowed
+			if len(value) == 0: self.s_raised = False
+			elif not self.s_raised: self.s_raised = True
+
+	def on_s_raised(self, instance, value):
+		'''Called when self.s_raised value is changed'''
+		if value == True: self.raise_selection_menu()
+		else: self.lower_selection_menu()
+
+	def raise_selection_menu(self):
+		'''Raises the selection menu'''
+		self.show_side_bar.raise_bar()
+
+	def lower_selection_menu(self):
+		'''Raises the selection menu'''
+		self.show_side_bar.lower_bar()
+
+	def clear_selected(self):
+		'''Clear everything from the selected list'''
+		for tup in self.selected_list:
+			tup[0].selected = False # triggering unselect
+		self.selected_list = []
+
+class SingleSelector(Selector):
+	'''Handles single item selection'''
+
+	def handle_selection(self, event_instance,
+						what_was_selected, linked_content, value, *args):
+		'''Overload function. Only allows 1 selected item'''
+		if value:
+			self.clear_selected()
+			self.selected_list.append((what_was_selected, linked_content))
+		else: self.clear_selected()
+
+class SelectionMenuBar(Widget):
+	pass
+
+class ShowSideBar(SelectionMenuBar):
+	def __init__(self, **kwargs):
+		super(ShowSideBar, self).__init__(**kwargs)
+		self.size_hint_x = None
+		self.width = S_BAR_SIZE
+		self.opacity = 0
+
+	def on_size(self, *args):
+		''' Called to correctly set initial position on resize '''
+		self.x = self.right
+
+	def raise_bar(self):
+		''' Raise the side menu '''
+		Animation.cancel_all(self)
+		anim = Animation(x=root.right - S_BAR_SIZE, y=0, duration=S_MOVEMENT_TIME, transition = 'in_cubic')
+		anim.bind(on_start = self.on_start)
+		anim.start(self)
+
+	def lower_bar(self):
+		''' Lower the side menu '''
+		Animation.cancel_all(self)
+		anim = Animation(x=root.right, y=0, duration=S_MOVEMENT_TIME, transition = 'out_cubic')
+		anim.bind(on_complete = self.on_complete)
+		anim.start(self)
+
+	def on_start(self, *args):
+		''' Binded to the begining of the raise animation '''
+		self.opacity = S_BAR_OPACITY # show bar
+
+	def on_complete(self, *args):
+		''' Binded to the completion of lower animation '''
+		self.opacity = 0 # hide bar after completion
+
 # ------------------------------------
-#             SHOWS GRID
+#            BUTTON IMAGES
 # ------------------------------------
+
+class ItemContainer(ButtonBehavior, FloatLayout):
+	'''General item conatiner
+
+	Triggers on_selected events
+	Contains a Title, an Image and a description
+	'''
+	selected = BooleanProperty(False)
+	linked_content = None
+	image = None
+
+	def __init__(self, image=None, linked_content=None, title='', description='', **kwargs):
+		super(ItemContainer, self).__init__(**kwargs)
+
+	def on_release(self):
+		'''Image is pressed beahvior'''
+		if self.selected > 0:
+			self.selected = False
+			# launch on_selected event
+			event_manager.select(self, self.linked_content, False)
+		else:
+			self.selected = True
+			# launch on_selected event
+			event_manager.select(self, self.linked_content, True)
+
+	def on_selected(self, instance, value):
+		'''Action to take when self.selected changes'''
+		if value: self.select_effect()
+		else: self.unselect_effect()
+
+	def select_effect(self):
+		'''Apply effect of select -- should be overloaded'''
+		pass
+
+	def unselect_effect(self):
+		'''Apply effect of unselect --  should be overloaded'''
+		pass
 
 class ImageButton(ButtonBehavior, AsyncImage):
 	selected = BooleanProperty(False)
 	linked_content = Placeholder()
 
-	''' When Image is pressed '''
-	def on_press(self):
+	def on_release(self):
+		'''Image is pressed beahvior'''
 		if self.selected > 0:
 			self.selected = False
-			# launch selected event
+			# launch on_selected event
 			event_manager.select(self, self.linked_content, False)
 		else:
 			self.selected = True
-			# launch selected event
+			# launch on_selected event
 			event_manager.select(self, self.linked_content, True)
-	'''
-	Catch self.selected change event
-	Params:
-		instance: represents self
-		value: selection value, True if selected, False if unselected
-	'''
 	def on_selected(self, instance, value):
+		'''Action to take when self.selected changes'''
 # TODO instead of colouring use rectangle in the canves BUT DONT FUCKING FORGET TO PUT
 # pos: self.pos , OTHERWISE IT **FUCKING** WONT MOVE!!!
 		if value: self.select_effect()
 		else: self.unselect_effect()
 
-	''' Apply effect of selected '''
 	def select_effect(self):
+		'''Apply effect of select'''
 		self.color = [0.5, 0.5, 0.5, 1]
 
-	''' Apply effect of selected '''
 	def unselect_effect(self):
+		'''Apply effect of unselect'''
 		self.color = [1, 1, 1, 1]
 
 class ImagePoster(ImageButton):
@@ -216,243 +286,41 @@ class ImageBanner(ImageButton):
 class EpisodeImage(ImageButton):
 	pass
 
-class ShowsVerticalGrid(GridLayout):
+# ------------------------------------
+#             SHOWS GRID
+# ------------------------------------
+class ItemScroller(ScrollView):
+	'''Container for scrollable Layouts'''
+	pass
+
+class ScrollableGrid(GridLayout):
 	def __init__(self, **kwargs):
-		super(ShowsVerticalGrid, self).__init__(**kwargs)
+		super(ScrollableGrid, self).__init__(**kwargs)
 		# Make sure the height is such that there is something to scroll.
 		self.bind(minimum_height=self.setter('height'))
 		event_manager.bind(on_state_update=self.handle_state_update)
-		# generate grid content
 
-	'''
-	Called when update GUI event is triggered
-	Default scenario displaying all shows
-	'''
 	def handle_state_update(self, *args):
-		self.clear_widgets()
-		# generate grid content
-		for show in User_State.shows:
-			source = User_State.shows[show].banner
-			img = ImageBanner(source= source)
-			img.linked_content = User_State.shows[show]
-			self.add_widget(img)
+		'''Called when update GUI event is triggered'''
+		pass
 
-	''' Sets amount of columns when layout size is changed (resize) '''
 	def on_size(self, *largs):
+		'''Sets amount of columns when layout size is changed (resize)'''
 		if self.right < 650: self.cols = 1
 		elif self.right < 980: self.cols = 2
 		else: self.cols = 3
 
-class WatchedShowsVerticalGrid(ShowsVerticalGrid):
-	'''
-	Called when update GUI event is triggered
-	Displays only watched shows
-	'''
+class AllShowsGrid(ScrollableGrid):
 	def handle_state_update(self, *args):
+		'''Update Grid Content with all shows'''
 		self.clear_widgets()
-		# generate grid content
-		for show in [show for show in User_State.shows if User_State.shows[show].watched]:
+		for show in User_State.shows:
 			source = User_State.shows[show].banner
+			self.add_widget(ItemContainer())
 			img = ImageBanner(source= source)
 			img.linked_content = User_State.shows[show]
 			self.add_widget(img)
 
-class FollowingShowsVerticalGrid(ShowsVerticalGrid):
-	'''
-	Called when update GUI event is triggered
-	Displays only following shows
-	'''
-	def handle_state_update(self, *args):
-		self.clear_widgets()
-		# generate grid content
-		for show in [show for show in User_State.shows if not User_State.shows[show].watched]:
-			source = User_State.shows[show].banner
-			img = ImageBanner(source= source)
-			img.linked_content = User_State.shows[show]
-			self.add_widget(img)
-
-class ShowsHorizontalGrid(GridLayout):
-	def __init__(self, **kwargs):
-		super(ShowsHorizontalGrid, self).__init__(**kwargs)
-		# Make sure the height is such that there is something to scroll.
-		self.bind(minimum_width=self.setter('width'))
-		event_manager.bind(on_state_update=self.handle_state_update)
-
-	def handle_state_update(self, *args):
-		self.clear_widgets()
-		# generate grid content
-		for show in User_State.unwatched_episodes():
-			source = User_State.shows[show].poster
-			img = ImagePoster(source= source)
-			img.linked_content = User_State.shows[show]
-			self.add_widget(img)
-
-class EpisodesHorizontalGrid(GridLayout):
-	def __init__(self, **kwargs):
-		super(EpisodesHorizontalGrid, self).__init__(**kwargs)
-		# Make sure the height is such that there is something to scroll.
-		self.bind(minimum_width=self.setter('width'))
-
-	''' create this grid '''
-	def create(self, show):
-		self.clear_widgets()
-		for season in show.seasons:
-			if not season.watched:
-				for episode in season.episodes:
-					source = episode.image
-					img = EpisodeImage(source= source)
-					img.linked_content = episode
-			# FIXME BUG HERE
-					self.add_widget(img)
-
-	def handle_state_update(self, *args):
-		print "Trying to update..."
-
-	''' Sets amount of columns when layout size is changed (resize) '''
-	def on_size(self, *largs):
-		print self.top
-		if self.top < 200: self.cols = 3
-		elif self.top < 400: self.cols = 4
-		else: self.cols = 5
-
-
-''' Contains show information '''
-class ItemScroller(ScrollView):
-	pass
-
-# ------------------------------
-#            SELECTOR
-# ------------------------------
-
-class SelectionMenuBar(Widget):
-	pass
-
-class ShowSideBar(SelectionMenuBar):
-	def __init__(self, **kwargs):
-		super(ShowSideBar, self).__init__(**kwargs)
-		self.size_hint_x = None
-		self.width = S_BAR_SIZE
-		self.opacity = 0
-		#butt1 = RemoveShow()
-		#butt2 = ToogleWatched()
-		#self.add_widget(butt1)
-		#self.add_widget(butt2)
-
-	''' Called to correctly set initial position on resize '''
-	def on_size(self, *args):
-		self.x = self.right
-
-	''' Raise the side menu '''
-	def raise_bar(self):
-		Animation.cancel_all(self)
-		anim = Animation(x=root.right - S_BAR_SIZE, y=0, duration=S_MOVEMENT_TIME, transition = 'in_cubic')
-		anim.bind(on_start = self.on_start)
-		anim.start(self)
-
-	''' Lower the side menu '''
-	def lower_bar(self):
-		Animation.cancel_all(self)
-		anim = Animation(x=root.right, y=0, duration=S_MOVEMENT_TIME, transition = 'out_cubic')
-		anim.bind(on_complete = self.on_complete)
-		anim.start(self)
-
-	''' Binded to the begining of the raise animation '''
-	def on_start(self, *args):
-		self.opacity = S_BAR_OPACITY # show bar
-
-	''' Binded to the completion of lower animation '''
-	def on_complete(self, *args):
-		self.opacity = 0 # hide bar after completion
-
-class SelectionButtons(FloatLayout):
-	pass
-
-'''
-Handles item selection
-This is intenteded to only catch on_selection events
-Note: A selector doesn't bind itself to the on_selection event,
-	due to possible conflicts events must be binded and unbinded manually
-	to the handle_selection method
-'''
-class Selector(FloatLayout):
-
-	selected_list = ListProperty(0) # amount of selected items
-	s_raised = BooleanProperty(False) # selection menu raised
-
-	def __init__(self, side_bar=True, **kwargs):
-		super(Selector, self).__init__(**kwargs)
-		# add a hidden selection menu ( hardcoded 1920 to be after the screen edge
-		if side_bar:
-			self.show_side_bar = ShowSideBar()
-			self.add_widget(self.show_side_bar)
-		self.allow_side_bar=side_bar
-
-	'''
-	Triggered when a on_selection event ocurrs
-	Params:
-		event_instance: instance of MultiEventDispatcher
-		what_was_selected: instance of what was selected in the GUI
-		linked_content: instance of linked content to GUI element
-		value: selection value, True if selected, False if unselected
-		*args: should be empty
-	'''
-	def handle_selection(self, event_instance, what_was_selected, linked_content, value, *args):
-		if value: self.selected_list.append((what_was_selected, linked_content))
-		else: self.selected_list.remove((what_was_selected, linked_content))
-
-	'''
-	Called when self.selected_list content is changed
-	Sets self.s_raised in so that a menu is raised / lowered
-	Params:
-		instance: represents self
-		value: list with new content
-	'''
-	def on_selected_list(self, instance, value):
-		if self.allow_side_bar: # if side bar is allowed
-			if len(value) == 0: self.s_raised = False
-			elif not self.s_raised: self.s_raised = True
-
-	'''
-	Called when self.s_raised value is changed
-	Used to raise/lower selection menu
-	Params:
-		instance: represents self
-		value: new value
-	'''
-	def on_s_raised(self, instance, value):
-		if value == True: self.raise_selection_menu()
-		else: self.lower_selection_menu()
-
-	''' Raises the selection menu '''
-	def raise_selection_menu(self):
-		self.show_side_bar.raise_bar()
-
-	''' Raises the selection menu '''
-	def lower_selection_menu(self):
-		self.show_side_bar.lower_bar()
-
-	''' Clear everything selected selections '''
-	def clear_selected(self):
-		for tup in self.selected_list:
-			tup[0].selected = False
-		self.selected_list = []
-
-class SingleSelector(Selector):
-	'''
-	Triggered when a on_selection event ocurrs
-	This overloads the correspondent super function
-	Params:
-		event_instance: instance of MultiEventDispatcher
-		what_was_selected: instance of what was selected in the GUI
-		linked_content: instance of linked content to GUI element
-		value: selection value, True if selected, False if unselected
-		*args: should be empty
-	'''
-	def handle_selection(self, event_instance, what_was_selected, linked_content, value, *args):
-		if value:
-			self.clear_selected()
-			self.selected_list.append((what_was_selected, linked_content))
-		else: self.clear_selected()
 
 # ------------------------------
 #       BUTTONS & POPUPS
@@ -472,6 +340,7 @@ class ToogleWatched(ThemeButton):
 
 class UsernamePopup(Popup):
 	def __init__(self, **kwargs):
+		'''Build The Popup'''
 		super(UsernamePopup, self).__init__(**kwargs)
 		layout = BoxLayout(orientation='vertical')
 		self.username = TextInput(text='fabio', font_name=theme_font, font_size=30, multiline=False)
@@ -483,8 +352,8 @@ class UsernamePopup(Popup):
 		self.username.bind(on_text_validate=self.load_user) # when 'enter' is pressed
 		self.butt.bind(on_release=self.load_user) # when button is clicked call load_user
 
-	''' Load user based on username input '''
 	def load_user(self, *args):
+		''' Load user based on username input '''
 		user_name = self.username.text
 		if  user_name != "":
 			USER_STATE_FILE = "%srobinit_%s_%s%s" % (USER_STATE_DIR, __version__, user_name, '.pkl') # Only used to look for state file
@@ -499,10 +368,9 @@ class UsernamePopup(Popup):
 				event_manager.update_gui()
 				self.parent.remove_popups()
 
-	''' Generate a new user '''
 	def generate_new_user(self):
+		''' Generate a new user '''
 		pass
-
 
 class PopupShade(FloatLayout):
 	pass
@@ -557,84 +425,23 @@ class AllShowsScreen(Screen):
 class ShowViewScreen(Screen):
 	pass
 
-class ShowsMainScreen(Screen):
+class ToWatchScreen(Screen):
 	'''
 	Builds the show main screen
 	Structure is as follows:
-	BoxLayout:
-		Carousel:
-			ItemScoller:
-				ShowsHorizontalGrid:
-					SingleSelector:
-				EpisodesHorizontalGrid:
-					Selector:
+		TODO
 	'''
 	def __init__(self, **kwargs):
-		super(ShowsMainScreen, self).__init__(**kwargs)
-		# create horizontal scroller with shows
-		self.horizontal_scroller = ItemScroller()
-		self.shows = ShowsHorizontalGrid(rows=1, spacing=5, size_hint_x=None)
-		self.horizontal_scroller.add_widget(self.shows)
-		# create the carousel
-		self.carousel = Carousel()
-		self.carousel.direction = 'bottom'
-		self.carousel.add_widget(self.horizontal_scroller)
-		# create the layout
-		self.layout = BoxLayout(size_hint_y=None, pos=(0,100))
-		self.layout.add_widget(self.carousel)
-		# add layout
-		self.add_widget(self.layout)
-
-		self.show_selector = Selector()
-		self.add_widget(self.show_selector)
+		super(ToWatchScreen, self).__init__(**kwargs)
 
 	def on_pre_enter(self):
-		# correctly resize the layout
-		self.layout.height=root.top - 200
-		# on_selection event on the event_manager will trigger a handle_selection
-		event_manager.bind(on_selection=self.handle_selection)
+		pass
 
 	def on_size(self, *args):
-		# correctly resize the layout
-		self.layout.height=root.top - 200
+		pass
 
 	def on_pre_leave(self):
-		self.show_selector.clear_selected()
-		event_manager.unbind(on_selection=self.handle_selection)
-
-	'''
-	Triggered when a on_selection event ocurrs
-	This will create a new carousel slide and switch to it
-	Params:
-		event_instance: instance of MultiEventDispatcher
-		what_was_selected: instance of what was selected in the GUI
-		linked_content: instance of linked content to GUI element
-		value: selection value, True if selected, False if unselected
-		*args: should be empty
-	'''
-	def handle_selection(self, event_instance, what_was_selected, linked_content, value, *args):
-		if value:
-			# unbind previous handler
-			event_manager.unbind(on_selection=self.handle_selection)
-
-			# create horizontal scroller with episodes
-			self.episodes_scroller = ItemScroller()
-			self.episodes = EpisodesHorizontalGrid(rows=3, spacing=5, size_hint_x=None)
-			self.episodes_scroller.add_widget(self.episodes)
-			self.episodes.create(linked_content)
-			# set carousel
-			self.carousel.add_widget(self.episodes_scroller)
-
-			what_was_selected.selected = False # unselect
-			self.carousel.load_slide(self.carousel.next_slide)
-
-			# bind on selection events to the a selector
-# TODO CHANGE SELECTOR BEHAVIOR TO BE A BOTTOM BAR
-# ALSO ADD A BUTTON TO SELECTOR SO THAT IT CLEARS SELECTION
-			event_manager.bind(on_selection=self.show_selector.handle_selection)
-
-		else: # not likely this will be triggered
-			pass
+		pass
 
 class MoviesMainScreen(Screen):
 	pass
@@ -656,8 +463,8 @@ class MainScreen(Screen):
 		self.remove_widget(self.popup)
 		self.remove_widget(self.popup_shade)
 
-''' Version and author information '''
 class InfoContainer(FloatLayout):
+	''' Version and author information '''
 	pass
 
 # ---------------------------------------------
@@ -671,7 +478,7 @@ Builder.load_file('gui_style/items.kv')
 # ------------------------------------
 screen_manager = ScreenManager(transition=SlideTransition())
 screen_manager.add_widget(MainScreen(name = 'main_screen'))
-screen_manager.add_widget(ShowsMainScreen(name = 'shows_main_screen'))
+screen_manager.add_widget(ToWatchScreen(name = 'to_watch_screen'))
 screen_manager.add_widget(AllShowsScreen(name = 'all_shows_screen'))
 screen_manager.add_widget(MoviesMainScreen(name = 'movies_main_screen'))
 
@@ -683,8 +490,8 @@ root.add_widget(Background())
 root.add_widget(screen_manager)
 root.add_widget(InfoContainer())
 
-''' APP CLASS '''
 class RobinItApp(App):
+	''' APP CLASS '''
 	def build(self):
 		return root
 

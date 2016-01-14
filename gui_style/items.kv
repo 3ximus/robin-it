@@ -14,15 +14,6 @@
 # -------------------
 #    BACKGROUND
 # -------------------
-<BokehLight>:
-	# Bokeh settings
-	opacity: self._opacity
-	canvas:
-		Color:
-			rgb: self.r_color
-		Ellipse:
-			size: self.r_width, self.r_height
-			pos: self.pos
 <Background>:
 	# Background Color
 	canvas:
@@ -34,17 +25,17 @@
 # --------------------
 # SCROOLLERS AND GRIDS
 # --------------------
-
 <ItemScroller>:
 	bar_color: green_color
 
-# ----------------------
-# IMAGES/BUTTONS/POPUPS
-# ----------------------
+<ItemContainer>:
 
+# ----------------------
+#        IMAGES
+# ----------------------
 <ImageBanner>:
 	size_hint_y: None
-	height: 80
+	height: 100
 
 <ImagePoster>:
 	size_hint_x: None
@@ -54,39 +45,30 @@
 	size_hint_x: None
 	width: 300
 
+# ----------------------
+#       THEME
+# ----------------------
 <ThemeTitle>:
 	font_name: title_font
 	font_size: 70
 	size_hint: None, None
 	height: 80
 
-# General Green Button rule
 <ThemeButton>:
 	background_normal: ''
 	background_disabled_down: ''
 	background_color: green_color
 	font_name: font
 
-# Button rule definition
 <MainMenuButton@ThemeButton>:
 	width: 170
 	height: 90
 	font_size: 60
 	size_hint: None, None
 
-<RemoveShow>:
-	text: 'Remove'
-	font_size: 60
-	width: 120
-	height: 60
-	pos: self.pos
-
-<ToogleWatched>:
-	text: 'Toogle'
-	font_size: 60
-	width: 120
-	height: 60
-
+# ----------------------
+#       POPUP
+# ----------------------
 <UsernamePopup>:
 	title: 'Insert Username'
 	title_font: title_font
@@ -103,6 +85,17 @@
 			size: self.size
 	opacity: 0.8
 
+<SelectionMenuBar>:
+	canvas:
+		Color:
+			rgb: 0.5, 0.5, 0.5, 1
+		Rectangle:
+			size: self.size
+			pos: self.pos
+
+# ----------------------
+#        TODO
+# ----------------------
 [CustomAccordionItem@Label]:
     text: ctx.title
 	font_name: font
@@ -128,10 +121,4 @@
     canvas.after:
         PopMatrix
 
-<SelectionMenuBar>:
-	canvas:
-		Color:
-			rgb: 0.5, 0.5, 0.5, 1
-		Rectangle:
-			size: self.size
-			pos: self.pos
+
