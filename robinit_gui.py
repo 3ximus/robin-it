@@ -8,6 +8,7 @@ Copyright (C) 2015 - eximus
 
 __version__ = '1.3'
 
+# ------- KIVY IMPORTS ----------
 from kivy.app import App
 from kivy.lang import Builder # to import .kv file
 from kivy.clock import Clock
@@ -16,7 +17,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition, ScreenManagerException
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
@@ -27,10 +27,12 @@ from kivy.uix.image import AsyncImage
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.event import EventDispatcher
 from kivy.animation import Animation
-from kivy.properties import ListProperty, NumericProperty, BooleanProperty, ObjectProperty
+from kivy.properties import ListProperty, NumericProperty, BooleanProperty, ObjectProperty, OptionProperty
+# ------- OTHER IMPORTS ----------
 from random import random, randint
 from functools import partial
 import os, sys
+# ------- USER API ----------
 from robinit_api import UserContent
 
 # yellow / green theme colors
@@ -47,13 +49,8 @@ User_State = None
 USER_STATE_DIR = "user/"
 USER_STATE_FILE = ''
 
-# --- BACKGROUND BOKEH GLOBALS ---
-B_SPAWNED = 2 # set number of bokehs spawned each time
-B_SPAWN_TIME_INTERVAL = 1 # time interval between each spawn
-B_MAX_OPACITY = 0.3 # maximum opacity a bokeh can reach
-B_OPACITY_RATE = 0.04 # rate of opacity change, less == more screen time
-B_MIN_SIZE = 20 # minimum bookeh size
-B_MAX_SIZE = 150 # maximum bokeh size
+# --- SELECTION BOX GLOBALS ---
+SB_SIZE = 1 # height of selection box in percentage of selected item width
 
 # --- SELECTION BAR GLOBALS ---
 S_BAR_SIZE = 500
@@ -117,7 +114,6 @@ class Selector(FloatLayout):
 	This is binded to on_selection event by default
 	but can be binded to a specific method with bind_to(<method>)
 	'''
-
 	selected_list = ListProperty(0) # amount of selected items
 	s_raised = BooleanProperty(False) # selection menu raised
 
@@ -129,11 +125,28 @@ class Selector(FloatLayout):
 		self.allow_side_bar=side_bar
 		event_manager.bind(on_selection=self.handle_selection)
 
+	def bind_to(self, method, unbind_selector=False):
+		'''Binds the new function method passed to the on_selection event
+
+		If unbind_selctor is passed it will unbind this selector and
+		only bind the given funtion
+		'''
+		if unbind_selector: event_manager.unbind(on_selection=self.handle_selection)
+		event_manager.bind(on_selection=method)
+
+	def bind(self):
+		'''Binds the selector default handler to on_selection event'''
+		event_manager.bind(on_selection=self.handle_selection)
+
+	def unbind(self):
+		'''Unbinds the selector default handler from on_selection event'''
+		event_manager.unbind(on_selection=self.handle_selection)
 	def handle_selection(self, event_instance,
 						what_was_selected, linked_content, value, *args):
 		'''Adds selected item and its link to a list or removes them'''
 		if value: self.selected_list.append((what_was_selected, linked_content))
 		else: self.selected_list.remove((what_was_selected, linked_content))
+
 
 	def on_selected_list(self, instance, value):
 		'''Called when self.selected_list content is changed'''
@@ -208,24 +221,38 @@ class ShowSideBar(SelectionMenuBar):
 		self.opacity = 0 # hide bar after completion
 
 # ------------------------------------
-#            BUTTON IMAGES
+#           ITEM CONTAINERS
 # ------------------------------------
 
 class ItemContainer(ButtonBehavior, FloatLayout):
 	'''General item conatiner
 
 	Triggers on_selected events
-	Contains a Title, an Image and a description
+	Must contain a link to the Content it displays
+	Its usable displayed atributes are generally
+		image, title and description
+	Other atributes may be added in specific instances
+	Check derived classes for specific attributes and variations
+	The status variable can take the values described, and should be used as follows
+		unwatched -- available but not watched (mainly for tv shows)
+		watched -- watched until this point (mainly for tv shows)
+		completed -- completed (and watched for tv shows)
+		pending -- not available yet (mainly for movies)
 	'''
 	selected = BooleanProperty(False)
-	linked_content = None
-	image = None
+	linked_content = ObjectProperty(None)
+	status = OptionProperty("pending", options=["watched",
+												"unwatched",
+												"completed",
+												"pending"])
+	status_box = None
 
-	def __init__(self, image=None, linked_content=None, title='', description='', **kwargs):
+	def __init__(self, linked_content, **kwargs):
 		super(ItemContainer, self).__init__(**kwargs)
+		self.linked_content = linked_content
 
-	def on_release(self):
-		'''Image is pressed beahvior'''
+	def on_press(self):
+		'''Image is pressed behavior'''
 		if self.selected > 0:
 			self.selected = False
 			# launch on_selected event
@@ -234,6 +261,33 @@ class ItemContainer(ButtonBehavior, FloatLayout):
 			self.selected = True
 			# launch on_selected event
 			event_manager.select(self, self.linked_content, True)
+
+	def update_status(self):
+		'''Action to force status to be updated based on linked_content'''
+		pass
+
+	def on_status(self, instance, value):
+		'''Action to take when self.status changes'''
+		if value == "watched": self._set_status_box(MarkWatchedBox)
+		elif value == "unwatched": self._set_status_box(MarkUnwatchedBox)
+		elif value == "completed": self._set_status_box(MarkCompletedBox)
+		elif value == "pending": self._set_status_box(MarkPendingBox)
+		else: raise ValueError("Wrong State on ItemContainer")
+
+	def _set_status_box(self, box_type):
+		'''Sets status box to a given box class and displays it
+
+		Must not be called directly
+		Allways change the value of status to automaticly trigger this function
+		'''
+		if self.status_box: self.remove_widget(self.status_box)
+		self.status_box = box_type(size_hint=(None, None))
+		self.add_widget(self.status_box)
+
+	def on_size(self, *args):
+		'''Action taken on resize'''
+		self.status_box.size = self.size
+		self.status_box.pos = self.pos
 
 	def on_selected(self, instance, value):
 		'''Action to take when self.selected changes'''
@@ -241,49 +295,99 @@ class ItemContainer(ButtonBehavior, FloatLayout):
 		else: self.unselect_effect()
 
 	def select_effect(self):
-		'''Apply effect of select -- should be overloaded'''
-		pass
+		'''Remove status box to "make space" for the select effect'''
+		if self.status_box: self.remove_widget(self.status_box)
 
 	def unselect_effect(self):
-		'''Apply effect of unselect --  should be overloaded'''
-		pass
+		'''Add status box again after deselection'''
+		self.add_widget(self.status_box)
 
-class ImageButton(ButtonBehavior, AsyncImage):
-	selected = BooleanProperty(False)
-	linked_content = Placeholder()
+class BannerContainer(ItemContainer):
+	'''Container with only the banner'''
+	def __init__(self, **kwargs):
+		super(BannerContainer, self).__init__(**kwargs)
+		self.image = ImageBanner(source=self.linked_content.banner)
+		self.add_widget(self.image)
+		self.selection_box = SelectionBox(size_hint=(None, None))
+		self.update_status()
 
-	def on_release(self):
-		'''Image is pressed beahvior'''
-		if self.selected > 0:
-			self.selected = False
-			# launch on_selected event
-			event_manager.select(self, self.linked_content, False)
-		else:
-			self.selected = True
-			# launch on_selected event
-			event_manager.select(self, self.linked_content, True)
-	def on_selected(self, instance, value):
-		'''Action to take when self.selected changes'''
-# TODO instead of colouring use rectangle in the canves BUT DONT FUCKING FORGET TO PUT
-# pos: self.pos , OTHERWISE IT **FUCKING** WONT MOVE!!!
-		if value: self.select_effect()
-		else: self.unselect_effect()
+	def update_status(self):
+		'''Action to force status to be updated based on linked_content'''
+		if self.linked_content.watched:
+			if self.linked_content.status == 'Ended':
+				self.status = "completed"
+			elif self.linked_content.status == 'Continuing':
+				self.status = "watched"
+		else: self.status = "unwatched"
+
+	def on_size(self, *args):
+		'''Called on every size update'''
+		# limit status box to image banner status box
+		self.status_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
+		self.status_box.y = self.y
+		self.status_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
+		# update image pos with own pos
+		self.image.pos = self.pos
+		# limit selection box to image banner
+		self.selection_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
+		self.selection_box.y = self.y
+		self.selection_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
 
 	def select_effect(self):
 		'''Apply effect of select'''
-		self.color = [0.5, 0.5, 0.5, 1]
+		super(BannerContainer, self).select_effect()
+		self.add_widget(self.selection_box)
 
 	def unselect_effect(self):
 		'''Apply effect of unselect'''
+		super(BannerContainer, self).unselect_effect()
+		self.remove_widget(self.selection_box)
+
+# ------------------------------------
+#               BOXES
+# ------------------------------------
+
+class SelectionBox(Widget):
+	'''Box to mark selected items'''
+	pass
+
+class MarkWatchedBox(Widget):
+	'''Box to mark watched items'''
+	pass
+
+class MarkUnwatchedBox(Widget):
+	'''Box to mark unwatched items'''
+	pass
+
+class MarkCompletedBox(Widget):
+	'''Box to mark completed items'''
+	pass
+
+class MarkPendingBox(Widget):
+	'''Box to mark pending items'''
+	pass
+
+# ------------------------------------
+#            IMAGES
+# ------------------------------------
+
+class WebImage(AsyncImage):
+	'''Image loaded from a url'''
+	def darken_color(self):
+		'''Apply darker image tint'''
+		self.color = [0.5, 0.5, 0.5, 1]
+
+	def reset_color(self):
+		'''Reset image color to original'''
 		self.color = [1, 1, 1, 1]
 
-class ImagePoster(ImageButton):
+class ImagePoster(WebImage):
 	pass
 
-class ImageBanner(ImageButton):
+class ImageBanner(WebImage):
 	pass
 
-class EpisodeImage(ImageButton):
+class EpisodeImage(WebImage):
 	pass
 
 # ------------------------------------
@@ -304,22 +408,34 @@ class ScrollableGrid(GridLayout):
 		'''Called when update GUI event is triggered'''
 		pass
 
-	def on_size(self, *largs):
-		'''Sets amount of columns when layout size is changed (resize)'''
-		if self.right < 650: self.cols = 1
-		elif self.right < 980: self.cols = 2
-		else: self.cols = 3
 
 class AllShowsGrid(ScrollableGrid):
 	def handle_state_update(self, *args):
 		'''Update Grid Content with all shows'''
 		self.clear_widgets()
+		completed = []
+		watched = []
+		unwatched = []
 		for show in User_State.shows:
-			source = User_State.shows[show].banner
-			self.add_widget(ItemContainer())
-			img = ImageBanner(source= source)
-			img.linked_content = User_State.shows[show]
-			self.add_widget(img)
+			if User_State.shows[show].watched:
+				if User_State.shows[show].status == 'Ended':
+					status = "completed"
+				elif User_State.shows[show].status == 'Continuing':
+					status = "watched"
+			else: status = "unwatched"
+			item = BannerContainer(linked_content=User_State.shows[show])
+			item.size_hint_y = None
+			item.height = 60
+			locals()[status].append(item)
+		for item in unwatched + watched + completed:
+			self.add_widget(item)
+
+	def on_size(self, *args):
+		'''Sets amount of columns when layout size is changed (resize)'''
+		if self.right < 670: self.cols = 1
+		elif self.right < 1015: self.cols = 2
+		elif self.right < 1365: self.cols = 3
+		else: self.cols = 4
 
 
 # ------------------------------
@@ -379,42 +495,52 @@ class PopupShade(FloatLayout):
 #            SCREENS
 # ------------------------------
 
-class AllShowsScreen(Screen):
+class MainScreen(Screen):
 	def __init__(self, **kwargs):
-		super(AllShowsScreen, self).__init__(**kwargs)
+		super(MainScreen, self).__init__(**kwargs)
+		self.popup_shade = PopupShade()
+		self.popup = UsernamePopup()
+		self.add_widget(self.popup_shade)
+		self.add_widget(self.popup)
 
-	''' Executed before entering '''
+	def on_size(self, *args):
+		self.popup.center_x = self.right / 2
+		self.popup.center_y = self.top / 2
+
+	def remove_popups(self):
+		self.popup.dismiss()
+		self.remove_widget(self.popup)
+		self.remove_widget(self.popup_shade)
+
+class ShowsMainScreen(Screen):
+	pass
+
+class AllShowsScreen(Screen):
+	'''Screen containing a view of all shows'''
 	def on_pre_enter(self):
+		''' Executed before entering '''
 		# catch selection events and handle by opening new screen with show view
-		event_manager.bind(on_selection=self.handle_selection)
-		# remove a view screen when returning
+		# TODO Handle this with the selector
+		#event_manager.bind(on_selection=self.handle_selection)
+		# if a view screen was open, remove it
 		try: self.manager.remove_widget(self.manager.get_screen('view_show'))
 		except ScreenManagerException: pass
 
-	'''
-	Triggered when a on_selection event ocurrs
-	Params:
-		event_instance: instance of MultiEventDispatcher
-		what_was_selected: instance of what was selected in the GUI
-		linked_content: instance of linked content to GUI element
-		value: selection value, True if selected, False if unselected
-		*args: should be empty
-	'''
-	def handle_selection(self, event_instance, what_was_selected, linked_content, value, *args):
+	def handle_selection(self, event_instance,
+						what_was_selected, linked_content, value, *args):
+		'''Triggered when a on_selection event ocurrs'''
 		if value:
 			what_was_selected.selected = False # unselect
 			self.new_screen(linked_content)
 		else: # not likely this will be triggered
 			pass
 
-	''' Executed before leaving '''
 	def on_pre_leave(self):
+		''' Executed before leaving '''
 		event_manager.unbind(on_selection=self.handle_selection)
 
-	'''
-	Create new view show screen with
-	'''
 	def new_screen(self, show):
+		'''Create new view show screen with'''
 		screen = ShowViewScreen(name='view_show')
 		screen.add_widget(ThemeTitle(text=show.name, pos=(self.center_x, self.top - 90)))
 		# TODO SETUP THE NEW SCREEN WITH SHOW INFO
@@ -446,25 +572,12 @@ class ToWatchScreen(Screen):
 class MoviesMainScreen(Screen):
 	pass
 
-class MainScreen(Screen):
-	def __init__(self, **kwargs):
-		super(MainScreen, self).__init__(**kwargs)
-		self.popup_shade = PopupShade()
-		self.popup = UsernamePopup()
-		self.add_widget(self.popup_shade)
-		self.add_widget(self.popup)
-
-	def on_size(self, *args):
-		self.popup.center_x = self.right / 2
-		self.popup.center_y = self.top / 2
-
-	def remove_popups(self):
-		self.popup.dismiss()
-		self.remove_widget(self.popup)
-		self.remove_widget(self.popup_shade)
-
 class InfoContainer(FloatLayout):
-	''' Version and author information '''
+	'''Version and author information'''
+	pass
+
+class LoadingMessageContainer(FloatLayout):
+	'''Loading Status information'''
 	pass
 
 # ---------------------------------------------
@@ -478,6 +591,7 @@ Builder.load_file('gui_style/items.kv')
 # ------------------------------------
 screen_manager = ScreenManager(transition=SlideTransition())
 screen_manager.add_widget(MainScreen(name = 'main_screen'))
+screen_manager.add_widget(ShowsMainScreen(name = 'shows_main_screen'))
 screen_manager.add_widget(ToWatchScreen(name = 'to_watch_screen'))
 screen_manager.add_widget(AllShowsScreen(name = 'all_shows_screen'))
 screen_manager.add_widget(MoviesMainScreen(name = 'movies_main_screen'))
@@ -489,6 +603,7 @@ root = FloatLayout()
 root.add_widget(Background())
 root.add_widget(screen_manager)
 root.add_widget(InfoContainer())
+root.add_widget(LoadingMessageContainer())
 
 class RobinItApp(App):
 	''' APP CLASS '''

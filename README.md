@@ -130,3 +130,5 @@ Benchmark Page parsers
 
 --------------------------------
 ##Known Bugs##
+
+- Before resizing some items have selection boxes with incorrect sizes

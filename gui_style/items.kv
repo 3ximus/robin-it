@@ -10,6 +10,9 @@
 #:set Ltech_font 'gui_style/fonts/Park Tech CG Light.ttf'
 
 #:set green_color 0.4, 0.8, 0.2, 1
+#:set yellow_color 0.98, 0.97, 0.08, 1
+#:set red_color 0.98, 0.2, 0.2, 1
+#:set grey_color 0.5, 0.5, 0.5, 1
 
 # -------------------
 #    BACKGROUND
@@ -34,8 +37,6 @@
 #        IMAGES
 # ----------------------
 <ImageBanner>:
-	size_hint_y: None
-	height: 100
 
 <ImagePoster>:
 	size_hint_x: None
@@ -65,6 +66,41 @@
 	height: 90
 	font_size: 60
 	size_hint: None, None
+
+<SelectionBox>:
+	canvas:
+		Color:
+			rgb: green_color
+		Line:
+			rectangle: self.x+1,self.y+1,self.width-2,self.height-2
+			width: 2
+
+<MarkWatchedBox>:
+	canvas:
+		Color:
+			rgb: grey_color
+		Triangle:
+			points: self.x, self.y, self.x, self.y+8, self.x+8, self.y
+<MarkUnwatchedBox>:
+	canvas:
+		Color:
+			rgb: red_color
+		Triangle:
+			points: self.x, self.y, self.x, self.y+8, self.x+8, self.y
+<MarkCompletedBox>:
+	canvas:
+		Color:
+			rgb: green_color
+		Line:
+			rectangle: self.x+1,self.y+1,self.width-2,self.height-2
+			width: 2
+<MarkPendingBox>:
+	canvas:
+		Color:
+			rgb: yellow_color
+		Line:
+			rectangle: self.x+1,self.y+1,self.width-2,self.height-2
+			width: 2
 
 # ----------------------
 #       POPUP

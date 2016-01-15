@@ -37,7 +37,7 @@
 				text: 'Shows'
 				on_release:
 					root.manager.transition.direction = 'up'
-					root.manager.current = 'all_shows_screen'
+					root.manager.current = 'shows_main_screen'
 			MainMenuButton
 				text: 'Books'
 				on_release: root.manager.current = 'books_main_screen'
@@ -53,20 +53,65 @@
 #    SHOWS SCREEN
 # -------------------
 
+<ShowsMainScreen>:
+	ThemeTitle:
+		text: 'Shows'
+		pos: root.center_x, root.top - 90
+	ThemeButton:
+		text: 'Home'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'down'
+			root.manager.current = 'main_screen'
+		size_hint: None, None
+		width: 100
+		height: 60
+		pos: 10, root.top - 70
+	ThemeButton:
+		text: 'To Watch >'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'left'
+			root.manager.current = 'to_watch_screen'
+		size_hint: None, None
+		width: 150
+		height: 60
+		pos: root.right - 160, root.top - 70
+	ThemeButton:
+		text: 'All'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'up'
+			root.manager.current = 'all_shows_screen'
+		size_hint: None, None
+		width: 100
+		height: 60
+		pos: root.right - 110, 10
+
 <ToWatchScreen>:
 	ThemeTitle:
 		text: 'To Watch'
 		pos: root.center_x, root.top - 90
 	ThemeButton:
-		text: '< All'
+		text: 'Shows'
 		font_size: 50
 		on_release:
 			root.manager.transition.direction = 'right'
-			root.manager.current = 'all_shows_screen'
+			root.manager.current = 'shows_main_screen'
 		size_hint: None, None
 		width: 100
 		height: 60
 		pos: 10, root.top - 70
+	ThemeButton:
+		text: 'All'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'up'
+			root.manager.current = 'all_shows_screen'
+		size_hint: None, None
+		width: 100
+		height: 60
+		pos: root.right - 110, 10
 	ThemeButton:
 		text: '+ Add'
 		font_size: 50
@@ -83,17 +128,17 @@
 		width: root.right - 180
 		AllShowsGrid:
 			cols: 3
-			spacing: 15
+			spacing: 20
 			size_hint_y: None
 	ThemeTitle:
 		text: 'All Shows'
 		pos: root.center_x, root.top - 90
 	ThemeButton:
-		text: 'Back'
+		text: 'Shows'
 		font_size: 50
 		on_release:
-			root.manager.transition.direction = 'right'
-			root.manager.current = 'main_screen'
+			root.manager.transition.direction = 'down'
+			root.manager.current = 'shows_main_screen'
 		size_hint: None, None
 		width: 120
 		height: 60
@@ -118,7 +163,7 @@
 
 <ShowViewScreen>:
 	ThemeButton:
-		text: '<< All'
+		text: 'Back'
 		font_size: 50
 		on_release:
 			root.manager.transition.direction = 'down'
