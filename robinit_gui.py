@@ -34,6 +34,7 @@ from functools import partial
 import os, sys
 # ------- USER API ----------
 from robinit_api import UserContent
+import webbrowser
 
 # yellow / green theme colors
 theme_colors = [[0.2, 0.8, 0.2, 0.5], # green
@@ -51,6 +52,11 @@ USER_STATE_FILE = ''
 
 # --- SELECTION BOX GLOBALS ---
 SB_SIZE = 1 # height of selection box in percentage of selected item width
+
+P_TEXT_SIZE = 25 # poster container text size
+P_POSTER_HEIGHT = 280 # poster container height
+
+B_BANNER_HEIGHT = 60 # banner container height
 
 # --- SELECTION BAR GLOBALS ---
 S_BAR_SIZE = 500
@@ -225,7 +231,7 @@ class ShowSideBar(SelectionMenuBar):
 # ------------------------------------
 
 class ItemContainer(ButtonBehavior, FloatLayout):
-	'''General item conatiner
+	'''General item conatiner definition -- see overloads
 
 	Triggers on_selected events
 	Must contain a link to the Content it displays
@@ -241,15 +247,16 @@ class ItemContainer(ButtonBehavior, FloatLayout):
 	'''
 	selected = BooleanProperty(False)
 	linked_content = ObjectProperty(None)
+	status_box = None
 	status = OptionProperty("pending", options=["watched",
 												"unwatched",
 												"completed",
 												"pending"])
-	status_box = None
 
 	def __init__(self, linked_content, **kwargs):
 		super(ItemContainer, self).__init__(**kwargs)
 		self.linked_content = linked_content
+		self.selection_box = SelectionBox(size_hint=(None, None))
 
 	def on_press(self):
 		'''Image is pressed behavior'''
@@ -285,7 +292,11 @@ class ItemContainer(ButtonBehavior, FloatLayout):
 		self.add_widget(self.status_box)
 
 	def on_size(self, *args):
-		'''Action taken on resize'''
+		'''Action taken on resize, will call update structure'''
+		self.update_structure()
+
+	def update_structure(self):
+		'''Called on resize, must contain size and position rules for selection and status boxes'''
 		self.status_box.size = self.size
 		self.status_box.pos = self.pos
 
@@ -297,31 +308,23 @@ class ItemContainer(ButtonBehavior, FloatLayout):
 	def select_effect(self):
 		'''Remove status box to "make space" for the select effect'''
 		if self.status_box: self.remove_widget(self.status_box)
+		self.add_widget(self.selection_box)
 
 	def unselect_effect(self):
 		'''Add status box again after deselection'''
+		self.remove_widget(self.selection_box)
 		self.add_widget(self.status_box)
 
 class BannerContainer(ItemContainer):
-	'''Container with only the banner'''
+	'''General container with only the banner -- see overloads'''
 	def __init__(self, **kwargs):
 		super(BannerContainer, self).__init__(**kwargs)
 		self.image = ImageBanner(source=self.linked_content.banner)
 		self.add_widget(self.image)
-		self.selection_box = SelectionBox(size_hint=(None, None))
-		self.update_status()
 
-	def update_status(self):
-		'''Action to force status to be updated based on linked_content'''
-		if self.linked_content.watched:
-			if self.linked_content.status == 'Ended':
-				self.status = "completed"
-			elif self.linked_content.status == 'Continuing':
-				self.status = "watched"
-		else: self.status = "unwatched"
-
-	def on_size(self, *args):
-		'''Called on every size update'''
+	def update_structure(self, *args):
+		'''Update size and position of items'''
+		super(BannerContainer, self).update_structure()
 		# limit status box to image banner status box
 		self.status_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
 		self.status_box.y = self.y
@@ -333,15 +336,98 @@ class BannerContainer(ItemContainer):
 		self.selection_box.y = self.y
 		self.selection_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
 
-	def select_effect(self):
-		'''Apply effect of select'''
-		super(BannerContainer, self).select_effect()
-		self.add_widget(self.selection_box)
+class ShowBannerContainer(BannerContainer):
+	'''Show container with only the banner'''
+	def __init__(self, **kwargs):
+		super(ShowBannerContainer, self).__init__(**kwargs)
+		self.update_status()
 
-	def unselect_effect(self):
-		'''Apply effect of unselect'''
-		super(BannerContainer, self).unselect_effect()
-		self.remove_widget(self.selection_box)
+	def update_status(self):
+		'''Action to force status to be updated based on linked_content'''
+		self.status = self.linked_content.get_status()
+
+class PosterContainer(ItemContainer):
+	'''General container with only the poster -- see overload'''
+	def __init__(self, **kwargs):
+		super(PosterContainer, self).__init__(**kwargs)
+		self.image = ImagePoster(source=self.linked_content.poster)
+		self.add_widget(self.image)
+
+	def update_structure(self, *args):
+		'''Update size and position of items'''
+		super(PosterContainer, self).update_structure()
+		# limit status box to image banner status box
+		self.status_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
+		self.status_box.y = self.y
+		self.status_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
+		# update image pos with own pos
+		self.image.pos = self.pos
+		# limit selection box to image banner
+		self.selection_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
+		self.selection_box.y = self.y
+		self.selection_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
+
+class ShowPosterContainer(PosterContainer):
+	'''Show Container with poster and description'''
+
+	def __init__(self, **kwargs):
+		super(ShowPosterContainer, self).__init__(**kwargs)
+		self.update_status() # will also generate  new labels
+		self.add_widget(self.title_highlight)
+		self.add_widget(self.title)
+		self.add_widget(self.unwatched_count)
+		self.add_widget(self.rating)
+		self.add_widget(self.imdb)
+
+	def update_structure(self, *args):
+		'''Update size and position of items'''
+		self.status_box.size = self.size
+		self.status_box.pos = self.pos
+
+		x_offset = (self.width-self.height*self.image.image_ratio)/2
+
+		self.image.y = self.y
+		self.image.x = self.x - x_offset
+
+		self.title_highlight.pos = (self.x + self.height*self.image.image_ratio, self.y + P_POSTER_HEIGHT*0.8)
+		self.title_highlight.width = self.width-self.height*self.image.image_ratio
+		self.title_highlight.height = P_POSTER_HEIGHT*0.2
+
+		self.title.pos = (self.x + x_offset, self.y + P_POSTER_HEIGHT*0.4)
+		self.unwatched_count.pos = (self.x + x_offset, self.y + P_POSTER_HEIGHT*0.2)
+		self.rating.pos = (self.x + x_offset, self.y - P_POSTER_HEIGHT*0)
+		self.imdb.pos = (self.x + x_offset, self.y - P_POSTER_HEIGHT*0.2)
+
+		self.selection_box.size = self.size
+		self.selection_box.pos = self.pos
+
+	def update_status(self):
+		'''Action to force status to be updated based on linked_content'''
+		self.status = self.linked_content.get_status()
+
+		self.title = Label(text=self.linked_content.name,
+							font_name=theme_font,
+							font_size=P_TEXT_SIZE)
+		self.title_highlight = ThemeHighlight()
+		total_unwatched = 0
+		for ep_list in self.linked_content.get_unwatched_episodes().values():
+			total_unwatched += len(ep_list)
+		self.unwatched_count = Label(text='Episodes to watch: %d' % total_unwatched,
+							font_name=theme_font,
+							font_size=P_TEXT_SIZE)
+		self.rating = Label(text='Rating: [color=ffbf00]%s[/color]' % self.linked_content.rating,
+							markup=True,
+							font_name=theme_font,
+							font_size=P_TEXT_SIZE)
+		self.imdb = Label(text='[ref=imdb][color=00bfff]IMDB[/color][/ref]',
+							markup=True,
+							font_name=theme_font,
+							font_size=P_TEXT_SIZE)
+		self.imdb.bind(on_ref_press=self.open_imdb_link)
+
+	def open_imdb_link(self, instance, value):
+		'''Open IMDB link'''
+		webbrowser.open(self.linked_content.imdb_id)
 
 # ------------------------------------
 #               BOXES
@@ -365,6 +451,10 @@ class MarkCompletedBox(Widget):
 
 class MarkPendingBox(Widget):
 	'''Box to mark pending items'''
+	pass
+
+class ThemeHighlight(Widget):
+	'''Box to put behind titles'''
 	pass
 
 # ------------------------------------
@@ -408,7 +498,6 @@ class ScrollableGrid(GridLayout):
 		'''Called when update GUI event is triggered'''
 		pass
 
-
 class AllShowsGrid(ScrollableGrid):
 	def handle_state_update(self, *args):
 		'''Update Grid Content with all shows'''
@@ -417,16 +506,10 @@ class AllShowsGrid(ScrollableGrid):
 		watched = []
 		unwatched = []
 		for show in User_State.shows:
-			if User_State.shows[show].watched:
-				if User_State.shows[show].status == 'Ended':
-					status = "completed"
-				elif User_State.shows[show].status == 'Continuing':
-					status = "watched"
-			else: status = "unwatched"
-			item = BannerContainer(linked_content=User_State.shows[show])
+			item = ShowPosterContainer(linked_content=User_State.shows[show])
 			item.size_hint_y = None
-			item.height = 60
-			locals()[status].append(item)
+			item.height = P_POSTER_HEIGHT
+			locals()[User_State.shows[show].get_status()].append(item)
 		for item in unwatched + watched + completed:
 			self.add_widget(item)
 
@@ -437,6 +520,23 @@ class AllShowsGrid(ScrollableGrid):
 		elif self.right < 1365: self.cols = 3
 		else: self.cols = 4
 
+class ShowsToWatchGrid(ScrollableGrid):
+	def handle_state_update(self, *args):
+		'''Update Grid Content with all shows'''
+		self.clear_widgets()
+		for show in User_State.shows:
+			item = ShowBannerContainer(linked_content=User_State.shows[show])
+			item.size_hint_y = None
+			item.height = B_BANNER_HEIGHT
+			if User_State.shows[show].get_status() == 'unwatched':
+				self.add_widget(item)
+
+	def on_size(self, *args):
+		'''Sets amount of columns when layout size is changed (resize)'''
+		if self.right < 670: self.cols = 1
+		elif self.right < 1015: self.cols = 2
+		elif self.right < 1365: self.cols = 3
+		else: self.cols = 4
 
 # ------------------------------
 #       BUTTONS & POPUPS
@@ -521,7 +621,7 @@ class AllShowsScreen(Screen):
 		''' Executed before entering '''
 		# catch selection events and handle by opening new screen with show view
 		# TODO Handle this with the selector
-		#event_manager.bind(on_selection=self.handle_selection)
+		event_manager.bind(on_selection=self.handle_selection)
 		# if a view screen was open, remove it
 		try: self.manager.remove_widget(self.manager.get_screen('view_show'))
 		except ScreenManagerException: pass
@@ -552,11 +652,7 @@ class ShowViewScreen(Screen):
 	pass
 
 class ToWatchScreen(Screen):
-	'''
-	Builds the show main screen
-	Structure is as follows:
-		TODO
-	'''
+	'''Screen with shows to watch'''
 	def __init__(self, **kwargs):
 		super(ToWatchScreen, self).__init__(**kwargs)
 

@@ -92,6 +92,15 @@
 	ThemeTitle:
 		text: 'To Watch'
 		pos: root.center_x, root.top - 90
+	ItemScroller:
+		size_hint: None, None
+		pos: 150 , 100
+		height: root.top - 200
+		width: root.right - 180
+		ShowsToWatchGrid:
+			cols: 3
+			spacing: 20
+			size_hint_y: None
 	ThemeButton:
 		text: 'Shows'
 		font_size: 50
@@ -123,8 +132,8 @@
 <AllShowsScreen>:
 	ItemScroller:
 		size_hint: None, None
-		pos: 150 , 100
-		height: root.top - 200
+		pos: 150 , 10
+		height: root.top - 110
 		width: root.right - 180
 		AllShowsGrid:
 			cols: 3

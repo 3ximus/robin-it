@@ -31,16 +31,12 @@
 <ItemScroller>:
 	bar_color: green_color
 
-<ItemContainer>:
-
 # ----------------------
 #        IMAGES
 # ----------------------
 <ImageBanner>:
 
 <ImagePoster>:
-	size_hint_x: None
-	width: 300
 
 <EpisodeImage>:
 	size_hint_x: None
@@ -74,33 +70,40 @@
 		Line:
 			rectangle: self.x+1,self.y+1,self.width-2,self.height-2
 			width: 2
-
 <MarkWatchedBox>:
 	canvas:
 		Color:
-			rgb: grey_color
+			rgb: green_color
 		Triangle:
-			points: self.x, self.y, self.x, self.y+8, self.x+8, self.y
+			points: self.x, self.y, self.x, self.y+15, self.x+15, self.y
 <MarkUnwatchedBox>:
 	canvas:
 		Color:
 			rgb: red_color
 		Triangle:
-			points: self.x, self.y, self.x, self.y+8, self.x+8, self.y
+			points: self.x, self.y, self.x, self.y+15, self.x+15, self.y
 <MarkCompletedBox>:
 	canvas:
 		Color:
-			rgb: green_color
-		Line:
-			rectangle: self.x+1,self.y+1,self.width-2,self.height-2
-			width: 2
+			rgb: grey_color
+		Triangle:
+			points: self.x, self.y, self.x, self.y+15, self.x+15, self.y
 <MarkPendingBox>:
 	canvas:
 		Color:
 			rgb: yellow_color
-		Line:
-			rectangle: self.x+1,self.y+1,self.width-2,self.height-2
-			width: 2
+		Triangle:
+			points: self.x, self.y, self.x, self.y+15, self.x+15, self.y
+
+<ThemeHighlight>:
+	size_hint: None, None
+	canvas:
+		Color:
+			rgb: green_color 
+		Rectangle:
+			size: self.size
+			pos: self.pos
+	
 
 # ----------------------
 #       POPUP

@@ -179,13 +179,9 @@ class UserContent:
 		for show in self.shows:
 			if self.shows[show].watched:
 				continue
-			seasons_dict = {}
-			for season in self.shows[show].seasons:
-				episodes_list = []
-				for episode in season.episodes:
-					if not episode.watched: episodes_list.append(episode)
-				if episodes_list != []: seasons_dict.update({str(season.s_id):episodes_list})
-			if seasons_dict != {}: unwatched_dict.update({show:seasons_dict})
+			seasons_dict = self.shows[show].get_unwatched_episodes()
+			if seasons_dict != {}:
+				unwatched_dict.update({show:seasons_dict})
 		return unwatched_dict
 
 	'''
