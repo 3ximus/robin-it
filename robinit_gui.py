@@ -383,20 +383,21 @@ class ShowPosterContainer(PosterContainer):
 		'''Update size and position of items'''
 		self.status_box.size = self.size
 		self.status_box.pos = self.pos
-
-		x_offset = (self.width-self.height*self.image.image_ratio)/2
+		# calculate offset and size
+		image_width = self.height * self.image.image_ratio
+		x_offset = (self.width - image_width)/2
 
 		self.image.y = self.y
 		self.image.x = self.x - x_offset
 
-		self.title_highlight.pos = (self.x + self.height*self.image.image_ratio, self.y + P_POSTER_HEIGHT*0.8)
-		self.title_highlight.width = self.width-self.height*self.image.image_ratio
+		self.title_highlight.pos = (self.x + image_width, self.y + P_POSTER_HEIGHT*0.8)
+		self.title_highlight.width = self.width - image_width
 		self.title_highlight.height = P_POSTER_HEIGHT*0.2
 
-		self.title.pos = (self.x + x_offset, self.y + P_POSTER_HEIGHT*0.4)
-		self.unwatched_count.pos = (self.x + x_offset, self.y + P_POSTER_HEIGHT*0.2)
-		self.rating.pos = (self.x + x_offset, self.y - P_POSTER_HEIGHT*0)
-		self.imdb.pos = (self.x + x_offset, self.y - P_POSTER_HEIGHT*0.2)
+		self.title.pos = (self.x + image_width/2, self.y + P_POSTER_HEIGHT*0.4)
+		self.unwatched_count.pos = (self.x + image_width/2, self.y + P_POSTER_HEIGHT*0.2)
+		self.rating.pos = (self.x + image_width/2, self.y - P_POSTER_HEIGHT*0)
+		self.imdb.pos = (self.x + image_width/2, self.y - P_POSTER_HEIGHT*0.2)
 
 		self.selection_box.size = self.size
 		self.selection_box.pos = self.pos
@@ -515,9 +516,9 @@ class AllShowsGrid(ScrollableGrid):
 
 	def on_size(self, *args):
 		'''Sets amount of columns when layout size is changed (resize)'''
-		if self.right < 670: self.cols = 1
-		elif self.right < 1015: self.cols = 2
-		elif self.right < 1365: self.cols = 3
+		if self.right < 760: self.cols = 1
+		elif self.right < 1160: self.cols = 2
+		elif self.right < 1560: self.cols = 3
 		else: self.cols = 4
 
 class ShowsToWatchGrid(ScrollableGrid):
@@ -704,6 +705,7 @@ root.add_widget(LoadingMessageContainer())
 class RobinItApp(App):
 	''' APP CLASS '''
 	def build(self):
+		print "HELLLOOOOOOOO"
 		return root
 
 if __name__ == '__main__':

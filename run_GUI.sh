@@ -1,1 +1,1 @@
-./robinit_gui.py --size=920x600
+./robinit_gui.py --size=1020x600
