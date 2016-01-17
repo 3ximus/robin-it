@@ -17,7 +17,8 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.screenmanager import Screen, ScreenManager, SlideTransition, ScreenManagerException
+from kivy.uix.screenmanager import Screen, ScreenManager, \
+									SlideTransition, ScreenManagerException
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -27,7 +28,13 @@ from kivy.uix.image import AsyncImage
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.event import EventDispatcher
 from kivy.animation import Animation
-from kivy.properties import ListProperty, NumericProperty, BooleanProperty, ObjectProperty, OptionProperty
+from kivy.properties import ListProperty, \
+							NumericProperty, \
+							BooleanProperty, \
+							ObjectProperty, \
+							OptionProperty, \
+							StringProperty
+
 # ------- OTHER IMPORTS ----------
 from random import random, randint
 from functools import partial
@@ -37,7 +44,8 @@ from robinit_api import UserContent
 import webbrowser
 
 # yellow / green theme colors
-theme_colors = [[0.2, 0.8, 0.2, 0.5], # green
+# this value is dinamic, meaning it can be extended to add more colors in the r,g,b format
+theme_colors = [[0.2, 0.8, 0.2, 1], # green
 				[0.98, 0.97, 0.08], # yellow
 				[0.78, 0.9, 0.21], # yellowish green
 				[0.11, 0.95, 0.55]] # greenish blue
@@ -49,6 +57,11 @@ theme_font = 'gui_style/fonts/VertigoFLF.ttf'
 User_State = None
 USER_STATE_DIR = "user/"
 USER_STATE_FILE = ''
+
+# --- BACK LIGHTS GLOBALS ---
+L_MAX_OPACITY = 0.7 # max backlights opacity
+L_COLOR_CHANGE_TIME = 5 # time it takes for target color to change
+L_OPACITY_RESLOPE = 4
 
 # --- SELECTION BOX GLOBALS ---
 SB_SIZE = 1 # height of selection box in percentage of selected item width
@@ -71,9 +84,72 @@ class Placeholder:
 #         BACKGROUND
 # ------------------------------
 
+class BackLight(Widget):
+	_timer_c = 0
+	_prev_color_time = 0
+	image = StringProperty('') # image source
+	l_color = ListProperty([1, 1, 1]) # color
+	max_opacity = NumericProperty(L_MAX_OPACITY) # maximum opacity a particle can reach
+	slope = 0.1 # rate that opacity changes
+	color_gradient = (0,1) # color gradient between 2 colors of the theme_colors list
+
+	def __init__(self, image, color, **kwargs):
+		super(BackLight, self).__init__(**kwargs)
+		self.image = image
+		self.l_color = color
+		self.opacity = 0
+		Clock.schedule_interval(self.update, 1/10) # update background, 30 fps
+		Clock.schedule_interval(self.re_slope, L_OPACITY_RESLOPE) # every 4 seconds change the slope
+
+	def update(self, dt):
+		'''Updates background lights'''
+		self._timer_c += dt # count time
+		self.color_interpolation()
+		# opacity control
+		if self.opacity >= self.max_opacity or self.opacity <= 0:
+			self.slope = -self.slope # invert slope
+		self.opacity += self._timer_c * self.slope * 0.0001 # calculate new opacity
+
+	def color_interpolation(self):
+		'''Calculate current color based on elapsed time since last change and'''
+		elapsed_time = self._timer_c - self._prev_color_time
+		# linear interpolation (base value + % of change * (color mismatch))
+		# start by calculating color change percentage based on elapsed time
+		percentage = elapsed_time/L_COLOR_CHANGE_TIME
+		# calculate color mismatch (RGB) multiply by percentage and add base color
+		for i in range(3): # for r, g and b
+			self.l_color[i] = theme_colors[self.color_gradient[0]][i] + ( \
+					theme_colors[self.color_gradient[1]][i] \
+					- theme_colors[self.color_gradient[0]][i]) * percentage
+		# reached target color, regradient
+		if percentage >= 1:
+			self.re_gradient()
+
+	def re_gradient(self):
+		'''Calculate new gradient'''
+		new_color = self.color_gradient[1]
+		while new_color == self.color_gradient[1]:
+			new_color = randint(0,len(theme_colors)-1)
+		self.color_gradient = (self.color_gradient[1], new_color)
+		self._prev_color_time = self._timer_c
+
+	def re_slope(self, dt):
+		'''Calculate a new random slope for opacity function'''
+		self.slope = random()
+
 class Background(FloatLayout):
 	'''Background configuration'''
-	pass
+	def __init__(self, **kwargs):
+		super(Background, self).__init__(**kwargs)
+		self.light_bl = BackLight(image='gui_style/images/backlight_l.png',
+								color=theme_colors[0])
+		self.light_br = BackLight(image='gui_style/images/backlight_r.png',
+								color=theme_colors[1])
+		self.light_tl = BackLight(image='gui_style/images/backlight_t.png',
+								color=theme_colors[2])
+		self.add_widget(self.light_bl)
+		self.add_widget(self.light_br)
+		self.add_widget(self.light_tl)
 
 # ------------------------------------
 #               EVENTS
@@ -260,12 +336,17 @@ class ItemContainer(ButtonBehavior, FloatLayout):
 
 	def on_press(self):
 		'''Image is pressed behavior'''
-		if self.selected > 0:
-			self.selected = False
+		if self.selected:
+			self.selected = False # triggers deselect effect
+		else:
+			self.selected = True # triggers select effect
+
+	def on_release(self):
+		'''Image is released behavior'''
+		if not self.selected: # reversed due to self.selected being done on on_press
 			# launch on_selected event
 			event_manager.select(self, self.linked_content, False)
 		else:
-			self.selected = True
 			# launch on_selected event
 			event_manager.select(self, self.linked_content, True)
 
@@ -705,7 +786,6 @@ root.add_widget(LoadingMessageContainer())
 class RobinItApp(App):
 	''' APP CLASS '''
 	def build(self):
-		print "HELLLOOOOOOOO"
 		return root
 
 if __name__ == '__main__':

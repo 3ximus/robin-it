@@ -1,6 +1,5 @@
 #:kivy 1.8.0
 
-
 #:set font 'gui_style/fonts/VertigoFLF.ttf'
 #:set title_font 'gui_style/fonts/GatsbyFLF-Bold.ttf'
 
@@ -17,8 +16,17 @@
 # -------------------
 #    BACKGROUND
 # -------------------
+
+<BackLight>:
+	opacity: self.opacity
+	canvas:
+		Color:
+			rgb: self.l_color
+		Rectangle:
+			source: self.image
+			size: self.size
+
 <Background>:
-	# Background Color
 	canvas:
 		Color:
 			rgb: 0.25, 0.25, 0.25
