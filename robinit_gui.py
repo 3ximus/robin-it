@@ -59,7 +59,7 @@ USER_STATE_DIR = "user/"
 USER_STATE_FILE = ''
 
 # --- BACK LIGHTS GLOBALS ---
-L_MAX_OPACITY = 0.7 # max backlights opacity
+L_MAX_OPACITY = 0.5 # max backlights opacity
 L_COLOR_CHANGE_TIME = 5 # time it takes for target color to change
 L_OPACITY_RESLOPE = 4
 
@@ -72,9 +72,7 @@ P_POSTER_HEIGHT = 280 # poster container height
 B_BANNER_HEIGHT = 60 # banner container height
 
 # --- SELECTION BAR GLOBALS ---
-S_BAR_SIZE = 500
 S_MOVEMENT_TIME = 0.2
-S_BAR_OPACITY = 0.6
 
 class Placeholder:
 	'''  PLACEHOLDER CLASS '''
@@ -197,57 +195,40 @@ class Selector(FloatLayout):
 	but can be binded to a specific method with bind_to(<method>)
 	'''
 	selected_list = ListProperty(0) # amount of selected items
-	s_raised = BooleanProperty(False) # selection menu raised
 
 	def __init__(self, **kwargs):
 		super(Selector, self).__init__(**kwargs)
-		if side_bar: # add side_bar
-			self.show_side_bar = ShowSideBar()
-			self.add_widget(self.show_side_bar)
-		self.allow_side_bar=side_bar
 		event_manager.bind(on_selection=self.handle_selection)
 
-	def bind_to(self, method, unbind_selector=False):
+	def bind_to(self, method):
 		'''Binds the new function method passed to the on_selection event
 
 		If unbind_selctor is passed it will unbind this selector and
 		only bind the given funtion
 		'''
-		if unbind_selector: event_manager.unbind(on_selection=self.handle_selection)
 		event_manager.bind(on_selection=method)
 
-	def bind(self):
+	def unbind_from(self, method):
+		'''Unbinds given function from on_selection event'''
+		event_manager.unbind(on_selection=method)
+
+	def re_bind(self):
 		'''Binds the selector default handler to on_selection event'''
 		event_manager.bind(on_selection=self.handle_selection)
 
 	def unbind(self):
 		'''Unbinds the selector default handler from on_selection event'''
 		event_manager.unbind(on_selection=self.handle_selection)
+
 	def handle_selection(self, event_instance,
 						what_was_selected, linked_content, value, *args):
 		'''Adds selected item and its link to a list or removes them'''
 		if value: self.selected_list.append((what_was_selected, linked_content))
 		else: self.selected_list.remove((what_was_selected, linked_content))
 
-
 	def on_selected_list(self, instance, value):
 		'''Called when self.selected_list content is changed'''
-		if self.allow_side_bar: # if side bar is allowed
-			if len(value) == 0: self.s_raised = False
-			elif not self.s_raised: self.s_raised = True
-
-	def on_s_raised(self, instance, value):
-		'''Called when self.s_raised value is changed'''
-		if value == True: self.raise_selection_menu()
-		else: self.lower_selection_menu()
-
-	def raise_selection_menu(self):
-		'''Raises the selection menu'''
-		self.show_side_bar.raise_bar()
-
-	def lower_selection_menu(self):
-		'''Raises the selection menu'''
-		self.show_side_bar.lower_bar()
+		pass
 
 	def clear_selected(self):
 		'''Clear everything from the selected list'''
@@ -260,7 +241,7 @@ class SingleSelector(Selector):
 
 	def handle_selection(self, event_instance,
 						what_was_selected, linked_content, value, *args):
-		'''Overload function. Only allows 1 selected item'''
+		'''Overload function. Only allows 1 selected item at a time'''
 		if value:
 			self.clear_selected()
 			self.selected_list.append((what_was_selected, linked_content))
@@ -630,12 +611,6 @@ class ThemeTitle(Label):
 class ThemeButton(Button):
 	pass
 
-class RemoveShow(ThemeButton):
-	pass
-
-class ToogleWatched(ThemeButton):
-	pass
-
 class UsernamePopup(Popup):
 	def __init__(self, **kwargs):
 		'''Build The Popup'''
@@ -737,15 +712,70 @@ class ToWatchScreen(Screen):
 	'''Screen with shows to watch'''
 	def __init__(self, **kwargs):
 		super(ToWatchScreen, self).__init__(**kwargs)
-
-	def on_pre_enter(self):
-		pass
+		self.selector = SingleSelector()
+		self.tw_button = ThemeButton(text='Watched',
+									font_size=30,
+									size_hint=(None, None),
+									size=(100,60))
+		self.view_button = ThemeButton(text='View',
+										font_size=30,
+										size_hint=(None, None),
+										size=(100,60))
+		self.add_widget(self.tw_button)
+		self.add_widget(self.view_button)
 
 	def on_size(self, *args):
-		pass
+		'''Called on resize'''
+		self.tw_button.pos=(self.center_x + 100, -60)
+		self.view_button.pos=(self.center_x - 100, -60)
+
+	def option_menu(self, event_instance, what_was_selected, linked_content, value):
+		'''Display option menu'''
+		if value: self.raise_buttons()
+		else: self.lower_buttons()
+
+	def raise_buttons(self):
+		'''Animation to raise buttons'''
+		Animation.cancel_all(self.tw_button)
+		Animation.cancel_all(self.view_button)
+		anim = Animation(y=10, duration=S_MOVEMENT_TIME, transition = 'in_cubic')
+		# action to take before the buttons entered the screen
+		anim.bind(on_complete=self._before_raising_buttons)
+		anim.start(self.tw_button)
+		anim.start(self.view_button)
+		# remove binding
+		anim.unbind(on_complete=self._before_raising_buttons)
+
+	def lower_buttons(self):
+		'''Animation to lower buttons'''
+		Animation.cancel_all(self.tw_button)
+		Animation.cancel_all(self.view_button)
+		# use tw_button as height reference
+		anim = Animation(y=-self.tw_button.height, duration=S_MOVEMENT_TIME, transition = 'out_cubic')
+		# action to take after the buttons left the screen
+		anim.bind(on_complete=self._after_lowering_buttons)
+		anim.start(self.tw_button)
+		anim.start(self.view_button)
+		# remove binding
+		anim.unbind(on_complete=self._after_lowering_buttons)
+
+	def _before_raising_buttons(self, *args):
+		''' Binded to the begining of the raise animation '''
+		self.tw_button.opacity = 1
+		self.view_button.opacity = 1
+
+	def _after_lowering_buttons(self, *args):
+		''' Binded to the completion of lower animation '''
+		self.tw_button.opacity = 0
+		self.view_button.opacity = 0
+
+	def on_pre_enter(self):
+		'''Called before entering screen'''
+		self.selector.bind_to(self.option_menu)
 
 	def on_pre_leave(self):
-		pass
+		'''Called before leaving screen'''
+		self.selector.unbind_from(self.option_menu)
 
 class MoviesMainScreen(Screen):
 	pass
