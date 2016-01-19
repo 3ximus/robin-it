@@ -44,6 +44,8 @@ import os, sys
 from robinit_api import UserContent
 import webbrowser
 
+# --- Some variable definitions for customization ---
+
 # yellow / green theme colors
 # this value is dinamic, meaning it can be extended to add more colors in the r,g,b format
 theme_colors = [[0.2, 0.8, 0.2, 1], # green
@@ -66,18 +68,62 @@ L_COLOR_CHANGE_TIME = 5 # time it takes for target color to change
 L_OPACITY_RESLOPE = 4
 
 # --- SELECTION BOX GLOBALS ---
-SB_SIZE = 1 # height of selection box in percentage of selected item width
+SB_SIZE = 1 # height of selection box in decimal ratio of selected item width
 
 P_TEXT_SIZE = 25 # poster container text size
 P_POSTER_HEIGHT = 280 # poster container height
 
 B_BANNER_HEIGHT = 60 # banner container height
 
-# --- SELECTION BAR GLOBALS ---
-S_MOVEMENT_TIME = 0.2
+# --- SLIDE MENU GLOBALS ---
+SM_BUTTON_WIDTH = 100 # buttons width
+SM_BUTTON_HEIGHT = 60 # buttons height
+SM_TEXT_SIZE = 30 # size of text on the buttons
+SM_HEIGHT = 10 # distance from bottom of the screen
+SM_MOVEMENT_TIME = 0.2 # time of raise / lower animation
 
-class Placeholder:
-	'''  PLACEHOLDER CLASS '''
+# ------------------------------------
+#               BOXES
+# ------------------------------------
+
+class SelectionBox(Widget):
+	'''Box to mark selected items'''
+	pass
+
+class MarkWatchedBox(Widget):
+	'''Box to mark watched items'''
+	pass
+
+class MarkUnwatchedBox(Widget):
+	'''Box to mark unwatched items'''
+	pass
+
+class MarkCompletedBox(Widget):
+	'''Box to mark completed items'''
+	pass
+
+class MarkPendingBox(Widget):
+	'''Box to mark pending items'''
+	pass
+
+class ThemeHighlight(Widget):
+	'''Box to put behind titles'''
+	pass
+
+# ------------------------------------
+#            IMAGES
+# ------------------------------------
+
+class WebImage(AsyncImage):
+	pass
+
+class ImagePoster(WebImage):
+	pass
+
+class ImageBanner(WebImage):
+	pass
+
+class EpisodeImage(WebImage):
 	pass
 
 # ------------------------------
@@ -195,16 +241,15 @@ event_manager = MultiEventDispatcher()
 #            SELECTOR
 # ------------------------------
 
-class Selector(FloatLayout):
+class Selector:
 	'''Handles item selection
 
 	This is binded to on_selection event by default
 	but can be binded to a specific method with bind_to(<method>)
 	'''
-	selected_list = ListProperty(0) # amount of selected items
+	selected_list = [] # amount of selected items
 
-	def __init__(self, **kwargs):
-		super(Selector, self).__init__(**kwargs)
+	def __init__(self):
 		event_manager.bind(on_selection=self.handle_selection)
 
 	def bind_to(self, method):
@@ -233,6 +278,18 @@ class Selector(FloatLayout):
 		if value: self.selected_list.append((what_was_selected, linked_content))
 		else: self.selected_list.remove((what_was_selected, linked_content))
 
+	def get_selection(self, gui=False, linked=False):
+		'''Return selected elements
+
+		Parameters:
+			gui -- to return only list of gui elements selected
+			linked -- to return only a list of linked elements of selection
+		If both are kept false or true the full list is returned
+		'''
+		if gui and not linked: return map(lambda x:x[0],self.selected_list)
+		elif linked and not gui: return map(lambda x:x[1],self.selected_list)
+		else: return self.selected_list
+
 	def on_selected_list(self, instance, value):
 		'''Called when self.selected_list content is changed'''
 		pass
@@ -253,42 +310,6 @@ class SingleSelector(Selector):
 			self.clear_selected()
 			self.selected_list.append((what_was_selected, linked_content))
 		else: self.clear_selected()
-
-class SelectionMenuBar(Widget):
-	pass
-
-class ShowSideBar(SelectionMenuBar):
-	def __init__(self, **kwargs):
-		super(ShowSideBar, self).__init__(**kwargs)
-		self.size_hint_x = None
-		self.width = S_BAR_SIZE
-		self.opacity = 0
-
-	def on_size(self, *args):
-		''' Called to correctly set initial position on resize '''
-		self.x = self.right
-
-	def raise_bar(self):
-		''' Raise the side menu '''
-		Animation.cancel_all(self)
-		anim = Animation(x=root.right - S_BAR_SIZE, y=0, duration=S_MOVEMENT_TIME, transition = 'in_cubic')
-		anim.bind(on_start = self.on_start)
-		anim.start(self)
-
-	def lower_bar(self):
-		''' Lower the side menu '''
-		Animation.cancel_all(self)
-		anim = Animation(x=root.right, y=0, duration=S_MOVEMENT_TIME, transition = 'out_cubic')
-		anim.bind(on_complete = self.on_complete)
-		anim.start(self)
-
-	def on_start(self, *args):
-		''' Binded to the begining of the raise animation '''
-		self.opacity = S_BAR_OPACITY # show bar
-
-	def on_complete(self, *args):
-		''' Binded to the completion of lower animation '''
-		self.opacity = 0 # hide bar after completion
 
 # ------------------------------------
 #           ITEM CONTAINERS
@@ -517,57 +538,6 @@ class ShowPosterContainer(PosterContainer):
 		webbrowser.open(self.linked_content.imdb_id)
 
 # ------------------------------------
-#               BOXES
-# ------------------------------------
-
-class SelectionBox(Widget):
-	'''Box to mark selected items'''
-	pass
-
-class MarkWatchedBox(Widget):
-	'''Box to mark watched items'''
-	pass
-
-class MarkUnwatchedBox(Widget):
-	'''Box to mark unwatched items'''
-	pass
-
-class MarkCompletedBox(Widget):
-	'''Box to mark completed items'''
-	pass
-
-class MarkPendingBox(Widget):
-	'''Box to mark pending items'''
-	pass
-
-class ThemeHighlight(Widget):
-	'''Box to put behind titles'''
-	pass
-
-# ------------------------------------
-#            IMAGES
-# ------------------------------------
-
-class WebImage(AsyncImage):
-	'''Image loaded from a url'''
-	def darken_color(self):
-		'''Apply darker image tint'''
-		self.color = [0.5, 0.5, 0.5, 1]
-
-	def reset_color(self):
-		'''Reset image color to original'''
-		self.color = [1, 1, 1, 1]
-
-class ImagePoster(WebImage):
-	pass
-
-class ImageBanner(WebImage):
-	pass
-
-class EpisodeImage(WebImage):
-	pass
-
-# ------------------------------------
 #             SHOWS GRID
 # ------------------------------------
 class ItemScroller(ScrollView):
@@ -596,6 +566,7 @@ class AllShowsGrid(ScrollableGrid):
 			item = ShowPosterContainer(linked_content=User_State.shows[show])
 			item.size_hint_y = None
 			item.height = P_POSTER_HEIGHT
+			# select correct list to append to
 			locals()[User_State.shows[show].get_status()].append(item)
 		for item in unwatched + watched + completed:
 			self.add_widget(item)
@@ -621,7 +592,6 @@ class ShowsToWatchGrid(ScrollableGrid):
 		# sort list being the key the sum of unwached episodes
 		sorted_list.sort(reverse=True, key=(lambda i: sum([len(e) for e in i.linked_content.get_unwatched_episodes().values()])))
 		# add sorted list
-		print ' ---------------- '
 		for a in sorted_list:
 			self.add_widget(a)
 
@@ -685,6 +655,62 @@ class UsernamePopup(Popup):
 class PopupShade(FloatLayout):
 	pass
 
+class SlidingButtonsMenu(FloatLayout):
+	'''Menu with buttons that slide in and out -- must be added as a widget to work'''
+	button_list = ListProperty([])
+	raised = False
+
+	def __init__(self, *args, **kwargs):
+		'''Class constructor
+
+		Arguments passed will be treated as buttons to add as follows:
+			SlidingButtonsMenu(button1=method1, button2=method2)
+		This will generate 2 buttons, the first named button1 will call the method1 when pressed,
+		same for button2
+		'''
+		super(SlidingButtonsMenu, self).__init__(**kwargs)
+		for button in kwargs:
+			# create a new self._button_<button name>
+			self.__dict__.update({'_button_' + button:
+					ThemeButton(text=button, font_size=SM_TEXT_SIZE,
+							size_hint=(None, None), size=(SM_BUTTON_WIDTH,SM_BUTTON_HEIGHT))})
+			# button_list will contain all self.buttons
+			self.button_list.append(self.__dict__['_button_'+button])
+			# bind button pressed/released to the passed method
+			self.__dict__['_button_'+button].bind(on_release=kwargs[button])
+			# finally add the button to the layout
+			self.add_widget(self.__dict__['_button_'+button])
+
+	def update_structure(self):
+		'''Update position for buttons -- should be called to keep buttons updated'''
+		start_x = len(self.button_list)/2 * (SM_BUTTON_WIDTH+10)
+		for i, button in enumerate(self.button_list):
+			button.pos=(self.center_x - start_x + i * (SM_BUTTON_WIDTH+10),
+						(SM_HEIGHT if self.raised else -SM_BUTTON_HEIGHT))
+
+	def raise_buttons(self):
+		'''Animation to raise buttons'''
+		anim = Animation(y=SM_HEIGHT, duration=SM_MOVEMENT_TIME, transition='in_cubic')
+		for button in self.button_list:
+			Animation.cancel_all(button)
+			button.opacity = 1
+			anim.start(button)
+		self.raised = True
+
+	def lower_buttons(self):
+		'''Animation to lower buttons'''
+		anim = Animation(y=-SM_BUTTON_HEIGHT, duration=SM_MOVEMENT_TIME, transition='out_cubic')
+		# action to take after the buttons left the screen
+		anim.bind(on_complete=self._after_lowering_buttons)
+		for button in self.button_list:
+			Animation.cancel_all(button)
+			anim.start(button)
+		self.raised = False
+
+	def _after_lowering_buttons(self, *args):
+		for button in self.button_list:
+			button.opacity = 0
+
 # ------------------------------
 #            SCREENS
 # ------------------------------
@@ -735,84 +761,100 @@ class AllShowsScreen(Screen):
 
 	def new_screen(self, show):
 		'''Create new view show screen with'''
-		screen = ShowViewScreen(name='view_show')
-		screen.add_widget(ThemeTitle(text=show.name, pos=(self.center_x, self.top - 90)))
-		# TODO SETUP THE NEW SCREEN WITH SHOW INFO
+		screen = ShowViewScreen(name='view_show', linked_content=show, prev_screen=self.name)
 		self.manager.add_widget(screen)
 		self.manager.transition.direction = 'up'
 		self.manager.current = 'view_show'
 
 class ShowViewScreen(Screen):
-	pass
+	linked_content = ObjectProperty(None)
+	prev_screen = StringProperty('')
+
+	def __init__(self, linked_content, prev_screen, **kwargs):
+		super(ShowViewScreen, self).__init__(**kwargs)
+		self.linked_content = linked_content
+		self.prev_screeen = prev_screen
+		self.show_title = ThemeTitle(text=self.linked_content.name)
+		self.add_widget(self.show_title)
+
+	def on_size(self, *args):
+		'''Called on each resize'''
+		self.show_title.pos = (self.center_x, self.top - 90)
+
+	def on_enter(self):
+		'''Called when entering'''
+		self.show_title.pos = (self.center_x, self.top - 90)
+
+class EpisodeViewScreen(Screen):
+	linked_content = ObjectProperty(None)
+	prev_screen = StringProperty('')
+
+	def __init__(self, linked_content, prev_screen, **kwargs):
+		super(EpisodeViewScreen, self).__init__(**kwargs)
+		self.linked_content = linked_content
+		self.prev_screeen = prev_screen
+		self.show_title = ThemeTitle(text=self.linked_content.name)
+		self.add_widget(self.show_title)
+
+	def on_size(self, *args):
+		'''Called on each resize'''
+		self.show_title.pos = (self.center_x, self.top - 90)
+
+	def on_enter(self):
+		'''Called when entering'''
+		self.show_title.pos = (self.center_x, self.top - 90)
 
 class ToWatchScreen(Screen):
 	'''Screen with shows to watch'''
 	def __init__(self, **kwargs):
 		super(ToWatchScreen, self).__init__(**kwargs)
 		self.selector = SingleSelector()
-		self.tw_button = ThemeButton(text='Watched',
-									font_size=30,
-									size_hint=(None, None),
-									size=(100,60))
-		self.view_button = ThemeButton(text='View',
-										font_size=30,
-										size_hint=(None, None),
-										size=(100,60))
-		self.add_widget(self.tw_button)
-		self.add_widget(self.view_button)
-
-	def on_size(self, *args):
-		'''Called on resize'''
-		self.tw_button.pos=(self.center_x + 100, -60)
-		self.view_button.pos=(self.center_x - 100, -60)
+		# create a slidding menu with Watched button and View button
+		self.button_menu = SlidingButtonsMenu(Watched=self.toogle_watched_action,
+												View=self.view_action)
+		self.add_widget(self.button_menu)
 
 	def option_menu(self, event_instance, what_was_selected, linked_content, value):
 		'''Display option menu'''
-		if value: self.raise_buttons()
-		else: self.lower_buttons()
+		if value: self.button_menu.raise_buttons()
+		else: self.button_menu.lower_buttons()
 
-	def raise_buttons(self):
-		'''Animation to raise buttons'''
-		Animation.cancel_all(self.tw_button)
-		Animation.cancel_all(self.view_button)
-		anim = Animation(y=10, duration=S_MOVEMENT_TIME, transition = 'in_cubic')
-		# action to take before the buttons entered the screen
-		anim.bind(on_complete=self._before_raising_buttons)
-		anim.start(self.tw_button)
-		anim.start(self.view_button)
-		# remove binding
-		anim.unbind(on_complete=self._before_raising_buttons)
+	def view_action(self, *args):
+		'''Action to take on "View" button release'''
+		# since is a single selector we can get only the first element
+		self.new_screen(self.selector.get_selection(linked=True)[0])
 
-	def lower_buttons(self):
-		'''Animation to lower buttons'''
-		Animation.cancel_all(self.tw_button)
-		Animation.cancel_all(self.view_button)
-		# use tw_button as height reference
-		anim = Animation(y=-self.tw_button.height, duration=S_MOVEMENT_TIME, transition = 'out_cubic')
-		# action to take after the buttons left the screen
-		anim.bind(on_complete=self._after_lowering_buttons)
-		anim.start(self.tw_button)
-		anim.start(self.view_button)
-		# remove binding
-		anim.unbind(on_complete=self._after_lowering_buttons)
+	def new_screen(self, show):
+		'''Create new view show screen with'''
+		screen = EpisodeViewScreen(name='ep_view_show',
+									linked_content=show, prev_screen=self.name)
+		self.manager.add_widget(screen)
+		self.manager.transition.direction = 'left'
+		self.manager.current = 'ep_view_show'
 
-	def _before_raising_buttons(self, *args):
-		''' Binded to the begining of the raise animation '''
-		self.tw_button.opacity = 1
-		self.view_button.opacity = 1
+	def toogle_watched_action(self, *args):
+		'''Action to take on "Watched" button release'''
+		self.selector.get_selection(linked=True)[0].toogle_watched()
+		event_manager.update_gui()
 
-	def _after_lowering_buttons(self, *args):
-		''' Binded to the completion of lower animation '''
-		self.tw_button.opacity = 0
-		self.view_button.opacity = 0
+	def on_size(self, *args):
+		'''Called on resize'''
+		self.button_menu.update_structure()
+
+	def on_enter(self, *args):
+		'''Called when entering'''
+		self.button_menu.update_structure()
 
 	def on_pre_enter(self):
 		'''Called before entering screen'''
 		self.selector.bind_to(self.option_menu)
+		# if a view screen was open, remove it
+		try: self.manager.remove_widget(self.manager.get_screen('ep_view_show'))
+		except ScreenManagerException: pass
 
 	def on_pre_leave(self):
 		'''Called before leaving screen'''
-		self.lower_buttons()
+		self.button_menu.lower_buttons()
 		self.selector.unbind_from(self.option_menu)
 		self.selector.clear_selected()
 

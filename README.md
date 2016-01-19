@@ -131,4 +131,5 @@ Benchmark Page parsers
 --------------------------------
 ##Known Bugs##
 
-- Before resizing some items have selection boxes with incorrect sizes
+- Before resizing some items have selection boxes with incorrect sizes. Same hapens with sliding menu
+

@@ -182,6 +182,18 @@
 		height: 60
 		pos: 10, root.top - 70
 
+<EpisodeViewScreen>:
+	ThemeButton:
+		text: 'Back'
+		font_size: 50
+		on_release:
+			root.manager.transition.direction = 'right'
+			root.manager.current = 'to_watch_screen'
+		size_hint: None, None
+		width: 160
+		height: 60
+		pos: 10, root.top - 70
+
 # -------------------
 #    MOVIES SCREEN
 # -------------------
