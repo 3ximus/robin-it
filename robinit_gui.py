@@ -835,6 +835,8 @@ class ToWatchScreen(Screen):
 	def toogle_watched_action(self, *args):
 		'''Action to take on "Watched" button release'''
 		self.selector.get_selection(linked=True)[0].toogle_watched()
+		self.selector.clear_selected()
+		self.button_menu.lower_buttons()
 		event_manager.update_gui()
 
 	def on_size(self, *args):
