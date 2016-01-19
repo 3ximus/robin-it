@@ -36,7 +36,8 @@ from kivy.properties import ListProperty, \
 							StringProperty
 
 # ------- OTHER IMPORTS ----------
-from random import random, randint
+from random import randint
+from math import sin
 from functools import partial
 import os, sys
 # ------- USER API ----------
@@ -60,6 +61,7 @@ USER_STATE_FILE = ''
 
 # --- BACK LIGHTS GLOBALS ---
 L_MAX_OPACITY = 0.5 # max backlights opacity
+L_MIN_OPACITY = 0 # min backlights opacity
 L_COLOR_CHANGE_TIME = 5 # time it takes for target color to change
 L_OPACITY_RESLOPE = 4
 
@@ -85,10 +87,10 @@ class Placeholder:
 class BackLight(Widget):
 	_timer_c = 0
 	_prev_color_time = 0
+	_adjust_hf = 0 # horizontal adjustment to compensate frequency change
 	image = StringProperty('') # image source
 	l_color = ListProperty([1, 1, 1]) # color
-	max_opacity = NumericProperty(L_MAX_OPACITY) # maximum opacity a particle can reach
-	slope = 0.1 # rate that opacity changes
+	frequency = 1 # rate that opacity changes
 	color_gradient = (0,1) # color gradient between 2 colors of the theme_colors list
 
 	def __init__(self, image, color, **kwargs):
@@ -97,16 +99,16 @@ class BackLight(Widget):
 		self.l_color = color
 		self.opacity = 0
 		Clock.schedule_interval(self.update, 1/10) # update background, 30 fps
-		Clock.schedule_interval(self.re_slope, L_OPACITY_RESLOPE) # every 4 seconds change the slope
+		Clock.schedule_interval(self.re_slope, L_OPACITY_RESLOPE) # every 4 seconds change the frequency
+		self.re_slope(0) # initial re_slope for randomness
 
 	def update(self, dt):
 		'''Updates background lights'''
 		self._timer_c += dt # count time
 		self.color_interpolation()
-		# opacity control
-		if self.opacity >= self.max_opacity or self.opacity <= 0:
-			self.slope = -self.slope # invert slope
-		self.opacity += self._timer_c * self.slope * 0.0001 # calculate new opacity
+		# opacity sin function -- (amplitude * sin(frequency * x + horizontal translation) + vertical translation)
+		# function -- diff(max,min) * sin(frequency * compensator * x + match_frequency ) + (min + max) / 2  --> divide by 2 to keep constraint of max opacity
+		self.opacity = ((L_MAX_OPACITY - L_MIN_OPACITY) * sin(self._timer_c * self.frequency + self._adjust_hf) + (L_MAX_OPACITY + L_MIN_OPACITY)) / 2
 
 	def color_interpolation(self):
 		'''Calculate current color based on elapsed time since last change and'''
@@ -126,14 +128,19 @@ class BackLight(Widget):
 	def re_gradient(self):
 		'''Calculate new gradient'''
 		new_color = self.color_gradient[1]
-		while new_color == self.color_gradient[1]:
+		while new_color == self.color_gradient[1]: # force diferent color
 			new_color = randint(0,len(theme_colors)-1)
 		self.color_gradient = (self.color_gradient[1], new_color)
 		self._prev_color_time = self._timer_c
 
 	def re_slope(self, dt):
-		'''Calculate a new random slope for opacity function'''
-		self.slope = random()
+		'''Calculate a new random frequency for opacity function'''
+		prev_frequency = self.frequency
+		self.frequency = randint(10,20) * 0.01
+		# create horizontal translation on sin function so that opacity
+		# matches on both frequencies, making a seamless transition
+		# formula -- c2 = (f1 - f2)x + c1
+		self._adjust_hf = (prev_frequency - self.frequency) * self._timer_c + self._adjust_hf
 
 class Background(FloatLayout):
 	'''Background configuration'''
@@ -402,11 +409,29 @@ class ShowBannerContainer(BannerContainer):
 	'''Show container with only the banner'''
 	def __init__(self, **kwargs):
 		super(ShowBannerContainer, self).__init__(**kwargs)
+		self.counter = ThemeCounter()
+		self.c_highlight = CounterHightlight()
+		self.add_widget(self.c_highlight)
+		self.add_widget(self.counter)
 		self.update_status()
 
 	def update_status(self):
 		'''Action to force status to be updated based on linked_content'''
 		self.status = self.linked_content.get_status()
+		total_unwatched = 0
+		for ep_list in self.linked_content.get_unwatched_episodes().values():
+			total_unwatched += len(ep_list)
+		self.counter.text = str(total_unwatched)
+
+	def update_structure(self, *args):
+		'''Update size and position of items'''
+		super(ShowBannerContainer, self).update_structure()
+		self.c_highlight.y = self.y
+		self.c_highlight.center_x = self.right - 15 - \
+								(self.width - self.height * self.image.image_ratio)/2
+		self.counter.y = self.y
+		self.counter.center_x = self.right - 15 - \
+								(self.width - self.height * self.image.image_ratio)/2
 
 class PosterContainer(ItemContainer):
 	'''General container with only the poster -- see overload'''
@@ -434,7 +459,7 @@ class ShowPosterContainer(PosterContainer):
 
 	def __init__(self, **kwargs):
 		super(ShowPosterContainer, self).__init__(**kwargs)
-		self.update_status() # will also generate  new labels
+		self.update_status() # will also generate new labels
 		self.add_widget(self.title_highlight)
 		self.add_widget(self.title)
 		self.add_widget(self.unwatched_count)
@@ -472,9 +497,8 @@ class ShowPosterContainer(PosterContainer):
 							font_name=theme_font,
 							font_size=P_TEXT_SIZE)
 		self.title_highlight = ThemeHighlight()
-		total_unwatched = 0
-		for ep_list in self.linked_content.get_unwatched_episodes().values():
-			total_unwatched += len(ep_list)
+		# count unwatched
+		total_unwatched = sum([len(e) for e in self.linked_content.get_unwatched_episodes().values()])
 		self.unwatched_count = Label(text='Episodes to watch: %d' % total_unwatched,
 							font_name=theme_font,
 							font_size=P_TEXT_SIZE)
@@ -587,12 +611,19 @@ class ShowsToWatchGrid(ScrollableGrid):
 	def handle_state_update(self, *args):
 		'''Update Grid Content with all shows'''
 		self.clear_widgets()
+		sorted_list = []
 		for show in User_State.shows:
 			item = ShowBannerContainer(linked_content=User_State.shows[show])
 			item.size_hint_y = None
 			item.height = B_BANNER_HEIGHT
 			if User_State.shows[show].get_status() == 'unwatched':
-				self.add_widget(item)
+				sorted_list.append(item)
+		# sort list being the key the sum of unwached episodes
+		sorted_list.sort(reverse=True, key=(lambda i: sum([len(e) for e in i.linked_content.get_unwatched_episodes().values()])))
+		# add sorted list
+		print ' ---------------- '
+		for a in sorted_list:
+			self.add_widget(a)
 
 	def on_size(self, *args):
 		'''Sets amount of columns when layout size is changed (resize)'''
@@ -606,6 +637,12 @@ class ShowsToWatchGrid(ScrollableGrid):
 # ------------------------------
 
 class ThemeTitle(Label):
+	pass
+
+class ThemeCounter(Label):
+	pass
+
+class CounterHightlight(Widget):
 	pass
 
 class ThemeButton(Button):
@@ -775,7 +812,9 @@ class ToWatchScreen(Screen):
 
 	def on_pre_leave(self):
 		'''Called before leaving screen'''
+		self.lower_buttons()
 		self.selector.unbind_from(self.option_menu)
+		self.selector.clear_selected()
 
 class MoviesMainScreen(Screen):
 	pass
