@@ -78,8 +78,6 @@ L_COLOR_CHANGE_TIME = 5 # time it takes for target color to change
 L_OPACITY_RESLOPE = 4
 
 # --- SELECTION BOX GLOBALS ---
-SB_SIZE = 1 # height of selection box in decimal ratio of selected item width
-
 P_TEXT_SIZE = 25 # poster container text size
 P_POSTER_HEIGHT = 280 # poster container height
 
@@ -93,9 +91,10 @@ SM_HEIGHT = 10 # distance from bottom of the screen
 SM_MOVEMENT_TIME = 0.2 # time of raise / lower animation
 
 # --- SHOW VIEW GLOBALS ---
-SV_TEXT_SIZE = 25
-SV_TEXT_WIDTH = 300
-SV_TEXT_SPACING = 10
+SV_TEXT_SIZE = 25 # size of text on the information box
+SV_TEXT_WIDTH = 300 # information box width
+SV_TEXT_SPACING = 10 # space between info box text
+SV_SEASON_POSTER_SIZE = 400 # posters are usually 400px wide
 
 # ------------------------------------
 #               BOXES
@@ -343,6 +342,7 @@ class ItemContainer(ButtonBehavior, FloatLayout):
 		watched -- watched until this point (mainly for tv shows)
 		completed -- completed (and watched for tv shows)
 		pending -- not available yet (mainly for movies)
+	NOTE: So far its mandatory that status variable is set on child classes
 	'''
 	selected = BooleanProperty(False)
 	linked_content = ObjectProperty(None)
@@ -430,13 +430,13 @@ class BannerContainer(ItemContainer):
 		'''Update size and position of items'''
 		super(BannerContainer, self).update_structure()
 		# limit status box to image banner status box
-		self.status_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
+		self.status_box.size = (self.height*self.image.image_ratio, self.height)
 		self.status_box.y = self.y
 		self.status_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
 		# update image pos with own pos
 		self.image.pos = self.pos
 		# limit selection box to image banner
-		self.selection_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
+		self.selection_box.size = (self.height*self.image.image_ratio, self.height)
 		self.selection_box.y = self.y
 		self.selection_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
 
@@ -451,7 +451,7 @@ class ShowBannerContainer(BannerContainer):
 		self.update_status()
 
 	def update_status(self):
-		'''Action to force status to be updated based on linked_content'''
+		'''Action to force status to be updated/generated based on linked_content'''
 		self.status = self.linked_content.get_status()
 		total_unwatched = 0
 		for ep_list in self.linked_content.get_unwatched_episodes().values():
@@ -469,25 +469,29 @@ class ShowBannerContainer(BannerContainer):
 								(self.width - self.height * self.image.image_ratio)/2
 
 class PosterContainer(ItemContainer):
-	'''General container with only the poster -- see overload'''
-	def __init__(self, **kwargs):
+	'''General container with only the poster -- see/use overloads'''
+	def __init__(self, poster=None, **kwargs):
 		super(PosterContainer, self).__init__(**kwargs)
-		self.image = ImagePoster(source=self.linked_content.poster)
+		if not poster: # if no poster is given
+			self.image = ImagePoster(source=self.linked_content.poster)
+		else: # if poster was given
+			self.image = ImagePoster(source=poster)
 		self.add_widget(self.image)
 
 	def update_structure(self, *args):
 		'''Update size and position of items'''
 		super(PosterContainer, self).update_structure()
 		# limit status box to image banner status box
-		self.status_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
+		_image_width = self.height*self.image.image_ratio
+		self.status_box.size = (_image_width, self.height)
 		self.status_box.y = self.y
-		self.status_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
+		self.status_box.x = self.x + (self.width-_image_width)/2
 		# update image pos with own pos
 		self.image.pos = self.pos
 		# limit selection box to image banner
-		self.selection_box.size = (self.height*self.image.image_ratio, self.height*SB_SIZE)
+		self.selection_box.size = (_image_width, self.height)
 		self.selection_box.y = self.y
-		self.selection_box.x = self.x + (self.width-self.height*self.image.image_ratio)/2
+		self.selection_box.x = self.x + (self.width-_image_width)/2
 
 class ShowPosterContainer(PosterContainer):
 	'''Show Container with poster and description'''
@@ -500,6 +504,24 @@ class ShowPosterContainer(PosterContainer):
 		self.add_widget(self.unwatched_count)
 		self.add_widget(self.rating)
 		self.add_widget(self.imdb)
+
+	def update_status(self):
+		'''Action to force status to be updated/generated based on linked_content'''
+		self.status = self.linked_content.get_status()
+
+		self.title = Label(text=self.linked_content.name,
+							font_name=theme_font,
+							font_size=P_TEXT_SIZE)
+		self.title_highlight = ThemeHighlight()
+		# count unwatched
+		total_unwatched = sum([len(e) for e in self.linked_content.get_unwatched_episodes().values()])
+		self.unwatched_count = Label(text='Episodes to watch: %d' % total_unwatched,
+							font_name=theme_font, font_size=P_TEXT_SIZE)
+		self.rating = Label(text='Rating: [color=ffbf00]%s[/color]' % self.linked_content.rating,
+							markup=True, font_name=theme_font, font_size=P_TEXT_SIZE)
+		self.imdb = Label(text='[ref=imdb][color=00bfff]IMDB[/color][/ref]',
+							markup=True, font_name=theme_font, font_size=P_TEXT_SIZE)
+		self.imdb.bind(on_ref_press=self.open_imdb_link)
 
 	def update_structure(self, *args):
 		'''Update size and position of items'''
@@ -524,27 +546,35 @@ class ShowPosterContainer(PosterContainer):
 		self.selection_box.size = self.size
 		self.selection_box.pos = self.pos
 
-	def update_status(self):
-		'''Action to force status to be updated based on linked_content'''
-		self.status = self.linked_content.get_status()
-
-		self.title = Label(text=self.linked_content.name,
-							font_name=theme_font,
-							font_size=P_TEXT_SIZE)
-		self.title_highlight = ThemeHighlight()
-		# count unwatched
-		total_unwatched = sum([len(e) for e in self.linked_content.get_unwatched_episodes().values()])
-		self.unwatched_count = Label(text='Episodes to watch: %d' % total_unwatched,
-							font_name=theme_font, font_size=P_TEXT_SIZE)
-		self.rating = Label(text='Rating: [color=ffbf00]%s[/color]' % self.linked_content.rating,
-							markup=True, font_name=theme_font, font_size=P_TEXT_SIZE)
-		self.imdb = Label(text='[ref=imdb][color=00bfff]IMDB[/color][/ref]',
-							markup=True, font_name=theme_font, font_size=P_TEXT_SIZE)
-		self.imdb.bind(on_ref_press=self.open_imdb_link)
-
 	def open_imdb_link(self, instance, value):
 		'''Open IMDB link'''
 		webbrowser.open(self.linked_content.imdb_id)
+
+class SeasonPosterContainer(PosterContainer):
+	'''Poster Container for seasons'''
+
+	def __init__(self, poster, **kwargs):
+		'''Class constructor
+
+		Since the season poster variable is a list with posters, pass
+		the poster to be used as a parameter
+		'''
+		super(SeasonPosterContainer, self).__init__(poster=poster, **kwargs)
+		# TODO: Future Calculate poster to use right here
+		self.update_status()
+
+	def update_status(self):
+		'''Action to force status to be updated/generated based on linked_content'''
+		self.status = self.linked_content.get_status()
+
+	def update_structure(self):
+		'''Update size and position of items'''
+		self.status_box.size = self.size
+		self.status_box.pos = self.pos
+		self.image.pos = self.pos
+		_image_width = self.height*self.image.image_ratio
+		self.selection_box.size = self.size
+		self.selection_box.pos = self.pos
 
 # ------------------------------------
 #             SHOWS GRID
@@ -610,6 +640,94 @@ class ShowsToWatchGrid(VerticalScrollableGrid):
 		elif self.right < 1015: self.cols = 2
 		elif self.right < 1365: self.cols = 3
 		else: self.cols = 4
+
+# ------------------------------
+#       SHOW VIEW SCROLLER
+# ------------------------------
+
+class InfoBox(GridLayout):
+	linked_content = ObjectProperty(None)
+	def __init__(self, linked_content, **kwargs):
+		super(InfoBox, self).__init__(**kwargs)
+		self.bind(minimum_height=self.setter('height'))
+		self.linked_content = linked_content
+		self.build_me()
+		self.display_me()
+
+	def build_me(self):
+		# get some values
+		_total_unwatched = sum([len(e) for e in self.linked_content.get_unwatched_episodes().values()])
+		_genre = ''.join(self.linked_content.genre.split('|'))
+		# calculate estimated number of lines -- NOTE heavily dependant on font used
+		_description_lines = len(self.linked_content.description) / 38 # 35 is the average #char_per_line -- biased value
+		# build widgets
+		self.unwatched_count = Label(text='Episodes to watch: %d' % _total_unwatched,
+							font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.rating_imdb = Label(text='Rating: [color=ffbf00]%s[/color]  [ref=imdb][color=00bfff]IMDB[/color][/ref]' % self.linked_content.rating,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.genre = Label(text='Genre: %s' % _genre,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.airinfo = Label(text='Air: %s at %s' % (self.linked_content.air_dayofweek,
+													self.linked_content.air_time),
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.runtime = Label(text='Run Time: %s min' % self.linked_content.runtime,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.network = Label(text='Network: %s' % self.linked_content.network,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.actors = Label(text='Main actors: %s' % self.linked_content.actors,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							text_size=(SV_TEXT_WIDTH,None), halign='center',
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.description = Label(text='Description: %s' % self.linked_content.description,
+							text_size=(SV_TEXT_WIDTH,None), halign='center',
+							font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height = _description_lines * (SV_TEXT_SIZE + 3)) # 3 for space between lines
+
+	def display_me(self):
+		'''Add all built widgets'''
+		self.add_widget(self.unwatched_count)
+		self.add_widget(self.rating_imdb)
+		self.rating_imdb.bind(on_ref_press=self.open_imdb_link)
+		self.add_widget(self.genre)
+		self.add_widget(self.airinfo)
+		self.add_widget(self.runtime)
+		self.add_widget(self.network)
+		#self.add_widget(self.actors) # TODO ADD WHEN DESCRIPTION HEIGHT IS FIGURED OUT
+		self.add_widget(self.description)
+
+	def open_imdb_link(self, instance, value):
+		'''Open IMDB link'''
+		webbrowser.open(self.linked_content.imdb_id)
+
+class ShowStack(GridLayout):
+	linked_content = ObjectProperty(None)
+	def __init__(self, linked_content, **kwargs):
+		super(ShowStack, self).__init__(**kwargs)
+		# Make sure the height is such that there is something to scroll.
+		self.bind(minimum_width=self.setter('width'))
+		self.linked_content = linked_content
+		# build info box
+		self.info_container=ItemScroller(size_hint_x=None, width=SV_TEXT_WIDTH)
+		self.layout=InfoBox(linked_content=self.linked_content,
+						cols=1, spacing=SV_TEXT_SPACING, size_hint_y=None)
+		# add info box
+		self.info_container.add_widget(self.layout)
+		self.add_widget(self.info_container)
+		# build seasons
+		for season in self.linked_content.seasons:
+			if season.poster != []:
+				poster = season.poster[0]
+			else: break # dont add this season
+			item = SeasonPosterContainer(linked_content=season, poster=poster)
+			item.size_hint_x = None
+			item.width = SV_SEASON_POSTER_SIZE
+			self.add_widget(item)
 
 # ------------------------------
 #       BUTTONS & POPUPS
@@ -775,76 +893,6 @@ class AllShowsScreen(Screen):
 		self.manager.transition.direction = 'left'
 		self.manager.current = 'view_show'
 
-
-class InfoBox(GridLayout):
-	linked_content = ObjectProperty(None)
-	def __init__(self, linked_content, **kwargs):
-		super(InfoBox, self).__init__(**kwargs)
-		self.bind(minimum_height=self.setter('height'))
-		self.linked_content = linked_content
-		self.build_me()
-		self.display_me()
-
-	def build_me(self):
-		# get some values
-		_total_unwatched = sum([len(e) for e in self.linked_content.get_unwatched_episodes().values()])
-		_genre = ''.join(self.linked_content.genre.split('|'))
-		# calculate estimated number of lines -- NOTE heavily dependant of font used
-		_description_lines = len(self.linked_content.description) / 38 # 35 is the average #char_per_line -- biased value
-		# build widgets
-		self.unwatched_count = Label(text='Episodes to watch: %d' % _total_unwatched,
-							font_name=theme_font, font_size=SV_TEXT_SIZE,
-							size_hint_y=None, height=SV_TEXT_SIZE)
-		self.rating = Label(text='Rating: [color=ffbf00]%s[/color]'%self.linked_content.rating,
-							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
-							size_hint_y=None, height=SV_TEXT_SIZE)
-		self.imdb = Label(text='[ref=imdb][color=00bfff]IMDB[/color][/ref]',
-							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
-							size_hint_y=None, height=SV_TEXT_SIZE)
-		self.genre = Label(text='Genre: %s' % _genre,
-							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
-							size_hint_y=None, height=SV_TEXT_SIZE)
-		self.runtime = Label(text='Run Time: %s min' % self.linked_content.runtime,
-							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
-							size_hint_y=None, height=SV_TEXT_SIZE)
-		self.network = Label(text='Network: %s' % self.linked_content.network,
-							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
-							size_hint_y=None, height=SV_TEXT_SIZE)
-		self.description = Label(text='Description: %s' % self.linked_content.description,
-							text_size=(SV_TEXT_WIDTH,None), halign='center',
-							font_name=theme_font, font_size=SV_TEXT_SIZE,
-							size_hint_y=None, height = _description_lines * (SV_TEXT_SIZE + 3)) # 3 for space between lines
-
-	def display_me(self):
-		'''Add all built widgets'''
-		self.add_widget(self.unwatched_count)
-		self.add_widget(self.rating)
-		self.add_widget(self.imdb)
-		self.add_widget(self.genre)
-		self.add_widget(self.runtime)
-		self.add_widget(self.network)
-		self.imdb.bind(on_ref_press=self.open_imdb_link)
-		self.add_widget(self.description)
-
-	def open_imdb_link(self, instance, value):
-		'''Open IMDB link'''
-		webbrowser.open(self.linked_content.imdb_id)
-
-class ShowStack(GridLayout):
-	linked_content = ObjectProperty(None)
-	def __init__(self, linked_content, **kwargs):
-		super(ShowStack, self).__init__(**kwargs)
-		# Make sure the height is such that there is something to scroll.
-		self.bind(minimum_width=self.setter('width'))
-		self.linked_content = linked_content
-		# build widgets
-		self.info_container=ItemScroller(size_hint_x=None, width=SV_TEXT_WIDTH)
-		self.layout=InfoBox(linked_content=self.linked_content,
-						cols=1, spacing=SV_TEXT_SPACING, size_hint_y=None)
-		# add widgets to display
-		self.info_container.add_widget(self.layout)
-		self.add_widget(self.info_container)
-
 class ShowViewScreen(Screen):
 	linked_content = ObjectProperty(None)
 	prev_screen = StringProperty('')
@@ -860,8 +908,9 @@ class ShowViewScreen(Screen):
 		self.image = ImagePoster(source=self.linked_content.poster, size_hint=(None, None))
 		self.add_widget(self.image)
 
-		self.scroller = ItemScroller(size_hint_y=(None,None))
-		self.layout = ShowStack(linked_content=self.linked_content, size_hint_x=None, rows=1, spacing=10)
+		self.scroller = ItemScroller(size_hint=(None,None))
+		self.layout = ShowStack(linked_content=self.linked_content,
+								rows=1, spacing=10, size_hint_x=None)
 		self.scroller.add_widget(self.layout)
 		self.add_widget(self.scroller)
 
@@ -876,7 +925,7 @@ class ShowViewScreen(Screen):
 		self.image.width = self.image.image_ratio*self.image.height
 		self.image.pos = (10,10) # 10 pixels from margins
 		self.scroller.pos = (self.image.width + 30,10)
-		self.scroller.size = (self.right-480, self.top-100)
+		self.scroller.size = (self.right-self.image.width-40, self.top-100)
 
 	def on_enter(self):
 		'''Called when entering'''

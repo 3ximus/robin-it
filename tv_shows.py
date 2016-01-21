@@ -16,16 +16,16 @@ import os
 IMDB_TITLE = "http://www.imdb.com/title/"
 CACHE = "cache/"
 
-'''Main Error Class'''
 class TVError(Exception):
+	'''Main Error Class'''
 	pass
 
-'''Unknown tv show error'''
 class UnknownTVError(TVError):
+	'''Unknown tv show error'''
 	pass
 
-'''Unhandled error'''
 class UnhandledTVError(TVError):
+	'''Unhandled error'''
 	pass
 
 '''
@@ -176,7 +176,7 @@ class Show:
 
 	def get_unwatched_episodes(self):
 		'''Returns unwatched episodes
-		
+
 		Return format:
 			{season_id:[ep1, ep2, ...], season_id:[...] ...}'''
 		seasons = {}
@@ -266,6 +266,16 @@ class Season():
 		if cont == len(self.episodes): self.watched = True
 		self.tv_show.update_watched() # call update on tv show
 
+	def get_status(self):
+		'''Returns the status this show has, in repect to the user'''
+		if self.watched:
+			if self.tv_show.status == 'Ended':
+				return "completed"
+			elif self.tv_show.status == 'Continuing':
+				return "watched"
+		else: return "unwatched"
+# TODO handle episode air date
+
 '''
 Class defining a Season Episode
 Its self updatable with method update_info updating episode information
@@ -328,6 +338,18 @@ class Episode:
 	def update_watched(self):
 		# call update on the belonging season
 		self.tv_show.seasons[s_id].update_watched()
+
+	def get_status(self):
+		'''Returns the status this show has, in repect to the user'''
+		if self.watched:
+			if self.tv_show.status == 'Ended':
+				return "completed"
+			elif self.tv_show.status == 'Continuing':
+				return "watched"
+		else: return "unwatched"
+# TODO handle episode air date
+
+# ------------------------------------------------------
 
 ''' Example Run '''
 if __name__ == '__main__':
