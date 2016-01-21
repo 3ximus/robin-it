@@ -170,11 +170,15 @@
 		pos: root.right - 160, root.top - 70
 
 <ShowViewScreen>:
-	ThemeButton:
+	Button:
 		text: 'Back'
+		background_normal: ''
+		background_disabled_down: ''
+		background_color: green_color
+		font_name: font
 		font_size: 50
 		on_release:
-			root.manager.transition.direction = 'down'
+			root.manager.transition.direction = 'right'
 			root.manager.current = 'all_shows_screen'
 		size_hint: None, None
 		width: 160
@@ -182,8 +186,12 @@
 		pos: 10, root.top - 70
 
 <EpisodeViewScreen>:
-	ThemeButton:
+	Button:
 		text: 'Back'
+		background_normal: ''
+		background_disabled_down: ''
+		background_color: green_color
+		font_name: font
 		font_size: 50
 		on_release:
 			root.manager.transition.direction = 'right'

@@ -16,6 +16,7 @@ from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.stacklayout import StackLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.screenmanager import Screen, ScreenManager, \
 									SlideTransition, ScreenManagerException
@@ -38,7 +39,7 @@ from kivy.properties import ListProperty, \
 # ------- OTHER IMPORTS ----------
 from random import randint
 from math import sin
-from functools import partial
+#from functools import partial
 import os, sys
 # ------- USER API ----------
 from robinit_api import UserContent
@@ -53,13 +54,22 @@ theme_colors = [[0.2, 0.8, 0.2, 1], # green
 				[0.78, 0.9, 0.21], # yellowish green
 				[0.11, 0.95, 0.55]] # greenish blue
 
-# default font
+# default value for colors, these wont suffer changes during the program execution
+# and will often reset the theme_colors variable
+default_theme_colors = [[0.2, 0.8, 0.2, 1], # green
+				[0.98, 0.97, 0.08], # yellow
+				[0.78, 0.9, 0.21], # yellowish green
+				[0.11, 0.95, 0.55]] # greenish blue
+
+# default font -- if changed some text portions may not display correctly
+# known issues on: shows descriptions on view_show_screen
 theme_font = 'gui_style/fonts/VertigoFLF.ttf'
 
 # --- USER STATE ----
 User_State = None
 USER_STATE_DIR = "user/"
 USER_STATE_FILE = ''
+CACHE_DIR = "cache/"
 
 # --- BACK LIGHTS GLOBALS ---
 L_MAX_OPACITY = 0.5 # max backlights opacity
@@ -81,6 +91,11 @@ SM_BUTTON_HEIGHT = 60 # buttons height
 SM_TEXT_SIZE = 30 # size of text on the buttons
 SM_HEIGHT = 10 # distance from bottom of the screen
 SM_MOVEMENT_TIME = 0.2 # time of raise / lower animation
+
+# --- SHOW VIEW GLOBALS ---
+SV_TEXT_SIZE = 25
+SV_TEXT_WIDTH = 300
+SV_TEXT_SPACING = 10
 
 # ------------------------------------
 #               BOXES
@@ -137,13 +152,12 @@ class BackLight(Widget):
 	image = StringProperty('') # image source
 	l_color = ListProperty([1, 1, 1]) # color
 	frequency = 1 # rate that opacity changes
-	color_gradient = (0,1) # color gradient between 2 colors of the theme_colors list
+	color_gradient = (theme_colors[0],theme_colors[1]) # color gradient between 2 colors of the theme_colors list
 
 	def __init__(self, image, color, **kwargs):
 		super(BackLight, self).__init__(**kwargs)
 		self.image = image
 		self.l_color = color
-		self.opacity = 0
 		Clock.schedule_interval(self.update, 1/10) # update background, 30 fps
 		Clock.schedule_interval(self.re_slope, L_OPACITY_RESLOPE) # every 4 seconds change the frequency
 		self.re_slope(0) # initial re_slope for randomness
@@ -164,9 +178,9 @@ class BackLight(Widget):
 		percentage = elapsed_time/L_COLOR_CHANGE_TIME
 		# calculate color mismatch (RGB) multiply by percentage and add base color
 		for i in range(3): # for r, g and b
-			self.l_color[i] = theme_colors[self.color_gradient[0]][i] + ( \
-					theme_colors[self.color_gradient[1]][i] \
-					- theme_colors[self.color_gradient[0]][i]) * percentage
+			self.l_color[i] = self.color_gradient[0][i] + ( \
+					self.color_gradient[1][i] \
+					- self.color_gradient[0][i]) * percentage
 		# reached target color, regradient
 		if percentage >= 1:
 			self.re_gradient()
@@ -175,14 +189,14 @@ class BackLight(Widget):
 		'''Calculate new gradient'''
 		new_color = self.color_gradient[1]
 		while new_color == self.color_gradient[1]: # force diferent color
-			new_color = randint(0,len(theme_colors)-1)
+			new_color = theme_colors[randint(0,len(theme_colors)-1)]
 		self.color_gradient = (self.color_gradient[1], new_color)
 		self._prev_color_time = self._timer_c
 
 	def re_slope(self, dt):
 		'''Calculate a new random frequency for opacity function'''
 		prev_frequency = self.frequency
-		self.frequency = randint(10,20) * 0.01
+		self.frequency = randint(10,20) * 0.025
 		# create horizontal translation on sin function so that opacity
 		# matches on both frequencies, making a seamless transition
 		# formula -- c2 = (f1 - f2)x + c1
@@ -521,16 +535,11 @@ class ShowPosterContainer(PosterContainer):
 		# count unwatched
 		total_unwatched = sum([len(e) for e in self.linked_content.get_unwatched_episodes().values()])
 		self.unwatched_count = Label(text='Episodes to watch: %d' % total_unwatched,
-							font_name=theme_font,
-							font_size=P_TEXT_SIZE)
+							font_name=theme_font, font_size=P_TEXT_SIZE)
 		self.rating = Label(text='Rating: [color=ffbf00]%s[/color]' % self.linked_content.rating,
-							markup=True,
-							font_name=theme_font,
-							font_size=P_TEXT_SIZE)
+							markup=True, font_name=theme_font, font_size=P_TEXT_SIZE)
 		self.imdb = Label(text='[ref=imdb][color=00bfff]IMDB[/color][/ref]',
-							markup=True,
-							font_name=theme_font,
-							font_size=P_TEXT_SIZE)
+							markup=True, font_name=theme_font, font_size=P_TEXT_SIZE)
 		self.imdb.bind(on_ref_press=self.open_imdb_link)
 
 	def open_imdb_link(self, instance, value):
@@ -544,9 +553,9 @@ class ItemScroller(ScrollView):
 	'''Container for scrollable Layouts'''
 	pass
 
-class ScrollableGrid(GridLayout):
+class VerticalScrollableGrid(GridLayout):
 	def __init__(self, **kwargs):
-		super(ScrollableGrid, self).__init__(**kwargs)
+		super(VerticalScrollableGrid, self).__init__(**kwargs)
 		# Make sure the height is such that there is something to scroll.
 		self.bind(minimum_height=self.setter('height'))
 		event_manager.bind(on_state_update=self.handle_state_update)
@@ -555,7 +564,7 @@ class ScrollableGrid(GridLayout):
 		'''Called when update GUI event is triggered'''
 		pass
 
-class AllShowsGrid(ScrollableGrid):
+class AllShowsGrid(VerticalScrollableGrid):
 	def handle_state_update(self, *args):
 		'''Update Grid Content with all shows'''
 		self.clear_widgets()
@@ -578,7 +587,7 @@ class AllShowsGrid(ScrollableGrid):
 		elif self.right < 1560: self.cols = 3
 		else: self.cols = 4
 
-class ShowsToWatchGrid(ScrollableGrid):
+class ShowsToWatchGrid(VerticalScrollableGrid):
 	def handle_state_update(self, *args):
 		'''Update Grid Content with all shows'''
 		self.clear_widgets()
@@ -763,12 +772,83 @@ class AllShowsScreen(Screen):
 		'''Create new view show screen with'''
 		screen = ShowViewScreen(name='view_show', linked_content=show, prev_screen=self.name)
 		self.manager.add_widget(screen)
-		self.manager.transition.direction = 'up'
+		self.manager.transition.direction = 'left'
 		self.manager.current = 'view_show'
+
+
+class InfoBox(GridLayout):
+	linked_content = ObjectProperty(None)
+	def __init__(self, linked_content, **kwargs):
+		super(InfoBox, self).__init__(**kwargs)
+		self.bind(minimum_height=self.setter('height'))
+		self.linked_content = linked_content
+		self.build_me()
+		self.display_me()
+
+	def build_me(self):
+		# get some values
+		_total_unwatched = sum([len(e) for e in self.linked_content.get_unwatched_episodes().values()])
+		_genre = ''.join(self.linked_content.genre.split('|'))
+		# calculate estimated number of lines -- NOTE heavily dependant of font used
+		_description_lines = len(self.linked_content.description) / 38 # 35 is the average #char_per_line -- biased value
+		# build widgets
+		self.unwatched_count = Label(text='Episodes to watch: %d' % _total_unwatched,
+							font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.rating = Label(text='Rating: [color=ffbf00]%s[/color]'%self.linked_content.rating,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.imdb = Label(text='[ref=imdb][color=00bfff]IMDB[/color][/ref]',
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.genre = Label(text='Genre: %s' % _genre,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.runtime = Label(text='Run Time: %s min' % self.linked_content.runtime,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.network = Label(text='Network: %s' % self.linked_content.network,
+							markup=True, font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height=SV_TEXT_SIZE)
+		self.description = Label(text='Description: %s' % self.linked_content.description,
+							text_size=(SV_TEXT_WIDTH,None), halign='center',
+							font_name=theme_font, font_size=SV_TEXT_SIZE,
+							size_hint_y=None, height = _description_lines * (SV_TEXT_SIZE + 3)) # 3 for space between lines
+
+	def display_me(self):
+		'''Add all built widgets'''
+		self.add_widget(self.unwatched_count)
+		self.add_widget(self.rating)
+		self.add_widget(self.imdb)
+		self.add_widget(self.genre)
+		self.add_widget(self.runtime)
+		self.add_widget(self.network)
+		self.imdb.bind(on_ref_press=self.open_imdb_link)
+		self.add_widget(self.description)
+
+	def open_imdb_link(self, instance, value):
+		'''Open IMDB link'''
+		webbrowser.open(self.linked_content.imdb_id)
+
+class ShowStack(GridLayout):
+	linked_content = ObjectProperty(None)
+	def __init__(self, linked_content, **kwargs):
+		super(ShowStack, self).__init__(**kwargs)
+		# Make sure the height is such that there is something to scroll.
+		self.bind(minimum_width=self.setter('width'))
+		self.linked_content = linked_content
+		# build widgets
+		self.info_container=ItemScroller(size_hint_x=None, width=SV_TEXT_WIDTH)
+		self.layout=InfoBox(linked_content=self.linked_content,
+						cols=1, spacing=SV_TEXT_SPACING, size_hint_y=None)
+		# add widgets to display
+		self.info_container.add_widget(self.layout)
+		self.add_widget(self.info_container)
 
 class ShowViewScreen(Screen):
 	linked_content = ObjectProperty(None)
 	prev_screen = StringProperty('')
+	button_color = theme_colors[0]
 
 	def __init__(self, linked_content, prev_screen, **kwargs):
 		super(ShowViewScreen, self).__init__(**kwargs)
@@ -776,14 +856,31 @@ class ShowViewScreen(Screen):
 		self.prev_screeen = prev_screen
 		self.show_title = ThemeTitle(text=self.linked_content.name)
 		self.add_widget(self.show_title)
+		# main poster
+		self.image = ImagePoster(source=self.linked_content.poster, size_hint=(None, None))
+		self.add_widget(self.image)
+
+		self.scroller = ItemScroller(size_hint_y=(None,None))
+		self.layout = ShowStack(linked_content=self.linked_content, size_hint_x=None, rows=1, spacing=10)
+		self.scroller.add_widget(self.layout)
+		self.add_widget(self.scroller)
 
 	def on_size(self, *args):
 		'''Called on each resize'''
+		self.update_structure()
+
+	def update_structure(self):
+		'''Update position and size of items on screen'''
 		self.show_title.pos = (self.center_x, self.top - 90)
+		self.image.height = self.top - 100
+		self.image.width = self.image.image_ratio*self.image.height
+		self.image.pos = (10,10) # 10 pixels from margins
+		self.scroller.pos = (self.image.width + 30,10)
+		self.scroller.size = (self.right-480, self.top-100)
 
 	def on_enter(self):
 		'''Called when entering'''
-		self.show_title.pos = (self.center_x, self.top - 90)
+		self.update_structure()
 
 class EpisodeViewScreen(Screen):
 	linked_content = ObjectProperty(None)
