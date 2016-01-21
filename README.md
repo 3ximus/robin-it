@@ -25,7 +25,7 @@ Searches thetvdb.com and gathers TV show information
 
 - Follow example usage at the end of the api
 
-##RobinIt API - User Information and Contnet (latest v1.3)##
+##RobinIt API - User Information and Content (latest v1.3)##
 
 Stores user information such as following shows and movies (movies not added as of v1.3)
 It can be made persistent saving its state to a file and loading it back (loading and saving must be called manually anytime you want the action to take place)
@@ -41,6 +41,20 @@ It is not possible with this CLI to set the watched states os episodes/season/sh
 - Type username, if save file exists it will try to load it ( default location at ./user/ directory )
 - Follow menu interaction and try not to blow it up
 
+
+##Instalation
+
+Right now the only way to use this is by running the python source code, in the future it will be independant
+but now it needs all the dependencies.
+The main ones are listend in the requirements.txt, and can be installed through `pip install -r requirements.txt`
+Some additional ones are needed [ python-lxml, python-pygame] and can be installed through your distribution package manager:
+	ex:
+	. apt-get install python-pygame python-lxml
+or through their website:
+	. pygame: "http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame"
+		- may also need SLD2 libraries: "https://www.libsdl.org/projects/SDL_ttf/"
+	. lxml: "http://lxml.de/installation.html"
+
 ---------------------
 
 *General Changelog*:
@@ -50,7 +64,7 @@ It is not possible with this CLI to set the watched states os episodes/season/sh
 - Tv Show tracking system system
 - *API* Persistent User Status
 - *API* Watched / unwatched states for tv shows
-- *API* Possible to generate a tv show header build if needed for less cluttering or faster loads (only contain basic info and nothing about seasons/episodes) 
+- *API* Possible to generate a tv show header build if needed for less cluttering or faster loads (only contain basic info and nothing about seasons/episodes)
 
 **v1.2**: (Info Display)
 
