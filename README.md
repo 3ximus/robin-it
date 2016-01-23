@@ -147,4 +147,5 @@ Benchmark Page parsers
 
 - Description on the 'show_view_screen' overlaps other text -- cant figure out how to calculate its height correctly
 - Before resizing some items have selection boxes with incorrect sizes. Same hapens with sliding menu -- update not done when image loads (done on_size or on_enter)
+	. May be able to trigger auto resize when image finishes loading with an event
 

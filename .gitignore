@@ -1,10 +1,6 @@
-*.pyc
 *.swp
 *.pyc
 *.vim
 cache/*
-kivy_lab/*
 storage/*
 user/*
-robinit/*
-benchmarks_dir/outjunk/*
