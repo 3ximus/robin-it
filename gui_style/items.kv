@@ -1,0 +1,153 @@
+#:kivy 1.8.0
+
+#:set font 'gui_style/fonts/VertigoFLF.ttf'
+#:set title_font 'gui_style/fonts/GatsbyFLF-Bold.ttf'
+
+## --- other options ---
+#:set tech_font 'gui_style/fonts/Park Tech CG.ttf'
+#:set Ltech_font 'gui_style/fonts/Park Tech CG Light.ttf'
+
+#:set green_color 0.4, 0.8, 0.2, 1
+#:set yellow_color 0.98, 0.97, 0.08, 1
+#:set red_color 0.98, 0.2, 0.2, 1
+#:set grey_color 0.5, 0.5, 0.5, 1
+
+# -------------------
+#    BACKGROUND
+# -------------------
+
+<BackLight>:
+	opacity: self.opacity
+	canvas:
+		Color:
+			rgb: self.l_color
+		Rectangle:
+			source: self.image
+			size: self.size
+
+<Background>:
+	canvas:
+		Color:
+			rgb: 0.25, 0.25, 0.25
+		Rectangle:
+			size: self.size
+
+# --------------------
+# SCROOLLERS AND GRIDS
+# --------------------
+<ItemScroller>:
+	bar_color: green_color
+
+# ----------------------
+#        IMAGES
+# ----------------------
+<ImageBanner>:
+
+<ImagePoster>:
+
+<EpisodeImage>:
+	size_hint_x: None
+	width: 300
+
+# ----------------------
+#       THEME
+# ----------------------
+<ThemeTitle>:
+	font_name: title_font
+	font_size: 70
+	size_hint: None, None
+	height: 80
+	pos: self.pos
+
+<ThemeCounter>:
+	text: '0'
+	font_name: title_font
+	font_size: 20
+	size_hint: None, None
+	height: 20
+	width: 30
+	pos: self.pos
+
+<CounterHightlight>:
+	size_hint: None, None
+	height: 20
+	width: 30
+	canvas:
+		Color:
+			rgb: green_color
+		Rectangle:
+			size: self.size
+			pos: self.pos
+
+<ThemeButton>:
+	background_normal: ''
+	background_disabled_down: ''
+	background_color: green_color
+	font_name: font
+
+<MainMenuButton@ThemeButton>:
+	width: 170
+	height: 90
+	font_size: 60
+	size_hint: None, None
+
+<SelectionBox>:
+	canvas:
+		Color:
+			rgb: green_color
+		Line:
+			rectangle: self.x+1,self.y+1,self.width-2,self.height-2
+			width: 2
+<MarkWatchedBox>:
+	canvas:
+		Color:
+			rgb: green_color
+		Triangle:
+			points: self.x, self.y, self.x, self.y+25, self.x+25, self.y
+<MarkUnwatchedBox>:
+	canvas:
+		Color:
+			rgb: red_color
+		Triangle:
+			points: self.x, self.y, self.x, self.y+25, self.x+25, self.y
+<MarkCompletedBox>:
+	canvas:
+		Color:
+			rgb: grey_color
+		Triangle:
+			points: self.x, self.y, self.x, self.y+25, self.x+25, self.y
+<MarkPendingBox>:
+	canvas:
+		Color:
+			rgb: yellow_color
+		Triangle:
+			points: self.x, self.y, self.x, self.y+25, self.x+25, self.y
+
+<ThemeHighlight>:
+	size_hint: None, None
+	canvas:
+		Color:
+			rgb: green_color
+		Rectangle:
+			size: self.size
+			pos: self.pos
+
+# ----------------------
+#       POPUP
+# ----------------------
+<UsernamePopup>:
+	title: 'Insert Username'
+	title_font: title_font
+	title_size: 30
+	separator_color: green_color
+	size_hint: None, None
+	size: 200, 200
+
+<PopupShade>:
+	canvas:
+		Color:
+			rgb: 0, 0, 0
+		Rectangle:
+			size: self.size
+	opacity: 0.8
+
