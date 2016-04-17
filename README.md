@@ -38,7 +38,6 @@ After building the compiled executable should be in the build directory under `r
 
 - Searches for available tv shows torrents at given a show name, quality (optional), season and episodes (optional) (Only Working for Kickass Torrents)
 
-
 --------------------------------
 
 ##[Known Bugs](https://github.com/3ximus/robin-it-console/labels/bug)
