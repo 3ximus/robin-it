@@ -51,9 +51,7 @@ ex:
 
 	. apt-get install python-lxml
 
-or through their website:
-
-	. lxml: "http://lxml.de/installation.html"
+or through their website -> [lxml](http://lxml.de/installation.html)
 
 ###TODO###
 
@@ -70,5 +68,3 @@ or through their website:
 --------------------------------
 
 ##Known Bugs##
-
-
