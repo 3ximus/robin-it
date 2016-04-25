@@ -28,26 +28,25 @@ class UnhandledTVError(TVError):
 	'''Unhandled error'''
 	pass
 
-'''
-Class Containing Show information
-This class is self updated, once the method update_info is called it updates itself
-Tv database is cached to its default location of CACHE
-'''
 class Show:
+	'''Class Containing Show information
 
+	This class is self updated, once the method update_info is called it updates itself
+	Tv database is cached to its default location of CACHE
 	'''
-	Class constructor
-	This show will containg the first match in the database based on the name given
-	The console flag should be set to True when running on console mode,
-		it is used to prompt the user to choose between one of the available search results
-	The graphical flag overrides the console flag and it stops the TV show generation,
-		the search_results are stored in self.search_results and should be acessed
-		to make the result decision. After that the method build_with_result(int) should be called
-		to complete the build process.
-	The header only flag only builds the class with Show information and doesn't retrieve seasons
-		and episodes info
-	'''
+
 	def __init__(self, name, console = True, graphical = False, header_only = False):
+		'''Class constructor
+
+		The console flag should be set to True when running on console mode,
+			it is used to prompt the user to choose between one of the available search results
+		The graphical flag overrides the console flag and it stops the TV show generation,
+			the search_results are stored in self.search_results and should be acessed
+			to make the result decision. After that the method build_with_result(int) should be called
+			to complete the build process.
+		The header only flag only builds the class with Show information and doesn't retrieve seasons
+			and episodes info
+		'''
 
 		# define class atributes
 		self.name = '' # tv show name
@@ -82,16 +81,13 @@ class Show:
 				except ValueError: raise ValueError("Invalid Option")
 			else: raise UnhandledTVError("Multiple search results unhandled")
 
-	'''Print this class information'''
 	def to_string(self):
+		'''Print this class information'''
 		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %sBanner: %s\nIMDB Link: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.banner, self.imdb_id)
 		print "Description: %s" % self.description.encode('utf-8')
 
-	'''
-	This handles multiple results in the console
-		build_with_result method directly
-	'''
 	def _handle_console_results(self, header_only = False):
+		'''This handles multiple results in the console'''
 		print "Multiple Results found when building, select one:"
 		for i, result in enumerate(self.search_results):
 			print "%i. %s" % (i, result['seriesname'])
@@ -101,24 +97,24 @@ class Show:
 			if choice < 0 or choice >= len(self.search_results): raise ValueError("Invalid option")
 		self.build_with_result(choice, header_only = header_only) # use choise to build content
 
-	'''
-	This function builds class with a given self.search_results index
-	Its intended is is to be called by a graphical interface after it checks the
-		self.search_results and prompts the user if multiple ones are found and builds with the
-		selected option
-	'''
 	def build_with_result(self, option, header_only = False):
+		'''This function builds class with a given self.search_results index
+
+		Its intended this is to be called by a graphical interface after it checks the
+			self.search_results and prompts the user if multiple ones are found and builds with the
+			selected option
+		'''
 		if option < 0 or option >= len(self.search_results): raise ValueError("Invalid option when generating class")
 		self.name = self.search_results[option]['seriesname']
 		self.update_info(header_only = header_only) # generate content
 
-	'''
-	Searches thetvdb.com and generates class attributes
-	This method function is responsible for building the entire data structure of a TV Show
-	If cache is False, update from the database is forced
-	It is mandatory that self.name is set otherwise build will fail
-	'''
 	def update_info(self, cache = CACHE, header_only = False):
+		'''Searches thetvdb.com and generates class attributes
+
+		This method function is responsible for building the entire data structure of a TV Show
+		If cache is False, update from the database is forced
+		It is mandatory that self.name is set otherwise build will fail
+		'''
 		if self.name == '': # error check
 			raise UnknownTVError("TV Show name not set, build class correctly")
 
@@ -148,17 +144,17 @@ class Show:
 		imdb_id = database[self.name]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 
-	''' Toogle the watched state '''
 	def toogle_watched(self):
+		''' Toogle the watched state '''
 		self.watched = not self.watched # toogle watched
 		for season in self.seasons: # replicate action to every season
 			season.set_watched(self.watched)
 
-	'''
-	Update watched on the entire tv show
-	Propagates decisions to entire show tree
-	'''
 	def update_watched(self):
+		'''Update watched on the entire tv show
+
+		Propagates decisions to entire show tree
+		'''
 		seasons_watched = 0
 		for season in self.seasons: # for every season on this show
 			if season.watched: seasons_watched += 1
@@ -178,7 +174,8 @@ class Show:
 		'''Returns unwatched episodes
 
 		Return format:
-			{season_id:[ep1, ep2, ...], season_id:[...] ...}'''
+			{season_id:[ep1, ep2, ...], season_id:[...] ...}
+		'''
 		seasons = {}
 		for season in self.seasons:
 			episode_list = []
@@ -188,18 +185,18 @@ class Show:
 				seasons.update({str(season.s_id):episode_list})
 		return seasons
 
-'''
-Class defining a TV Show Season
-Its self updatable with method update_info, this updates every episode information
-Update function generates cache on CACHE directory by default
-'''
 class Season():
+	'''Class defining a TV Show Season
 
+	Its self updatable with method update_info, this updates every episode information
+	Update function generates cache on CACHE directory by default
 	'''
-	Cosntructor method
-	Muste receive a season id number and a tv_show from where this season belongs to
-	'''
+
 	def __init__(self, s_id, tv_show):
+		'''Constructor method
+
+		Must receive a season id number and a tv_show from where this season belongs to
+		'''
 		self.s_id = s_id # 1 based
 		self.episodes = []
 		self.poster = [] # list of season poster
@@ -209,17 +206,17 @@ class Season():
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.update_info()
 
-	'''Print this class information'''
 	def to_string(self):
+		'''Print this class information'''
 		return_string = ''
 		for episode in self.episodes: return_string += "%s - %s\n" % (episode.episode_number, episode.name)
 		print return_string
 
-	'''
-	Searches thetvdb.com and updates all episodes it contains
-	If cache is False, update from the database is forced
-	'''
 	def update_info(self, cache = CACHE):
+		'''Searches thetvdb.com and updates all episodes it contains
+
+		If cache is False, update from the database is forced
+		'''
 		# update posters
 		database = Tvdb(cache = cache, banners = True)
 		try: posters = database[self.tv_show.name]['_banners']['season']
@@ -246,20 +243,20 @@ class Season():
 			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show)
 			self.episodes.append(new_episode)
 
-	''' Toogle the watched state '''
 	def toogle_watched(self):
+		''' Toogle the watched state '''
 		self.set_watched(not self.watched)
 		self.update_watched() # after setting the value call update_watched to propagate change
 
-	''' Set the watched state '''
 	def set_watched(self, value):
+		''' Set the watched state '''
 		self.watched = value
 		for episode in self.episodes:
 			episode.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
 
-	''' Update watched state according to its content'''
 	def update_watched(self):
+		''' Update watched state according to its content'''
 		cont = 0
 		for episode in self.episodes: # for every episode on this season
 			if episode.watched: cont += 1
@@ -276,18 +273,18 @@ class Season():
 		else: return "unwatched"
 # TODO handle episode air date
 
-'''
-Class defining a Season Episode
-Its self updatable with method update_info updating episode information
-Update function generates cache on CACHE directory by default
-'''
 class Episode:
+	'''Class defining a Season Episode
 
+	Its self updatable with method update_info updating episode information
+	Update function generates cache on CACHE directory by default
 	'''
-	Constructor method
-	Muste receive an episode id numeber, a season id number and a tv_show from where this episode belongs to
-	'''
+
 	def __init__(self, e_id, s_id, tv_show):
+		'''Constructor method
+
+		Must receive an episode id numeber, a season id number and a tv_show from where this episode belongs to
+		'''
 		self.e_id = e_id
 		self.s_id = s_id
 		self.name = ''
@@ -305,12 +302,16 @@ class Episode:
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.update_info()
 
-	'''Print this class information'''
 	def to_string(self):
+		'''Print this class information'''
 		print "\t Episode info:\nName: %s\nSeason: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s" % (self.name, self.season, self.episode_number, self.director, self.writer, self.rating, self.image, self.airdate, self.imdb_id)
 		print "Description: %s" % self.description.encode('utf-8') # fix encoding
 
 	def update_info(self, cache = CACHE):
+		'''Searches thetvdb.com and updates all episodes it contains
+
+		If cache is False, update from the database is forced
+		'''
 		database = Tvdb(cache = cache)
 		self.name = database[self.tv_show.name][self.s_id][self.e_id]['episodename']
 		self.description = database[self.tv_show.name][self.s_id][self.e_id]['overview']
@@ -324,18 +325,18 @@ class Episode:
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 		self.airdate = database[self.tv_show.name][self.s_id][self.e_id]['firstaired']
 
-	''' Toogle the watched state '''
 	def toogle_watched(self):
+		''' Toogle the watched state '''
 		self.set_watched(not self.watched)
 		self.update_watched() # after setting the value call update_watched to propagate change
 
-	''' Set the watched state '''
 	def set_watched(Self):
+		''' Set the watched state '''
 		self.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
 
-	''' Update watched state according to its content'''
 	def update_watched(self):
+		''' Update watched state according to its content'''
 		# call update on the belonging season
 		self.tv_show.seasons[s_id].update_watched()
 
@@ -351,8 +352,8 @@ class Episode:
 
 # ------------------------------------------------------
 
-''' Example Run '''
 if __name__ == '__main__':
+	'''Sample Run'''
 	name = raw_input('Select a show: ')
 	s = Show(name, console = True)
 	s.to_string() # print show info
