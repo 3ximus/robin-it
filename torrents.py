@@ -24,13 +24,13 @@ TRUSTED_FORMAT = 'web-dl|hdtv|eztv|ettv|'
 TRUSTED_FORMAT += TRUSTED_FORMAT.upper()
 ERROR_MSG = "[\033[1;31mERROR\033[0m]"
 
-'''
-Parse Page Links
-Mandatory attributes and methods for received parser are: 'feed(self, content)', 'close(self)' and 'parsed'
-Optional method 'reset()' is also called if available
-The feed method should return the content or store it in a class attribute named 'parsed'
-'''
-def parse_page_links(html_page, parser=parserlib.BS4):
+def parse_page_links(html_page, parser=parserlib.Torrent_BS4):
+	'''Parse Page Links
+
+	Mandatory attributes and methods for received parser are: 'feed(self, content)', 'close(self)' and 'parsed'
+	Optional method 'reset()' is also called if available
+	The feed method should return the content or store it in a class attribute named 'parsed'
+	'''
 	if not parser: raise ValueError("No parser specified")
 	parsed = parser.feed(html_page, parse_for = 'torrent', host = KICKASS) #  choose feed parameters to get expected results from parser
 	parser.close()
@@ -39,22 +39,23 @@ def parse_page_links(html_page, parser=parserlib.BS4):
 	except NameError: pass
 	return parsed # return list of Torrent instances
 
-'''
-Search
-Searches the given search_term with a given parser for links to other web pages or magnets.
-Gives a Trust flag to torrents
-'''
-def search(main_url, search_term, parser=parserlib.BS4(), page = 1, order_results = 'seeds'):
+def search(main_url, search_term, parser=parserlib.Torrent_BS4(), page = 1, order_results = 'seeds'):
+	'''Searches the given search_term with a given parser for links to other web pages or magnets.
+
+	Parameters:
+		main_url -- url to use on search
+		search_term -- term to search for
+		parser -- parser of html document
+		page -- page number of search results
+		order_results -- order of results, values are : 'seeds' and 'age'
+	'''
 	url = utillib.build_search_url(main_url, search_term, page=page, order_results=order_results)
 	try: html = utillib.get_page_html(url)
 	except utillib.UtillibError: raise # re-raise the exception
 	return parse_page_links(html, parser) # return list of Torrent instances
 
-'''
-Present Results
-Receives a list with Torrent instances and outputs it in presentable form
-'''
 def present_results(torrent_list):
+	'''Receives a list with Torrent instances and outputs it in presentable form'''
 	bold = False
 	print ' #. Rat | Name \t\t\t\t\t\t\t| Size\t\t| Age\t\t| Seeds\t| Peers |'
 	for i, torrent in enumerate(torrent_list):
@@ -76,12 +77,11 @@ def present_results(torrent_list):
 				'\033[0m' if bold else '')
 		bold = not bold # toogle
 
-'''
-Download URL List
-Downloads all torrents passed as a list of Torrent instances
-Name parser is used to determine the names of the downloaded torrents
-'''
 def download_torrents(torrent_list, name_parser = False, location = './storage/'):
+	'''Downloads all torrents passed as a list of Torrent instances
+
+	Name parser is used to determine the names of the downloaded torrents
+	'''
 	if type(torrent_list) is not list: torrent_list = [torrent_list,] # convert to list
 	file_list = []
 	for torrent in torrent_list:
@@ -90,21 +90,19 @@ def download_torrents(torrent_list, name_parser = False, location = './storage/'
 		file_list.append(filename) # add the new downloaded filename to the file list
 	return file_list
 
-'''
-Get Magnets
-Get magnet links from a Torrent list
-Returns list with magnet links
-'''
 def get_magnets(torrent_list):
+	'''Get magnet links from a Torrent list
+
+	Returns list with magnet links
+	'''
 	magnets = []
 	for torrent in torrent_list:
 		magnets.append(torrent.magnet)
 	return magnets
 
-'''
-Test program
-'''
+
 if __name__ == '__main__':
+	'''Sample program'''
 	try: search_terms = sys.argv[1]
 	except IndexError: sys.exit("No search term given")
 	try: results = search(KICKASS, search_terms)

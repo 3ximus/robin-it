@@ -10,24 +10,23 @@ from bs4 import BeautifulSoup
 
 KICKASS = "http://kickass.unblocked.la/"
 
-'''
-Torrent data structure
-'''
 class Torrent():
-	'''
-	Note that all items in the constructor are strings
-	name : Contains the torrent Name
-	link : Contains the link to the torrent page
-	magnet : Manget link
-	tor_file : partial torrent file link
-				(must be preceded with 'https:' and appended with '.torrent' to be a usable link
-	seeds = Torrent seeds
-	peers = Torrent peers
-	age = Simple representation of torrent age (hours, days, months, years)
-	files = Number of files a torrent contains
-	host = torrent host page (defaults to kickass)
-	'''
+	'''Torrent data structure'''
+
 	def __init__(self, name = '', link = '', magnet = '', tor_file = '', seeds = '', peers = '', age = '', files = '', size = '', host = KICKASS):
+		'''Torrent data Constructor
+
+		Parameters:
+			name -- Contains the torrent Name
+			link -- Contains the link to the torrent page
+			magnet -- Manget link
+			tor_file -- partial torrent file link (must be preceded with 'https:' and appended with '.torrent' to be a usable link
+			seeds -- Torrent seeds
+			peers -- Torrent peers
+			age -- Simple representation of torrent age (hours, days, months, years)
+			files -- Number of files a torrent contains
+			host -- torrent host page (defaults to kickass)
+		'''
 		self.name = name
 		self.link = link
 		self.magnet = magnet
@@ -52,33 +51,33 @@ class Torrent():
 		print " ==== "
 
 
-'''
-Beautiful Soup 4 Custom parser
-Parser class derivation of BeautifulSoup4
-Returns a tuple with Torrent class instances
-'''
-class BS4():
+class Torrent_BS4():
+	'''Beautiful Soup 4 Custom parser
+
+	Parser class derivation of BeautifulSoup4
+	Returns a tuple with Torrent class instances
+	'''
 	def __init__(self):
 		self.parsed = []
 		self.btree = None # not an actual btree but a 'beautiful tree'
 
-	'''
-	Callable feed method
-	Receives the content to parse, or the open filedescriptor and how to parse it
-	'''
 	def feed(self, html, parse_for='torrent', host = KICKASS):
+		'''Callable feed method
+
+		Receives the content to parse, or the open filedescriptor and how to parse it
+		'''
 		self.btree = BeautifulSoup(html, "lxml") # parse the webpage with lxml parser
 		if parse_for == 'torrent': self._torrent_parsing(host = host) # TODO pass another host if needed
 		else: raise ValueError("Unknown parser option given")
 
-	''' Prepare for parsing according to host structure '''
 	def _torrent_parsing(self, host = None):
+		''' Prepare for parsing according to host structure '''
 		if not host: raise ValueError("No valid host was given")
 		elif host == KICKASS: self._torrent_parsing_kat() # host is kickass so call a function to handle it
 		else : raise ValueError("Unknown host given")
 
-	''' Parse acording to Kickass structure '''
 	def _torrent_parsing_kat(self):
+		''' Parse acording to Kickass structure '''
 		tm_pattern = re.compile('Download torrent file|Torrent magnet link') # torrent and magnets pattern
 		# looking at the html all the information about the torrent can be found as follows
 		# torrent_ids comes as a list of tuples being the first element the torrent name and the last its link
@@ -103,8 +102,12 @@ class BS4():
 			self.parsed.append(to_add)
 		return self.parsed
 
-	''' Reset class attributes '''
+	def _torrent_parsing_pirate_tv(self):
+		''' Parse acording to pirate tv structure '''
+		pass
+
 	def reset(self):
+		''' Reset class attributes '''
 		self.parsed = []
 		self.btree = None
 
