@@ -44,108 +44,32 @@ It is not possible with this CLI to set the watched states os episodes/season/sh
 
 ##Instalation
 
-Right now the only way to use this is by running the python source code, in the future it will be independant
-but now it needs all the dependencies.
-The main ones are listend in the requirements.txt, and can be installed through `pip install -r requirements.txt`
-Some additional ones are needed [ python-lxml, python-pygame] and can be installed through your distribution package manager:
+The main dependencies are listed in the requirements.txt, and can be installed through `pip install -r requirements.txt`
+
+You may also need python-lxml wich you can get through your package manager:
+
 	ex:
-	. apt-get install python-pygame python-lxml
+
+	. apt-get install python-lxml
+
 or through their website:
-	. pygame: "http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame"
-		- may also need SLD2 libraries: "https://www.libsdl.org/projects/SDL_ttf/"
+
 	. lxml: "http://lxml.de/installation.html"
-
----------------------
-
-*General Changelog*:
-
-**v1.3**: (Traking System)
-
-- Tv Show tracking system system
-- *API* Persistent User Status
-- *API* Watched / unwatched states for tv shows
-- *API* Possible to generate a tv show header build if needed for less cluttering or faster loads (only contain basic info and nothing about seasons/episodes)
-
-**v1.2**: (Info Display)
-
-- *API*: Get TV show info (DONE)
-
-**v1.1**: (Speed and Usability Upgrades)
-
-- New Search results console display
-- usage is similar to v1.0
-- *API*: Use beautiful soup parser to improve the content gathrered from the web page (DONE)
-- *API*: Implement custom parser (DISCONTINUED)
-- *API*: Remove the get download links and use the parse algorithm to retrive the magnets and torrent links (DONE)
-- *API*: Function `parse_page_links_2` to use with any parser. Also make it receive content instead of making it get the page (DONE)
-
-**v1.0**: (First Run)
-
-- Basic Search and Download functionality
-
-
-*Multiprocess Test version on another branch*
-
---------------------------------
-
-##Other tools##
-
-Search torrents
-
-List url from page
-
-Benchmark Page parsers
-
---------------------------------
-
-##FUTURE##
-
-**v1.4**: (Big Release)
-
-- Implement GUI
-
-**v1.6**: (Auto downloads)
-
-- Incorporate Traking with Search/Download engine
-
-**v1.6**: (Movies)
-
-- Add Movie info gathering
-
-**v1.7**: (Schedule/Wait-release System)
-
-- Add a movie schedule system to allow movie releases to be notified
-
-**v1.8**: (Major Release)
-
-- Incorporate movie schedule with download feature to download followed movie releases
-
-**v2.0**:
-
-- Custom tvdb_api gatherer
-- Multiple devices
-- Multiple device persistence
-
-**v3.0**
-
-- Add Games!
 
 ###TODO###
 
 - Maintain a version control over tv_shows.py classes in order to load correctly, same for user content ( possibly later add multiple ways to convert user saved data to current releases )
+
 - Add a torrent url and magnet to an episode / movie so that it gets saved
+
 - Get apikey for thetvdb API for the user (prompt user to register the website) - later implementation of this is to get a login screen that gets the apikey)
+
+- Use `https://pirateproxy.tv/` as a backup for when kickass is missing torrents
 
 *Notes* : Use Kickass API instead of parsing when/if available
 
 --------------------------------
 
-##Known Limitations##
-
---------------------------------
 ##Known Bugs##
 
-- Description on the 'show_view_screen' overlaps other text -- cant figure out how to calculate its height correctly
-- Before resizing some items have selection boxes with incorrect sizes. Same hapens with sliding menu -- update not done when image loads (done on_size or on_enter)
-	. May be able to trigger auto resize when image finishes loading with an event
 
