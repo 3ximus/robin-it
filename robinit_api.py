@@ -10,12 +10,12 @@ __version__ = '1.3'
 import cPickle
 import tv_shows
 
-'''
-User TV Shows Content Class
-This class contains all user content
-Contains list with following shows being Show instances
-'''
 class UserContent:
+	'''User TV Shows Content Class
+
+	This class contains all user content
+	Contains list with following shows being Show instances
+	'''
 
 	def __init__(self, uname = '', empty = False):
 		if not empty:
@@ -32,11 +32,11 @@ class UserContent:
 # 	          GENERIC METHODS
 # ==========================================
 
-	'''
-	Saves the current class state to a file
-	This method closes the file if given
-	'''
 	def save_state(self, path = None, fd = None):
+		'''Saves the current class state to a file
+
+		This method closes the file if given
+		'''
 		if path:
 			path = "%srobinit_%s_%s%s" % (path, __version__, self.user_name, '.pkl')
 			fd = open(path, 'wb')
@@ -44,11 +44,11 @@ class UserContent:
 		cPickle.dump(self.__dict__, fd, cPickle.HIGHEST_PROTOCOL)
 		fd.close()
 
-	'''
-	Loads the current class state from a file
-	This method closes the file if given
-	'''
 	def load_state(self, path = None, fd = None):
+		'''Loads the current class state from a file
+
+		This method closes the file if given
+		'''
 		if path:
 			path = "%srobinit_%s_%s%s" % (path, __version__, self.user_name, '.pkl')
 			fd = open(path, 'rb')
@@ -57,13 +57,13 @@ class UserContent:
 		fd.close()
 		self.__dict__.update(tmp_dict)
 
-	'''
-	Find a key in a dictionry using a partial name
-	Basicly search for the correct name
-	For multiple matches promp user to choose from found results
-	Returns correct key name
-	'''
 	def find_item(self, name, given_list):
+		'''Find a key in a dictionry using a partial name
+
+		Basicly search for the correct name
+		For multiple matches promp user to choose from found results
+		Returns correct key name
+		'''
 		matches = []
 		for name_key in given_list: # build match list
 			if name.lower() in name_key.lower(): matches.append(name_key)
@@ -80,15 +80,15 @@ class UserContent:
 					if choice < len(matches) and choice >= 0: return matches[choice]
 					else: print "Invalid Option"
 
-	'''
-	Force update
-	This is a generator function, so you to run it you must iterate over it, it will yieald the name of the show being update each time
-	The were paramater must be one of the following 'all', 'shows' or 'movies'
-	If name is not given the where parameter is used to update everything in that category,
-		if where is not given either everything will be updated by default
-	Note: this may take a long time because it updates all the information contained
-	'''
 	def force_update(self, name = None, where = 'all'):
+		'''Force update
+
+		This is a generator function, so you to run it you must iterate over it, it will yieald the name of the show being update each time
+		The were paramater must be one of the following 'all', 'shows' or 'movies'
+		If name is not given the where parameter is used to update everything in that category,
+			if where is not given either everything will be updated by default
+		Note: this may take a long time because it updates all the information contained
+		'''
 		if where == 'shows' or 'all':
 			if name: # if name was given
 				show = find_item(name, self.shows)
@@ -109,14 +109,14 @@ class UserContent:
 # 	             TV SHOWS
 # ==========================================
 
-	'''
-	Add TV SHOW to the follwed tvshows dictionary
-	The parameter verbose will cancel the UnknownTVError excpetion by just printing a message
-		to be able to catch it do not use verbose
-		verbose will also print a "Show added <show name> message.
-		Intended use for verbose is CLI
-	'''
 	def add_show(self, name, verbose = False):
+		'''Add TV SHOW to the follwed tvshows dictionary
+
+		The parameter verbose will cancel the UnknownTVError excpetion by just printing a message
+			to be able to catch it do not use verbose
+			verbose will also print a "Show added <show name> message.
+			Intended use for verbose is CLI
+		'''
 		try: new_show = tv_shows.Show(name, console = True)
 		except tv_shows.UnknownTVError:
 			if verbose:
@@ -126,25 +126,25 @@ class UserContent:
 		self.shows.update({new_show.name:new_show})
 		if verbose: print "\033[32mShow added:\033[0m %s" % new_show.name
 
-	'''
-	Remove show by name
-	Partial names wil result in displaying multiple results to choose from if conflicts occur
-	Intended use for verbose is CLI
-	'''
 	def remove_show(self, name, verbose = False):
+		'''Remove show by name
+
+		Partial names wil result in displaying multiple results to choose from if conflicts occur
+		Intended use for verbose is CLI
+		'''
 		show_to_delete = self.find_item(name, self.shows)
 		if show_to_delete: # didnt find show
 			del(self.shows[show_to_delete])
 			if verbose: print "\033[31mDeleted Show:\033[0m %s" % show_to_delete
 		else: print "No Show found"
 
-	'''
-	Toogles watched value
-	If an item with watch state is given name is ignored
-	If name is given only updates that name otherwise update every show being followed
-	This recursivly sets all seasons and episodes to watched/unwatched if its a show
-	'''
 	def toogle_watched_show(self, name = None, item = None):
+		'''Toogles watched value
+
+		If an item with watch state is given name is ignored
+		If name is given only updates that name otherwise update every show being followed
+		This recursivly sets all seasons and episodes to watched/unwatched if its a show
+		'''
 		if item:
 			try: item.toogle_watched() # if valid item
 			except AttributeError: raise ValueError("Invalid item passed to toogle_watched_show")
@@ -154,12 +154,12 @@ class UserContent:
 			else: print "No Show found"
 		else: raise ValueError("No parameters passed to toogle_watched_show")
 
-	'''
-	Forces show watched states to be updated
-	If name is given only updates that name otherwise update every show being followed
-	Note: This only updates TV Shows
-	'''
 	def update_watched_show(self, name = None):
+		'''Forces show watched states to be updated
+
+		If name is given only updates that name otherwise update every show being followed
+		Note: This only updates TV Shows
+		'''
 		if name:
 			show = find_item(name, self.shows)
 			if show: self.shows[show].update_watched()
@@ -167,14 +167,14 @@ class UserContent:
 		else:
 			for show in self.shows: self.shows[show].update_watched()
 
-	'''
-	Get all episodes unwatched
-	Returns a dictionary where keys are shows and the values are lists, these are lists
-		of pairs, being the first element the season id and the second a list with instances
-		of episode class:
-		{ <show_name> : { <season_id> : [ <episode>, <episode>, ... ] , ... }, ... }
-	'''
 	def unwatched_episodes(self):
+		'''Get all episodes unwatched
+
+		Returns a dictionary where keys are shows and the values are lists, these are lists
+			of pairs, being the first element the season id and the second a list with instances
+			of episode class:
+			{ <show_name> : { <season_id> : [ <episode>, <episode>, ... ] , ... }, ... }
+		'''
 		unwatched_dict = {}
 		for show in self.shows:
 			if self.shows[show].watched:
@@ -184,11 +184,11 @@ class UserContent:
 				unwatched_dict.update({show:seasons_dict})
 		return unwatched_dict
 
-	'''
-	Print following shows
-	Intended for CLI
-	'''
 	def shows_to_string(self):
+		'''Print following shows
+
+		Intended for CLI
+		'''
 		s = False
 		print "Following Shows:"
 		for key in [t for t in self.shows if not self.shows[t].watched]: # iterate over unwatched shows
@@ -213,11 +213,11 @@ class UserContent:
 	def remove_movie(self, name):
 		pass
 
-	'''
-	Print scheduled movies
-	Intended for CLI
-	'''
 	def movies_to_string(self):
+		'''Print scheduled movies
+
+		Intended for CLI
+		'''
 		s = False
 		print "Scheduled Movies:"
 		for key in [t for t in self.movies if not self.movies[t].watched]: # iterate over unwatched shows
