@@ -13,17 +13,19 @@ import re, os, sys
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 ERROR_MSG = "[\033[1;31mERROR\033[0m]"
 
-''' Custom Error class '''
 class UtillibError(Exception):
+	'''Custom Error class'''
 	pass
 
-'''
-Build Search URL
-Receives a string and the page URL to do the search and builds the search url for that page.
-Receives the order in wich you want the results to be returned, accepted values are 'seeds' and 'age'.
-Note: building search url uses a keyword 'usearch' wich may not work in most websites ( works for KICKASS )
-'''
 def build_search_url(main_url, search_term, page = 1, order_results = 'seeds'):
+	'''Build URL based on search arguments and other parameters
+
+	Parameters:
+		main_url -- main page to build urls from
+		search_term -- term to search for on that page
+		order_results -- order results, accepted values are 'seeds' and 'age'
+	Note: building search url uses a keyword 'usearch' wich may not work in most websites ( works for KICKASS )
+	'''
 
 	ORDER_SEEDS = "?field=seeders&sorder=desc"
 	ORDER_AGE = "?field=time_add&sorder=desc"
@@ -34,12 +36,8 @@ def build_search_url(main_url, search_term, page = 1, order_results = 'seeds'):
 	search_url = '%susearch/%s/%d/%s' % (main_url, urllib2.quote(search_term, safe=''), page, order_results)
 	return search_url
 
-'''
-Get Page HTML
-Returns the html index given a page url
-Throws UtillibError Exception when host is unknown
-'''
 def get_page_html(url):
+	'''Get html index of given page'''
 	request = urllib2.Request(url, headers=HEADER) # make a request for the html
 	try: page = urllib2.urlopen(request) # open the html file
 	except urllib2.URLError: raise UtillibError("%s Name or service Unknown: %s" % (ERROR_MSG, url))
@@ -47,15 +45,19 @@ def get_page_html(url):
 	page.close() # close the retrieved html
 	return content
 
-'''
-Parse names
-Given a string parses it to look nicer.
-If url is set to True it tries to grab only the file name.
-If remove useless its set to True it will try to remove useless names.
-The ignore string is a regex patern to ignore
-The force_show string is a regex pattern to not ignore and make uppercase
-'''
 def parse_name(name, url = False, remove_useless = False, tv_show = False, split_char = '.', capitalize = False, force_show = None, ignore = None):
+	'''Parse names into some desired format
+
+	Parameters:
+		name -- name to be parsed
+		url -- if True it tries to grab only the filename contained in it
+		tv_show -- if True it tries to look for patterns like s01e02
+		split_char -- char present in the string separating the various names
+		capitalize -- strings to capitalize
+		remove_useless -- if True tries to remove useless names
+		force_show -- regex pattern force existance, overrides ignore strings
+		ignore -- regex pattern to ignore, ignored if string is existent in force_show
+	'''
 	new_name = ''
 # known patterns
 	tv_show_pattern = 's[0-9]*e[0-9]*'
@@ -73,12 +75,16 @@ def parse_name(name, url = False, remove_useless = False, tv_show = False, split
 	return new_name[1:]
 
 
-'''
-Download File
-Download a file from a given URL holding the file.
-By default it saves the file in './cache' by another path can be specified.
-'''
 def download_file(url, fname, location = './cache/', name_parser = False, extension = ''):
+	'''Download file at the given url
+
+	Parameters:
+		url -- url holding the file
+		fname -- name given to the download file
+		location -- location to save the file. Defaults to ./cache/
+		name_parser -- function to parse filenames
+		extension -- extension given to the file
+	'''
 	if not os.path.exists(location): os.mkdir(location) # check for folder existence
 	if name_parser: fname = name_parser(fname) # use a name parser to generate a better filename
 	fname = '%s%s%s' % (location, fname, extension) # complete the filename with the full path
