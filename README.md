@@ -47,8 +47,7 @@ It is not possible with this CLI to set the watched states os episodes/season/sh
 The main dependencies are listed in the requirements.txt, and can be installed through `pip install -r requirements.txt`
 
 You may also need python-lxml wich you can get through your package manager:
-
-	ex:
+ex:
 
 	. apt-get install python-lxml
 
