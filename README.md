@@ -1,9 +1,9 @@
-#Web Crawler#
+#Robin It#
 ================================
 
 *Version 1.3*
 
-Python web crawler to automaticly search and gather web resources.
+Python web crawler and TV Shows tracker to automaticly search and gather torrents.
 
 --------------------------------
 
@@ -30,7 +30,7 @@ Searches thetvdb.com and gathers TV show information
 Stores user information such as following shows and movies (movies not added as of v1.3)
 It can be made persistent saving its state to a file and loading it back (loading and saving must be called manually anytime you want the action to take place)
 
-##RobinIt Console [CLI] - Track/Manage User Information and Contnet (latest v1.3)##
+##RobinIt Console [CLI] - Track/Manage User Information and Content (latest v1.3)##
 
 In this version its is possible to add and remove tv shows to following list, list them and checks wich episodes are unwatched
 It is not possible with this CLI to set the watched states os episodes/season/shows, it may be added in the future in the CLI version
@@ -50,6 +50,8 @@ You may also need python-lxml wich you can get through your package manager:
 ex:
 
 	. apt-get install python-lxml
+
+	. pacman -S python-lxml
 
 or through their website -> [lxml](http://lxml.de/installation.html)
 
