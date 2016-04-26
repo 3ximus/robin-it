@@ -13,16 +13,16 @@ from robinit_api import UserContent
 
 USER_STATE_DIR = "user/"
 
-'''
-Setup user class in first use
-Prompt user to add shows or movies to follow
-Class state is saved after everything is inserted
-'''
 def first_use(user_name):
+	'''Setup user class in first use
+
+	Prompt user to add shows to follow
+	Class state is saved after everything is inserted
+	'''
 	print "\t\033[3;33mSetting things up for first use...\033[0m"
 	if not os.path.exists(USER_STATE_DIR): os.mkdir(USER_STATE_DIR)
 	new_user_state = UserContent(user_name)
-# Promp user to start adding tv shows or movies
+# Promp user to start adding tv shows
 	while (1):
 		answer = raw_input("Add Movies or TVShows now? (y/n) ")
 		if answer == 'y': break
@@ -30,54 +30,39 @@ def first_use(user_name):
 		else: print "Please use \"y\" or \"n\"."
 	return user_interaction(new_user_state)
 
-'''
-Menu for User interaction
-'''
-def user_interaction(new_user_state):
+def user_interaction(user_state):
+	'''Menu for User interaction'''
 	while(1):
 		# Display Menu
 		print "\n\033[1;33;40mChoose an action:\033[0m"
-		print "| 1. Add Movies\t\t| 5. Remove Movie"
-		print "| 2. Add TV Shows\t| 6. Remove Show"
-		print "| 3. List Shows\t\t| 7. Show unwatched"
-		print "| 4. List Movies\t| 8. Save and Exit\n"
+		print "| 1. Add TV Shows\t| 4. Schedule Download"
+		print "| 2. List Shows\t\t| 5. Download Now"
+		print "| 3. Remove Shows\t| 6. Save and Exit\n"
 		try: option = int(raw_input("> "))
 		except ValueError:
 			print "Invalid Option"
 			continue
-		if option == 1: # add new movies
+		if option == 1: # add new shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for m in raw_input("Movie name: ").split(','): new_user_state.add_movie(m, verbose = True)
-		elif option == 2: # add new shows
-			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for s in raw_input("Show name: ").split(','): new_user_state.add_show(s, verbose = True)
-		elif option == 3: # list shows
+			for s in raw_input("Show name: ").split(','): user_state.add_show(s, verbose = True)
+		elif option == 2: # list shows
 			print "\033[3;33mShows:\033[0m"
-			new_user_state.shows_to_string()
-		elif option == 4: # list movies
-			print "\033[3;33mMovies:\033[0m"
-			new_user_state.movies_to_string()
-		elif option == 5: # remove movies
-			pass
-		elif option == 6: # remove shows
+			user_state.shows_to_string()
+		elif option == 3: # remove shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for s in raw_input("Show name: ").split(','): new_user_state.remove_show(s, verbose = True)
-		elif option == 7: # Mark watched
-			u_e = new_user_state.unwatched_episodes()
-			for show in u_e:
-				print '\033[1;33m' + show + '\033[0m'
-				for season in u_e[show]:
-					print '  \033[1;36mSeason %s \033[0m' % season
-					for ep in u_e[show][season]:
-						print '    E: %s - %s' % (ep.episode_number, ep.name)
-		elif option == 8:
-			new_user_state.save_state(path = USER_STATE_DIR)
+			for s in raw_input("Show name: ").split(','): user_state.remove_show(s, verbose = True)
+		elif option == 4: # schedule downloads
+			pass
+		elif option == 5: # download now
+			pass
+		elif option == 6:
+			user_state.save_state(path = USER_STATE_DIR)
 			break
 		else: print "Invalid Option"
-	return new_user_state
+	return user_state
 
 # ==========================================
-# 	               MAIN
+#                  MAIN
 # ==========================================
 
 User_State = None # will hold the user state
@@ -95,5 +80,4 @@ else: # exists then load the previous state
 	User_State.load_state(USER_STATE_DIR)
 	try: user_interaction(User_State)
 	except KeyboardInterrupt: sys.exit('\033[1;33mAborting...\033[0m')
-
 

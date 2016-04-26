@@ -25,8 +25,6 @@ class UserContent:
 		self.tvdb_apikey = '' # TODO API KEY
 		# tv shows
 		self.shows = {} # following tv shows
-		# movies
-		self.movies = {} # scheduled movies
 
 # ==========================================
 # 	          GENERIC METHODS
@@ -80,11 +78,10 @@ class UserContent:
 					if choice < len(matches) and choice >= 0: return matches[choice]
 					else: print "Invalid Option"
 
-	def force_update(self, name = None, where = 'all'):
+	def force_update(self, name = None):
 		'''Force update
 
 		This is a generator function, so you to run it you must iterate over it, it will yieald the name of the show being update each time
-		The were paramater must be one of the following 'all', 'shows' or 'movies'
 		If name is not given the where parameter is used to update everything in that category,
 			if where is not given either everything will be updated by default
 		Note: this may take a long time because it updates all the information contained
@@ -100,9 +97,6 @@ class UserContent:
 				for show in self.shows:
 					yield show
 					self.shows[show].update_info() # update everything
-		elif where == 'movies' or where == 'all':
-			pass
-# TODO MOVIES
 		else: raise ValueError("Where parameter in force update not accepatble")
 
 # ==========================================
@@ -201,36 +195,4 @@ class UserContent:
 			s = True
 			print '\t' + key
 		if not s: print "\t- No Shows watched yet"
-
-# ==========================================
-# 	             MOVIES
-# ==========================================
-
-	def add_movie(self, name, verbose = False):
-		#self.movies.update()
-		pass
-
-	def remove_movie(self, name):
-		pass
-
-	def movies_to_string(self):
-		'''Print scheduled movies
-
-		Intended for CLI
-		'''
-		s = False
-		print "Scheduled Movies:"
-		for key in [t for t in self.movies if not self.movies[t].watched]: # iterate over unwatched shows
-			s = True
-			print '\t' + key
-		if not s: print "\t- No Movies added yet"
-		s = False
-		print "\nWatched Shows:"
-		for key in [t for t in self.movies if self.movies[t].watched]: # iterate over watched shows
-			s = True
-			print '\t' + key
-		if not s: print "\t- No Movies watched yet"
-
-
-
 
