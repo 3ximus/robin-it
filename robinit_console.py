@@ -30,16 +30,16 @@ def first_use(user_name):
 		else: print "Please use \"y\" or \"n\"."
 	return user_interaction(new_user_state)
 
-def selection_handler(pseudo_show):
-	print "Multiple Results found when building, select one: (Use 'q' to cancel)"
-	for i, result in enumerate(pseudo_show.search_results):
-		print "%i. %s" % (i, result['seriesname'])
+def selection_handler(results):
+	print "Multiple Results found, select one: (Use 'q' to cancel)"
+	for i, name in enumerate(results):
+		print "%i. %s" % (i, name)
 	while(1):
 		try:
 			choice = raw_input("Selection: ")
 			if choice == 'q': return None
 			choice = int(choice)
-			if choice < 0 or choice >= len(pseudo_show.search_results): raise ValueError()
+			if choice < 0 or choice >= len(results): raise ValueError()
 			else: break
 		except ValueError: print "Please Insert Valid Input"
 	return choice
@@ -58,10 +58,10 @@ def user_interaction(user_state):
 			continue
 		if option == 1: # add new shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for s in raw_input("Show name: ").split(','): user_state.add_show(s, selection_handler)
+			for s in raw_input("Show name: ").split(','): user_state.add_show(s, selection_handler = selection_handler)
 		elif option == 2: # remove shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for s in raw_input("Show name: ").split(','): user_state.remove_show(s)
+			for s in raw_input("Show name: ").split(','): user_state.remove_show(s, selection_handler = selection_handler)
 		elif option == 3: # list shows
 			print "\033[3;33mShows:\033[0m"
 			s = False

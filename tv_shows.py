@@ -72,6 +72,9 @@ class Show:
 			self.name = self.search_results[0]['seriesname'] # placeholder updated in the update search
 			self.update_info(header_only = header_only) # Build class
 			self.search_results = []
+		else:
+			for i, result in enumerate(self.search_results): # make list a collection of strings
+				self.search_results[i] = result['seriesname']
 
 	def to_string(self):
 		'''Print this class information'''
@@ -85,7 +88,7 @@ class Show:
 			if multiple ones are found and builds with the selected option
 		'''
 		if option < 0 or option >= len(self.search_results): raise ValueError("Invalid option when generating class")
-		self.name = self.search_results[option]['seriesname']
+		self.name = self.search_results[option]
 		self.update_info(header_only = header_only) # generate content
 		self.search_results = []
 
