@@ -63,6 +63,10 @@ or through their website -> [lxml](http://lxml.de/installation.html)
 
 - Use `https://pirateproxy.tv/` as a backup for when kickass is missing torrents
 
+- Select range of episodes to download
+
+- Schedule range of episodes to be downloaded periodically
+
 *Notes* : Use Kickass API instead of parsing when/if available
 
 --------------------------------
