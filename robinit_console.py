@@ -31,14 +31,18 @@ def first_use(user_name):
 	return user_interaction(new_user_state)
 
 def selection_handler(pseudo_show):
-	print "Multiple Results found when building, select one:"
+	print "Multiple Results found when building, select one: (Use 'q' to cancel)"
 	for i, result in enumerate(pseudo_show.search_results):
 		print "%i. %s" % (i, result['seriesname'])
-	try: choice = int(raw_input("Selection: "))
-	except ValueError: raise # re-raise ValueError
-	else:
-		if choice < 0 or choice >= len(pseudo_show.search_results): raise ValueError("Invalid option")
-	return None
+	while(1):
+		try:
+			choice = raw_input("Selection: ")
+			if choice == 'q': return None
+			choice = int(choice)
+			if choice < 0 or choice >= len(pseudo_show.search_results): raise ValueError()
+			else: break
+		except ValueError: print "Please Insert Valid Input"
+	return choice
 
 def user_interaction(user_state):
 	'''Menu for User interaction'''

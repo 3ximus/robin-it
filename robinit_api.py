@@ -99,33 +99,26 @@ class UserContent:
 					self.shows[show].update_info() # update everything
 		else: raise ValueError("Where parameter in force update not accepatble")
 
-# ==========================================
-# 	             TV SHOWS
-# ==========================================
-
-	def add_show(self, name, verbose = True, selection_handler = None):
+	def add_show(self, name, selection_handler) :
 		'''Add TV SHOW to the follwed tvshows dictionary
 
 		Parameters:
-			selection_handler -- is a function that must return an integer and receives a partially
-				created tv_show instance that contains a variable search_results holding search results
-				for given keyword, this function must then return the user selection.
+			selection_handler -- is a function that must return an integer (or None if canceled) and receives
+				a partially created tv_show instance that contains a variable search_results holding search
+				results for given keyword, this function must then return the user selection.
 					NOTE: This argument is mandatory!
-			verbose -- will cancel the UnknownTVError excpetion by just printing a message
-				to be able to catch it do not use verbose
-				verbose will also print a "Show added <show name> message.
 		'''
-		try: new_show = tv_shows.Show(name)
-		except tv_shows.MultipleResultsException:
-			i = selection_handler(new_show)
-			new_show.build_with_result(i) # use choise to build content
+		try:
+			new_show = tv_shows.Show(name)
+			if new_show.search_results != []:
+				i = selection_handler(new_show)
+				if i == None: return
+				new_show.build_with_result(i) # use choise to build content
 		except tv_shows.UnknownTVError:
-			if verbose:
-				print "Unknown TV show %s" % name
-				return
-			else: raise
+			print "Unknown TV show %s" % name
+			return
 		self.shows.update({new_show.name:new_show})
-		if verbose: print "\033[32mShow added:\033[0m %s" % new_show.name
+		print "\033[32mShow added:\033[0m %s" % new_show.name
 
 	def remove_show(self, name, verbose = True):
 		'''Remove show by name

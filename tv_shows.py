@@ -28,10 +28,6 @@ class UnhandledTVError(TVError):
 	'''Unhandled error'''
 	pass
 
-class MultipleResultsException(TVError):
-	'''Unhandled error'''
-	pass
-
 class Show:
 	'''Class Containing Show information
 
@@ -43,7 +39,7 @@ class Show:
 		'''Class constructor
 
 		In case multiple results are found for given tv_show name the search_results are stored in
-			self.search_results and an MultipleResultsException is thrown. After that the method
+			self.search_results and the class is left on an unbuilt state. After that the method
 			build_with_result(int) should be called to complete the build process.
 		The header only flag only builds the class with Show information and doesn't retrieve seasons
 			and episodes info
@@ -75,8 +71,7 @@ class Show:
 		if results_amount == 1:
 			self.name = self.search_results[0]['seriesname'] # placeholder updated in the update search
 			self.update_info(header_only = header_only) # Build class
-		else:
-			raise MultipleResultsException("Multiple search results unhandled")
+			self.search_results = []
 
 	def to_string(self):
 		'''Print this class information'''
@@ -86,13 +81,13 @@ class Show:
 	def build_with_result(self, option, header_only = False):
 		'''This function builds class with a given self.search_results index
 
-		Its intended this is to be called by a graphical interface after it checks the
-			self.search_results and prompts the user if multiple ones are found and builds with the
-			selected option
+		Its intended this is to be called after it checks the self.search_results and prompts the user
+			if multiple ones are found and builds with the selected option
 		'''
 		if option < 0 or option >= len(self.search_results): raise ValueError("Invalid option when generating class")
 		self.name = self.search_results[option]['seriesname']
 		self.update_info(header_only = header_only) # generate content
+		self.search_results = []
 
 	def update_info(self, cache = CACHE, header_only = False):
 		'''Searches thetvdb.com and generates class attributes
