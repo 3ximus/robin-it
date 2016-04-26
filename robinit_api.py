@@ -103,15 +103,22 @@ class UserContent:
 # 	             TV SHOWS
 # ==========================================
 
-	def add_show(self, name, verbose = False):
+	def add_show(self, name, verbose = True, selection_handler = None):
 		'''Add TV SHOW to the follwed tvshows dictionary
 
-		The parameter verbose will cancel the UnknownTVError excpetion by just printing a message
-			to be able to catch it do not use verbose
-			verbose will also print a "Show added <show name> message.
-			Intended use for verbose is CLI
+		Parameters:
+			selection_handler -- is a function that must return an integer and receives a partially
+				created tv_show instance that contains a variable search_results holding search results
+				for given keyword, this function must then return the user selection.
+					NOTE: This argument is mandatory!
+			verbose -- will cancel the UnknownTVError excpetion by just printing a message
+				to be able to catch it do not use verbose
+				verbose will also print a "Show added <show name> message.
 		'''
-		try: new_show = tv_shows.Show(name, console = True)
+		try: new_show = tv_shows.Show(name)
+		except tv_shows.MultipleResultsException:
+			i = selection_handler(new_show)
+			new_show.build_with_result(i) # use choise to build content
 		except tv_shows.UnknownTVError:
 			if verbose:
 				print "Unknown TV show %s" % name
@@ -120,11 +127,10 @@ class UserContent:
 		self.shows.update({new_show.name:new_show})
 		if verbose: print "\033[32mShow added:\033[0m %s" % new_show.name
 
-	def remove_show(self, name, verbose = False):
+	def remove_show(self, name, verbose = True):
 		'''Remove show by name
 
 		Partial names wil result in displaying multiple results to choose from if conflicts occur
-		Intended use for verbose is CLI
 		'''
 		show_to_delete = self.find_item(name, self.shows)
 		if show_to_delete: # didnt find show
@@ -178,21 +184,16 @@ class UserContent:
 				unwatched_dict.update({show:seasons_dict})
 		return unwatched_dict
 
-	def shows_to_string(self):
-		'''Print following shows
+	def get_episodes(self, ep_range, reverse = False):
+		'''Get Episodes on the given range in form of a list of integers
 
-		Intended for CLI
+		This range assumes that all episodes are numbered begining at s01e01
+		If reverse is True the range assumes that 0 is the last episode and so on in reverse order
 		'''
-		s = False
-		print "Following Shows:"
-		for key in [t for t in self.shows if not self.shows[t].watched]: # iterate over unwatched shows
-			s = True
-			print '\t' + key
-		if not s: print "\t- No Shows added yet"
-		s = False
-		print "\nWatched Shows:"
-		for key in [t for t in self.shows if self.shows[t].watched]: # iterate over watched shows
-			s = True
-			print '\t' + key
-		if not s: print "\t- No Shows watched yet"
+
+
+
+
+
+
 

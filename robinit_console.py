@@ -30,27 +30,41 @@ def first_use(user_name):
 		else: print "Please use \"y\" or \"n\"."
 	return user_interaction(new_user_state)
 
+def selection_handler(pseudo_show):
+	print "Multiple Results found when building, select one:"
+	for i, result in enumerate(pseudo_show.search_results):
+		print "%i. %s" % (i, result['seriesname'])
+	try: choice = int(raw_input("Selection: "))
+	except ValueError: raise # re-raise ValueError
+	else:
+		if choice < 0 or choice >= len(pseudo_show.search_results): raise ValueError("Invalid option")
+	return None
+
 def user_interaction(user_state):
 	'''Menu for User interaction'''
 	while(1):
 		# Display Menu
 		print "\n\033[1;33;40mChoose an action:\033[0m"
 		print "| 1. Add TV Shows\t| 4. Schedule Download"
-		print "| 2. List Shows\t\t| 5. Download Now"
-		print "| 3. Remove Shows\t| 6. Save and Exit\n"
+		print "| 2. Remove Shows\t| 5. Download Now"
+		print "| 3. List Shows\t\t| 6. Save and Exit\n"
 		try: option = int(raw_input("> "))
 		except ValueError:
 			print "Invalid Option"
 			continue
 		if option == 1: # add new shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for s in raw_input("Show name: ").split(','): user_state.add_show(s, verbose = True)
-		elif option == 2: # list shows
-			print "\033[3;33mShows:\033[0m"
-			user_state.shows_to_string()
-		elif option == 3: # remove shows
+			for s in raw_input("Show name: ").split(','): user_state.add_show(s, selection_handler)
+		elif option == 2: # remove shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for s in raw_input("Show name: ").split(','): user_state.remove_show(s, verbose = True)
+			for s in raw_input("Show name: ").split(','): user_state.remove_show(s)
+		elif option == 3: # list shows
+			print "\033[3;33mShows:\033[0m"
+			s = False
+			for key in [t for t in user_state.shows if not user_state.shows[t].watched]: # iterate over unwatched shows
+				s = True
+				print '\t' + key
+			if not s: print "\t- No Shows added yet"
 		elif option == 4: # schedule downloads
 			pass
 		elif option == 5: # download now

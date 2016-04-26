@@ -28,6 +28,10 @@ class UnhandledTVError(TVError):
 	'''Unhandled error'''
 	pass
 
+class MultipleResultsException(TVError):
+	'''Unhandled error'''
+	pass
+
 class Show:
 	'''Class Containing Show information
 
@@ -35,15 +39,12 @@ class Show:
 	Tv database is cached to its default location of CACHE
 	'''
 
-	def __init__(self, name, console = True, graphical = False, header_only = False):
+	def __init__(self, name, header_only = False):
 		'''Class constructor
 
-		The console flag should be set to True when running on console mode,
-			it is used to prompt the user to choose between one of the available search results
-		The graphical flag overrides the console flag and it stops the TV show generation,
-			the search_results are stored in self.search_results and should be acessed
-			to make the result decision. After that the method build_with_result(int) should be called
-			to complete the build process.
+		In case multiple results are found for given tv_show name the search_results are stored in
+			self.search_results and an MultipleResultsException is thrown. After that the method
+			build_with_result(int) should be called to complete the build process.
 		The header only flag only builds the class with Show information and doesn't retrieve seasons
 			and episodes info
 		'''
@@ -75,27 +76,12 @@ class Show:
 			self.name = self.search_results[0]['seriesname'] # placeholder updated in the update search
 			self.update_info(header_only = header_only) # Build class
 		else:
-			if graphical: return # abort tv show info generation
-			elif console:
-				try: self._handle_console_results(header_only = header_only)
-				except ValueError: raise ValueError("Invalid Option")
-			else: raise UnhandledTVError("Multiple search results unhandled")
+			raise MultipleResultsException("Multiple search results unhandled")
 
 	def to_string(self):
 		'''Print this class information'''
 		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %sBanner: %s\nIMDB Link: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.banner, self.imdb_id)
 		print "Description: %s" % self.description.encode('utf-8')
-
-	def _handle_console_results(self, header_only = False):
-		'''This handles multiple results in the console'''
-		print "Multiple Results found when building, select one:"
-		for i, result in enumerate(self.search_results):
-			print "%i. %s" % (i, result['seriesname'])
-		try: choice = int(raw_input("Selection: "))
-		except ValueError: raise # re-raise ValueError
-		else:
-			if choice < 0 or choice >= len(self.search_results): raise ValueError("Invalid option")
-		self.build_with_result(choice, header_only = header_only) # use choise to build content
 
 	def build_with_result(self, option, header_only = False):
 		'''This function builds class with a given self.search_results index
