@@ -8,8 +8,8 @@ Created - 11.12.15
 Copyright (C) 2015 - eximus
 '''
 
-import torrents as torrent_api
-from utillib import UtillibError
+import libs.torrents as torrent_api
+from libs.utillib import UtillibError
 import sys, re
 
 BIAS = 2

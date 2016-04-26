@@ -9,7 +9,7 @@ Copyright (C) 2016 - eximus
 __version__ = '1.3'
 
 import os, sys
-from robinit_api import UserContent
+from libs.robinit_api import UserContent
 
 USER_STATE_DIR = "user/"
 
@@ -23,11 +23,6 @@ def first_use(user_name):
 	if not os.path.exists(USER_STATE_DIR): os.mkdir(USER_STATE_DIR)
 	new_user_state = UserContent(user_name)
 # Promp user to start adding tv shows
-	while (1):
-		answer = raw_input("Add Movies or TVShows now? (y/n) ")
-		if answer == 'y': break
-		elif answer == 'n': return new_user_state
-		else: print "Please use \"y\" or \"n\"."
 	return user_interaction(new_user_state)
 
 def selection_handler(results):

@@ -7,8 +7,8 @@ Copyright (C) 2015 - eximus
 '''
 __version__ = '1.3'
 
+import tvshows
 import cPickle
-import tv_shows
 
 class UserContent:
 	'''User TV Shows Content Class
@@ -99,18 +99,16 @@ class UserContent:
 					NOTE: This argument is mandatory! See example on constructor Documentation
 			name -- if this is not given everything is updated
 		'''
-		if where == 'shows' or 'all':
-			if name: # if name was given
-				show = find_item(name, selection_handler = selection_handler)
-				if show:
-					yield show
-					self.shows[show].update_info()
-				else: return # show not found
-			else:
-				for show in self.shows:
-					yield show
-					self.shows[show].update_info() # update everything
-		else: raise ValueError("Where parameter in force update not accepatble")
+		if name: # if name was given
+			show = find_item(name, selection_handler = selection_handler)
+			if show:
+				yield show
+				self.shows[show].update_info()
+			else: return # show not found
+		else:
+			for show in self.shows:
+				yield show
+				self.shows[show].update_info() # update everything
 
 	def add_show(self, name, selection_handler = None) :
 		'''Add TV SHOW to the follwed tvshows dictionary
@@ -122,12 +120,12 @@ class UserContent:
 			name -- keyword used in search
 		'''
 		try:
-			new_show = tv_shows.Show(name)
+			new_show = tvshows.Show(name)
 			if new_show.search_results != []:
 				i = selection_handler(new_show.search_results)
 				if i == None: return
 				new_show.build_with_result(i) # use choise to build content
-		except tv_shows.UnknownTVError:
+		except tvshows.UnknownTVError:
 			print "Unknown TV show %s" % name
 			return
 		self.shows.update({new_show.name:new_show})
