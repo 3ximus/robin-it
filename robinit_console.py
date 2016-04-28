@@ -39,6 +39,9 @@ def selection_handler(results):
 		except ValueError: print "Please Insert Valid Input"
 	return choice
 
+def download_show(episode_list):
+	pass
+
 def user_interaction(user_state):
 	'''Menu for User interaction'''
 	while(1):
@@ -54,11 +57,17 @@ def user_interaction(user_state):
 		if option == 1: # add new shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
 			for s in raw_input("TV Show name: ").split(','):
-				user_state.add_show(s, selection_handler = selection_handler)
+				state = user_state.add_show(s, selection_handler = selection_handler)
+				if state: print "\033[32mShow added:\033[0m %s" % state
+				elif state == False: print "\033[3;31mShow Not Found\033[0m"
+				elif state == None: print "\033[3;33mAborted...\033[0m"
 		elif option == 2: # remove shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
 			for s in raw_input("TV Show name: ").split(','):
-				user_state.remove_show(s, selection_handler = selection_handler)
+				state = user_state.remove_show(s, selection_handler = selection_handler)
+				if state: print "\033[31mDeleted Show:\033[0m %s" % state
+				elif state == False: print "\033[3;31mShow Not Found\033[0m"
+				elif state == None: print "\033[3;33mAborted...\033[0m"
 		elif option == 3: # list shows
 			print "\033[3;33mShows:\033[0m"
 			s = False
@@ -69,7 +78,19 @@ def user_interaction(user_state):
 		elif option == 4: # schedule downloads
 			pass
 		elif option == 5: # download now
-			pass
+			show = user_state.get_show(raw_input("TV Show name: "), selection_handler = selection_handler)
+			if not show:
+				print "\033[3;31mShow Not Found\033[0m"
+				continue
+			print "\033[3;32mFound: %s\033[0m\nFor multiple selections separate with ','" % show.name
+			try:
+				seasons = map(lambda x: int(x), raw_input("Season: ").split(',')) # convert input to list of integers
+				reverse = True if raw_input("Get episodes in reverse order? (y) ") == "y" else False
+				episodes = map(lambda x: int(x), raw_input("Episodes: ").split(',')) # convert input to list of integers
+			except ValueError:
+				print "Invalid season. Aborting..."
+				return
+			print map(lambda x: x.e_id,user_state.get_episodes_in_range(show=show, season_filter=seasons, episode_filter=episodes, reverse=reverse))
 		elif option == 6:
 			user_state.save_state(path = USER_STATE_DIR)
 			break

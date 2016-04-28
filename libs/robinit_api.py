@@ -25,7 +25,7 @@ Copyright (C) 2015 - eximus
 '''
 __version__ = '1.3'
 
-import tvshows
+import tvshow
 import cPickle
 
 class UserContent:
@@ -46,6 +46,7 @@ class UserContent:
 # ==========================================
 # 	          GENERIC METHODS
 # ==========================================
+
 
 	def save_state(self, path = None, fd = None):
 		'''Saves the current class state to a file
@@ -73,7 +74,7 @@ class UserContent:
 		self.__dict__.update(tmp_dict)
 
 	def find_item(self, name, selection_handler = None):
-		'''Find a key in a dictionary using a partial name returning corerct name
+		'''Find a key in a dictionary using a partial name returning correct name
 
 		Parameters:
 			selection_handler -- is a function that must return an integer (or None if canceled) and receives
@@ -87,7 +88,21 @@ class UserContent:
 		if len(matches) == 0: return None # no matches found
 		elif len(matches) == 1: return matches[0] # return only match found
 		else: # multiple results, present choice
-			return matches[selection_handler(matches)]
+			selection = selection_handler(matches)
+			if selection: return matches[selection]
+			else: return None
+
+	def get_show(self, show, selection_handler = None):
+		'''Get a specific show
+		Parameters:
+			show -- name of a show
+			selection_handler -- is a function that must return an integer (or None if canceled) and receives
+				a list of strings, this function must then return the user selection.
+					NOTE: This argument is mandatory! See top Documentation
+		'''
+		show_name = self.find_item(show, selection_handler)
+		if show_name: return self.shows[show_name]
+		return None
 
 	def force_update(self, name = None, selection_handler = None):
 		'''Force update
@@ -111,28 +126,29 @@ class UserContent:
 				yield show
 				self.shows[show].update_info() # update everything
 
-	def add_show(self, name, selection_handler = None) :
+	def add_show(self, name = None, show = None, selection_handler = None) :
 		'''Add TV SHOW to the follwed tvshows dictionary
 
 		Parameters:
+			name -- keyword used in search
+			show -- show to add
 			selection_handler -- is a function that must return an integer (or None if canceled) and receives
 				a list of strings, this function must then return the user selection.
 					NOTE: This argument is mandatory! See top Documentation
-			name -- keyword used in search
+		Returns show name if was added sucessfully, false otherwise, None if canceled
 		'''
 		try:
-			new_show = tvshows.Show(name)
+			new_show = tvshow.Show(name)
 			if new_show.search_results != []:
 				i = selection_handler(new_show.search_results)
-				if i == None: return
+				if i == None: return None
 				new_show.build_with_result(i) # use choise to build content
-		except tvshows.UnknownTVError:
-			print "Unknown TV show %s" % name
-			return
+		except tvshow.UnknownTVShowException:
+			return False
 		self.shows.update({new_show.name:new_show})
-		print "\033[32mShow added:\033[0m %s" % new_show.name
+		return new_show.name
 
-	def remove_show(self, name, verbose = True, selection_handler = None):
+	def remove_show(self, name, selection_handler = None):
 		'''Remove show by name
 
 		Partial names wil result in displaying multiple results to choose from if conflicts occur
@@ -140,12 +156,14 @@ class UserContent:
 			selection_handler -- is a function that must return an integer (or None if canceled) and receives
 				a list of strings, this function must then return the user selection.
 					NOTE: This argument is mandatory! See top Documentation
+		Returns show name if was deleted sucessfully, false otherwise, None if canceled
 		'''
 		show_to_delete = self.find_item(name, selection_handler = selection_handler)
+		if not show_to_delete: return None
 		if show_to_delete: # didnt find show
 			del(self.shows[show_to_delete])
-			if verbose: print "\033[31mDeleted Show:\033[0m %s" % show_to_delete
-		else: print "No Show found"
+			return show_to_delete
+		else: return False
 
 	def toogle_watched(self, name = None, item = None, selection_handler = None):
 		'''Toogles watched value
@@ -175,8 +193,8 @@ class UserContent:
 		Note: This only updates TV Shows
 		'''
 		if name:
-			show = self.find_item(name, selection_handler = selection_handler)
-			if show: self.shows[show].update_watched()
+			show = self.get_show(name, selection_handler = selection_handler)
+			if show: show.update_watched()
 			else: print "No Show found"
 		else:
 			for show in self.shows: self.shows[show].update_watched()
@@ -198,11 +216,12 @@ class UserContent:
 				unwatched_dict.update({show:seasons_dict})
 		return unwatched_dict
 
-	def get_episodes_in_range(self, name, season_filter = None, episode_filter = None, reverse = False, selection_handler = None):
+	def get_episodes_in_range(self, name = None, show = None, season_filter = None, episode_filter = None, reverse = False, selection_handler = None):
 		'''Get Episodes with a given season or episode filter
 
 		Parameters:
-			name -- show to select
+			name -- name of show to select
+			show -- show to select
 			season_filter -- list of seasons
 			episode_filter -- list of episodes. This will be applied after the season filter so any range given here
 								will be applied after unwanted seasons are removed.
@@ -211,13 +230,12 @@ class UserContent:
 				a list of strings, this function must then return the user selection.
 					NOTE: This argument is mandatory! See top Documentation
 		'''
-		show = self.find_item(name, selection_handler = selection_handler)
-		barrier = None
-		if not show:  return None
-		aired_list = [ep for ep in self.shows[show].get_episodes_list() if ep.already_aired()]
+		if not show: show = self.get_show(name, selection_handler = selection_handler)
+		if not show: return None
+		aired_list = [ep for ep in show.get_episodes_list() if ep.already_aired()]
 		if reverse: aired_list = reversed(aired_list)
 		if season_filter: aired_list = filter(lambda x: x.s_id in season_filter, aired_list)
-		if episode_filter: aired_list = filter(lambda x: aired_list.index(x) in episode_filter, aired_list)
+		if episode_filter: aired_list = filter(lambda x: aired_list.index(x) in map(lambda x: x-1,episode_filter), aired_list)
 		return aired_list
 
 

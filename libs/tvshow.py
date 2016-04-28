@@ -22,12 +22,8 @@ class TVError(Exception):
 	'''Main Error Class'''
 	pass
 
-class UnknownTVError(TVError):
+class UnknownTVShowException(TVError):
 	'''Unknown tv show error'''
-	pass
-
-class UnhandledTVError(TVError):
-	'''Unhandled error'''
 	pass
 
 class Show:
@@ -69,7 +65,7 @@ class Show:
 		# search for available TV Shows
 		self.search_results = Tvdb(cache = CACHE, banners = True).search(name)
 		results_amount = len(self.search_results)
-		if results_amount == 0: raise UnknownTVError("Unexistent tv_show \"%s\"" % name)
+		if results_amount == 0: raise UnknownTVShowException("Unexistent tv_show \"%s\"" % name)
 		if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
 		if results_amount == 1:
 			self.name = self.search_results[0]['seriesname'] # placeholder updated in the update search
@@ -103,7 +99,7 @@ class Show:
 		It is mandatory that self.name is set otherwise build will fail
 		'''
 		if self.name == '': # error check
-			raise UnknownTVError("TV Show name not set, build class correctly")
+			raise UnknownTVShowException("TV Show name not set, build class correctly")
 
 		database = Tvdb(cache = cache)
 
@@ -183,6 +179,13 @@ class Show:
 			for episode in season.episodes:
 				episodes_list.append(episode)
 		return episodes_list
+
+	def get_last_aired(self):
+		'''Returns last episode aired'''
+		for s in reversed(self.seasons):
+			for e in reversed(s.episodes):
+				if e.already_aired: return e
+
 
 class Season():
 	'''Class defining a TV Show Season
