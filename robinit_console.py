@@ -53,11 +53,11 @@ def user_interaction(user_state):
 			continue
 		if option == 1: # add new shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for s in raw_input("Show name: ").split(','):
+			for s in raw_input("TV Show name: ").split(','):
 				user_state.add_show(s, selection_handler = selection_handler)
 		elif option == 2: # remove shows
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
-			for s in raw_input("Show name: ").split(','):
+			for s in raw_input("TV Show name: ").split(','):
 				user_state.remove_show(s, selection_handler = selection_handler)
 		elif option == 3: # list shows
 			print "\033[3;33mShows:\033[0m"
@@ -74,7 +74,7 @@ def user_interaction(user_state):
 			user_state.save_state(path = USER_STATE_DIR)
 			break
 		elif option == 7:
-			s = raw_input("Show name: ")
+			s = raw_input("TV Show name: ")
 			print user_state.get_episodes_in_range(s, selection_handler = selection_handler)
 		else: print "Invalid Option"
 	return user_state

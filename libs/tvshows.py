@@ -11,6 +11,7 @@ Copyright (C) 2015 - eximus
 '''
 
 from tvdb_api import Tvdb
+from torrent import Torrent
 import datetime
 import os
 
@@ -62,6 +63,7 @@ class Show:
 		self.banner = '' # banner
 		self.imdb_id = '' # imdb id
 		self.watched = False
+		self.torrent = None
 		self.search_results = [] # store search results
 
 		# search for available TV Shows
@@ -145,6 +147,10 @@ class Show:
 			if season.watched: seasons_watched += 1
 		if seasons_watched == len(self.seasons): self.watched = True
 
+	def set_torrent(self, torrent):
+		'''Set torrent instance associated with this episode'''
+		self.torrent=torrent
+
 	def get_status(self):
 		'''Returns the status this show has, in repect to the user'''
 		if self.watched:
@@ -195,6 +201,7 @@ class Season():
 		self.poster = [] # list of season poster
 		self.poster_wide = [] # list of season wide posters
 		self.watched = False
+		self.torrent = None
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.update_info()
@@ -248,6 +255,10 @@ class Season():
 			episode.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
 
+	def set_torrent(self, torrent):
+		'''Set torrent instance associated with this episode'''
+		self.torrent=torrent
+
 	def update_watched(self):
 		''' Update watched state according to its content'''
 		cont = 0
@@ -291,6 +302,7 @@ class Episode:
 		self.imdb_id = ''
 		self.airdate = ''
 		self.watched = False
+		self.torrent = None
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.update_info()
@@ -323,10 +335,15 @@ class Episode:
 		self.set_watched(not self.watched)
 		self.update_watched() # after setting the value call update_watched to propagate change
 
-	def set_watched(Self):
+	def set_watched(self):
 		''' Set the watched state '''
 		self.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
+
+	def set_torrent(self, torrent):
+		'''Set torrent instance associated with this episode'''
+		self.torrent=torrent
+
 
 	def update_watched(self):
 		''' Update watched state according to its content'''

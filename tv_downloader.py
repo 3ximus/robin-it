@@ -8,7 +8,7 @@ Created - 11.12.15
 Copyright (C) 2015 - eximus
 '''
 
-import libs.torrents as torrent_api
+import libs.gatherer
 from libs.utillib import UtillibError
 import sys, re
 
@@ -41,17 +41,17 @@ for s in seasons:
 			sys.exit(-1)
 		search_term = '%s %s %s' % (tv_show, ep_id, quality)
 		print 'Searching: %s' % search_term
-		try: search_results = torrent_api.search(torrent_api.KICKASS, search_term)
+		try: search_results = gatherer.search(gatherer.KICKASS, search_term)
 		except UtillibError:
 			print "No results found"
 			continue
-		torrent_api.present_results(search_results)
+		gatherer.present_results(search_results)
 
 		downloads = []
 		choice = raw_input("\nSelection: ")
 		for c in choice.split(' '):
 			downloads.append(search_results[int(c)])
 
-		files_downloaded = torrent_api.download_torrents(downloads, location=DOWNLOAD_PATH)
+		files_downloaded = gatherer.download_torrents(downloads, location=DOWNLOAD_PATH)
 		print 'Files Downloaded: %d, to %s' % (len(files_downloaded), DOWNLOAD_PATH)
 
