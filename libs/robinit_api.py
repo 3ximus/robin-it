@@ -26,6 +26,7 @@ Copyright (C) 2015 - eximus
 __version__ = '1.3'
 
 import tvshow
+import gatherer
 import cPickle
 
 class UserContent:
@@ -237,5 +238,7 @@ class UserContent:
 		if season_filter: aired_list = filter(lambda x: x.s_id in season_filter, aired_list)
 		if episode_filter: aired_list = filter(lambda x: aired_list.index(x) in map(lambda x: x-1,episode_filter), aired_list)
 		return aired_list
+
+	def assign_torrents
 
 

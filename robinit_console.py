@@ -76,7 +76,7 @@ def user_interaction(user_state):
 				print '\t' + key
 			if not s: print "\t- No Shows added yet"
 		elif option == 4: # schedule downloads
-			pass
+			print "NOT IMPLEMENTED"
 		elif option == 5: # download now
 			show = user_state.get_show(raw_input("TV Show name: "), selection_handler = selection_handler)
 			if not show:
@@ -84,19 +84,20 @@ def user_interaction(user_state):
 				continue
 			print "\033[3;32mFound: %s\033[0m\nFor multiple selections separate with ','" % show.name
 			try:
-				seasons = map(lambda x: int(x), raw_input("Season: ").split(',')) # convert input to list of integers
+				seasons = map(lambda x: int(x) if x!="" else None, raw_input("Season: ").split(',')) # convert input to list of integers
 				reverse = True if raw_input("Get episodes in reverse order? (y) ") == "y" else False
-				episodes = map(lambda x: int(x), raw_input("Episodes: ").split(',')) # convert input to list of integers
+				episodes = map(lambda x: int(x) if x!="" else None, raw_input("Episodes: ").split(',')) # convert input to list of integers
 			except ValueError:
-				print "Invalid season. Aborting..."
-				return
-			print map(lambda x: x.e_id,user_state.get_episodes_in_range(show=show, season_filter=seasons, episode_filter=episodes, reverse=reverse))
+				print "Invalid input. Aborting..."
+				continue
+			print map(lambda x: x.e_id,user_state.get_episodes_in_range(show=show,
+																		season_filter=seasons if seasons != [None] else None,
+																		episode_filter=episodes if episodes != [None] else None,
+																		reverse=reverse,
+																		selection_handler=selection_handler))
 		elif option == 6:
 			user_state.save_state(path = USER_STATE_DIR)
 			break
-		elif option == 7:
-			s = raw_input("TV Show name: ")
-			print user_state.get_episodes_in_range(s, selection_handler = selection_handler)
 		else: print "Invalid Option"
 	return user_state
 
