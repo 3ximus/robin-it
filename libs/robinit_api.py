@@ -1,6 +1,24 @@
 '''
 Api for traking TVShows and Movies
 User state is persistent across runs and saved in ./user/ directory
+
+NOTE: For many functions a selection_handler is needed, in that
+	case here is an example of one:
+
+def selection_handler(results):
+	print "Multiple Results found, select one: (Use 'q' to cancel)"
+	for i, name in enumerate(results):
+		print "%i. %s" % (i, name)
+	while(1):
+		try:
+			choice = raw_input("Selection: ")
+			if choice == 'q': return None
+			choice = int(choice)
+			if choice < 0 or choice >= len(results): raise ValueError()
+			else: break
+		except ValueError: print "Please Insert Valid Input"
+	return choice
+
 Latest Update - v1.3
 Created - 29.12.15
 Copyright (C) 2015 - eximus
@@ -15,22 +33,6 @@ class UserContent:
 
 	This class contains all user content
 	Contains list with following shows being Show instances
-	For many functions a selection_handler is needed, in that
-		case here is an example of one:
-
-	def selection_handler(results):
-		print "Multiple Results found, select one: (Use 'q' to cancel)"
-		for i, name in enumerate(results):
-			print "%i. %s" % (i, name)
-		while(1):
-			try:
-				choice = raw_input("Selection: ")
-				if choice == 'q': return None
-				choice = int(choice)
-				if choice < 0 or choice >= len(results): raise ValueError()
-				else: break
-			except ValueError: print "Please Insert Valid Input"
-		return choice
 	'''
 
 	def __init__(self, uname = '', empty = False):
@@ -39,7 +41,6 @@ class UserContent:
 			else: raise ValueError("Username cannot be empty")
 		else: self.user_name = ''
 		self.tvdb_apikey = '' # TODO API KEY
-		# tv shows
 		self.shows = {} # following tv shows
 
 # ==========================================
@@ -77,7 +78,7 @@ class UserContent:
 		Parameters:
 			selection_handler -- is a function that must return an integer (or None if canceled) and receives
 				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See example on constructor Documentation
+					NOTE: This argument is mandatory! See top Documentation
 			name -- keyword to search for
 		'''
 		matches = []
@@ -96,7 +97,7 @@ class UserContent:
 		Parameters:
 			selection_handler -- is a function that must return an integer (or None if canceled) and receives
 				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See example on constructor Documentation
+					NOTE: This argument is mandatory! See top Documentation
 			name -- if this is not given everything is updated
 		'''
 		if name: # if name was given
@@ -116,7 +117,7 @@ class UserContent:
 		Parameters:
 			selection_handler -- is a function that must return an integer (or None if canceled) and receives
 				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See example on constructor Documentation
+					NOTE: This argument is mandatory! See top Documentation
 			name -- keyword used in search
 		'''
 		try:
@@ -138,7 +139,7 @@ class UserContent:
 		Parameters:
 			selection_handler -- is a function that must return an integer (or None if canceled) and receives
 				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See example on constructor Documentation
+					NOTE: This argument is mandatory! See top Documentation
 		'''
 		show_to_delete = self.find_item(name, selection_handler = selection_handler)
 		if show_to_delete: # didnt find show
@@ -146,7 +147,7 @@ class UserContent:
 			if verbose: print "\033[31mDeleted Show:\033[0m %s" % show_to_delete
 		else: print "No Show found"
 
-	def toogle_watched_show(self, name = None, item = None, selection_handler = None):
+	def toogle_watched(self, name = None, item = None, selection_handler = None):
 		'''Toogles watched value
 
 		If an item with watch state is given name is ignored
@@ -157,10 +158,15 @@ class UserContent:
 			try: item.toogle_watched() # if valid item
 			except AttributeError: raise ValueError("Invalid item passed to toogle_watched_show")
 		elif name: # by name
-			show = find_item(name, selection_handler = selection_handler)
+			show = self.find_item(name, selection_handler = selection_handler)
 			if show: self.shows[show].toogle_watched()
-			else: print "No Show found"
+			else: raise ValueError("No Show found")
 		else: raise ValueError("No parameters passed to toogle_watched_show")
+
+	def mark_watched_until(self, name = None, season = None, episode = None, item = None, selection_handler = None):
+		'''Mark episodes/seasons watched until the episode/season given'''
+# TODO
+		pass
 
 	def update_watched_show(self, name = None, selection_handler = None):
 		'''Forces show watched states to be updated
@@ -169,7 +175,7 @@ class UserContent:
 		Note: This only updates TV Shows
 		'''
 		if name:
-			show = find_item(name, selection_handler = selection_handler)
+			show = self.find_item(name, selection_handler = selection_handler)
 			if show: self.shows[show].update_watched()
 			else: print "No Show found"
 		else:
@@ -192,16 +198,26 @@ class UserContent:
 				unwatched_dict.update({show:seasons_dict})
 		return unwatched_dict
 
-	def get_episodes(self, ep_range, reverse = False):
-		'''Get Episodes on the given range in form of a list of integers
+	def get_episodes_in_range(self, name, season_filter = None, episode_filter = None, reverse = False, selection_handler = None):
+		'''Get Episodes with a given season or episode filter
 
-		This range assumes that all episodes are numbered begining at s01e01
-		If reverse is True the range assumes that 0 is the last episode and so on in reverse order
+		Parameters:
+			name -- show to select
+			season_filter -- list of seasons
+			episode_filter -- list of episodes. This will be applied after the season filter so any range given here
+								will be applied after unwanted seasons are removed.
+			reverse -- if True the range assumes that 0 is the last episode aired and so on in reverse order
+			selection_handler -- is a function that must return an integer (or None if canceled) and receives
+				a list of strings, this function must then return the user selection.
+					NOTE: This argument is mandatory! See top Documentation
 		'''
-		pass
-
-
-
-
+		show = self.find_item(name, selection_handler = selection_handler)
+		barrier = None
+		if not show:  return None
+		aired_list = [ep for ep in self.shows[show].get_episodes_list() if ep.already_aired()]
+		if reverse: aired_list = reversed(aired_list)
+		if season_filter: aired_list = filter(lambda x: x.s_id in season_filter, aired_list)
+		if episode_filter: aired_list = filter(lambda x: aired_list.index(x) in episode_filter, aired_list)
+		return aired_list
 
 

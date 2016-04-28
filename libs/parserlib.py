@@ -37,6 +37,7 @@ class Torrent():
 		self.seeds = seeds
 		self.peers = peers
 		self.host = host
+
 	def __str__(self):
 		print "name: %s" % self.name
 		print "link: %s" % self.link

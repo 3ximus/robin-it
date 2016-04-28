@@ -11,6 +11,7 @@ Copyright (C) 2015 - eximus
 '''
 
 from tvdb_api import Tvdb
+import datetime
 import os
 
 IMDB_TITLE = "http://www.imdb.com/title/"
@@ -169,6 +170,14 @@ class Show:
 				seasons.update({str(season.s_id):episode_list})
 		return seasons
 
+	def get_episodes_list(self):
+		'''Returns full list of episodes'''
+		episodes_list = []
+		for season in self.seasons:
+			for episode in season.episodes:
+				episodes_list.append(episode)
+		return episodes_list
+
 class Season():
 	'''Class defining a TV Show Season
 
@@ -267,10 +276,10 @@ class Episode:
 	def __init__(self, e_id, s_id, tv_show):
 		'''Constructor method
 
-		Must receive an episode id numeber, a season id number and a tv_show from where this episode belongs to
+		Must receive an episode id number, a season id number and a tv_show from where this episode belongs to
 		'''
-		self.e_id = e_id
-		self.s_id = s_id
+		self.e_id = e_id # 1 based
+		self.s_id = s_id # 1 based
 		self.name = ''
 		self.description = ''
 		self.episode_number = ''
@@ -323,6 +332,10 @@ class Episode:
 		''' Update watched state according to its content'''
 		# call update on the belonging season
 		self.tv_show.seasons[s_id].update_watched()
+
+	def already_aired(self):
+		date_split = self.airdate.split('-')
+		return datetime.date.today() > datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
 
 	def get_status(self):
 		'''Returns the status this show has, in repect to the user'''
