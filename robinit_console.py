@@ -39,7 +39,7 @@ def selection_handler(results):
 		except ValueError: print "Please Insert Valid Input"
 	return choice
 
-def download_episodes(user_state, episode_list):
+def make_queue(user_state, episode_list):
 	print "Linking torrents with episodes..."
 	failed_ep = []
 	counter = 0
@@ -58,9 +58,10 @@ def user_interaction(user_state):
 	while True:
 		# Display Menu
 		print "\n\033[1;33;40mChoose an action:\033[0m"
-		print "| 1. Add TV Shows\t| 4. Schedule Download"
-		print "| 2. Remove Shows\t| 5. Download Now"
-		print "| 3. List Shows\t\t| 6. Save and Exit\n"
+		print "| 1. Add TV Shows\t| 5. Make Queue"
+		print "| 2. Remove Shows\t| 6. Schedule Download"
+		print "| 3. List Shows\t\t| 7. Download Now (Uses Queue)"
+		print "| 4. View Queue\t\t| 8. Save and Exit\n"
 		try: option = int(raw_input("> "))
 		except ValueError:
 			print "Invalid Option"
@@ -86,9 +87,9 @@ def user_interaction(user_state):
 				s = True
 				print '\t' + key
 			if not s: print "\t- No Shows added yet"
-		elif option == 4: # schedule downloads
+		elif option == 4: # view queue
 			print "NOT IMPLEMENTED"
-		elif option == 5: # download now
+		elif option == 5: # make queue
 # TODO MAKE THIS GLOBAL?
 			episode_list = []
 			while True:
@@ -111,15 +112,20 @@ def user_interaction(user_state):
 																	reverse=reverse,
 																	selection_handler=selection_handler))
 				stats = {}
+# TODO MOVE ALL THIS TO THE FUNCTION
 				for item in episode_list:
 					stats[item.tv_show.name] = 1 if item.tv_show.name not in stats else stats[item.tv_show.name]+1
 				print "Your List Contains: "
 				for key, value in stats.iteritems():
 					print "\t%s -- %s" % (key, value)
 				if raw_input("Keep adding? (y) ") != "y":
-					download_episodes(user_state, episode_list)
+					make_queue(user_state, episode_list)
 					break
-		elif option == 6:
+		elif option == 6: # download now
+			print "NOT IMPLEMENTED"
+		elif option == 7: # schedule downloads
+			print "NOT IMPLEMENTED"
+		elif option == 8:
 			user_state.save_state(path = USER_STATE_DIR)
 			print "Bye"
 			break
