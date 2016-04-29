@@ -27,8 +27,8 @@ def first_use(user_name):
 
 def selection_handler(results):
 	print "Multiple Results found, select one: (Use 'q' to cancel)"
-	for i, name in enumerate(results):
-		print "%i. %s" % (i, name)
+	for i, string in enumerate(results):
+		print "%i. %s" % (i, string)
 	while True:
 		try:
 			choice = raw_input("Selection: ")
@@ -39,7 +39,37 @@ def selection_handler(results):
 		except ValueError: print "Please Insert Valid Input"
 	return choice
 
-def make_queue(user_state, episode_list):
+def make_queue(user_state):
+# TODO MAKE THIS GLOBAL?
+	episode_list = []
+	while True:
+		show = user_state.get_show(raw_input("TV Show name: "), selection_handler = selection_handler)
+		if not show:
+			print "\033[3;31mShow Not Found\033[0m"
+			continue
+		print "\033[3;32mFound: %s\033[0m\nFor multiple selections separate with ','" % show.name
+		try:
+# TODO ADD RANGES
+			seasons = map(lambda x: int(x) if x!="" else None, raw_input("Season: ").split(',')) # convert input to list of integers
+			reverse = True if raw_input("Get episodes in reverse order? (y) ") == "y" else False
+			episodes = map(lambda x: int(x) if x!="" else None, raw_input("Episodes: ").split(',')) # convert input to list of integers
+		except ValueError:
+			print "Invalid input. Aborting..."
+			continue
+		episode_list.extend(user_state.get_episodes_in_range(show=show,
+															season_filter=seasons if seasons != [None] else None,
+															episode_filter=episodes if episodes != [None] else None,
+															reverse=reverse,
+															selection_handler=selection_handler))
+		stats = {}
+# TODO MOVE ALL THIS TO THE FUNCTION
+		for item in episode_list:
+			stats[item.tv_show.name] = 1 if item.tv_show.name not in stats else stats[item.tv_show.name]+1
+		print "Your List Contains: "
+		for key, value in stats.iteritems():
+			print "\t%s -- %s" % (key, value)
+		if raw_input("Keep adding? (y) ") != "y":
+			break
 	print "Linking torrents with episodes..."
 	failed_ep = []
 	counter = 0
@@ -90,37 +120,7 @@ def user_interaction(user_state):
 		elif option == 4: # view queue
 			print "NOT IMPLEMENTED"
 		elif option == 5: # make queue
-# TODO MAKE THIS GLOBAL?
-			episode_list = []
-			while True:
-				show = user_state.get_show(raw_input("TV Show name: "), selection_handler = selection_handler)
-				if not show:
-					print "\033[3;31mShow Not Found\033[0m"
-					continue
-				print "\033[3;32mFound: %s\033[0m\nFor multiple selections separate with ','" % show.name
-				try:
-# TODO ADD RANGES
-					seasons = map(lambda x: int(x) if x!="" else None, raw_input("Season: ").split(',')) # convert input to list of integers
-					reverse = True if raw_input("Get episodes in reverse order? (y) ") == "y" else False
-					episodes = map(lambda x: int(x) if x!="" else None, raw_input("Episodes: ").split(',')) # convert input to list of integers
-				except ValueError:
-					print "Invalid input. Aborting..."
-					continue
-				episode_list.extend(user_state.get_episodes_in_range(show=show,
-																	season_filter=seasons if seasons != [None] else None,
-																	episode_filter=episodes if episodes != [None] else None,
-																	reverse=reverse,
-																	selection_handler=selection_handler))
-				stats = {}
-# TODO MOVE ALL THIS TO THE FUNCTION
-				for item in episode_list:
-					stats[item.tv_show.name] = 1 if item.tv_show.name not in stats else stats[item.tv_show.name]+1
-				print "Your List Contains: "
-				for key, value in stats.iteritems():
-					print "\t%s -- %s" % (key, value)
-				if raw_input("Keep adding? (y) ") != "y":
-					make_queue(user_state, episode_list)
-					break
+			make_queue(user_state)
 		elif option == 6: # download now
 			print "NOT IMPLEMENTED"
 		elif option == 7: # schedule downloads
