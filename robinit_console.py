@@ -40,9 +40,18 @@ def selection_handler(results):
 	return choice
 
 def download_episodes(user_state, episode_list):
-	user_state.assign_torrents(episode_list, force = True if raw_input("Force? (y) ") == "y" else False)
-	print "Downloading..."
-	pass
+	print "Linking torrents with episodes..."
+	failed_ep = []
+	counter = 0
+	for episode, flag in user_state.assign_torrents(episode_list,
+											force = True if raw_input("Force? (y) ") == "y" else False,
+											selection_handler = selection_handler if raw_input("Select individually? (y) ") == "y" else None):
+		if not flag: failed_ep.append(episode)
+		counter += 1
+		print "\rGathering: %d/%d -- %s S%02dE%02d -- %s\033[0m%s\r" % (counter,len(episode_list),episode.tv_show.name,int(episode.s_id),int(episode.e_id), "\033[0;32mSucess" if flag else "\033[0;31mFailed", " "*20),
+		sys.stdout.flush()
+	print "\rGathered: %d/%d Episodes%s" % (counter, len(episode_list), " "*40)
+# TODO RETRY FAILURES??
 
 def user_interaction(user_state):
 	'''Menu for User interaction'''
@@ -112,6 +121,7 @@ def user_interaction(user_state):
 					break
 		elif option == 6:
 			user_state.save_state(path = USER_STATE_DIR)
+			print "Bye"
 			break
 		else: print "Invalid Option"
 	return user_state

@@ -25,6 +25,7 @@ Copyright (C) 2015 - eximus
 '''
 __version__ = '1.3'
 
+from utillib import UtillibError
 import tvshow
 import gatherer
 import cPickle
@@ -248,15 +249,21 @@ class UserContent:
 			selection_handler -- is a function that must return an integer (or None if canceled) and receives
 				a list of strings, this function must then return the user selection.
 					NOTE: This argument is mandatory! See top Documentation
+		This function yields every episode it finishes gathering and a flag representing its failure or sucess
 		'''
+		status = True
 		for e in episode_list:
 			if not e.torrent or force:
 					search_term = '%s %s %s' % (e.tv_show.name, 'S%02d' % int(e.s_id) + 'E%02d' % int(e.e_id), "720p")
-					results = gatherer.search(gatherer.KICKASS, search_term)
-					if selection_handler:
-						choice = selection_handler(results)
-						if choice: e.torrent = results[choice]
-					else: e.torrent = results[0] # TODO ADD A BETTER METHOD FOR THIS
+					try:
+						results = gatherer.search(gatherer.KICKASS, search_term)
+						if selection_handler:
+							choice = selection_handler(results)
+							if choice: e.torrent = results[choice]
+						else: e.torrent = results[0] # TODO ADD A BETTER METHOD FOR THIS
+					except UtillibError: status = False
+					else: status = True
+			yield e, status
 
 
 
