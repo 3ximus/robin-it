@@ -195,6 +195,8 @@ if user_name == "": sys.exit("Invalid username. Exiting...")
 # handle data loading or new profile generation
 USER_STATE_FILE = "%srobinit_%s_%s%s" % (USER_STATE_DIR, __version__, user_name, '.pkl') # Only used to look for state file
 
+print USER_STATE_FILE
+
 if not os.path.exists(USER_STATE_FILE): # no previous save file?
 	print "No user files in %s. Generating new user \"%s\"" % (USER_STATE_DIR, user_name)
 	try: User_State = first_use(user_name) # make new one

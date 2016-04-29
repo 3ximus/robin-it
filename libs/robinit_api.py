@@ -19,11 +19,11 @@ def selection_handler(results):
 		except ValueError: print "Please Insert Valid Input"
 	return choice
 
-Latest Update - v1.0
+Latest Update - v1.0.0
 Created - 29.12.15
 Copyright (C) 2015 - eximus
 '''
-__version__ = '1.0'
+__version__ = '1.0.0'
 
 from utillib import UtillibError
 import tvshow
@@ -259,7 +259,7 @@ class UserContent:
 		if not show: show = self.get_show(name, selection_handler = selection_handler)
 		if not show: return None
 		aired_list = [ep for ep in show.get_episodes_list() if ep.already_aired()]
-		if reverse: aired_list = reversed(aired_list)
+		if reverse: aired_list = list(reversed(aired_list))
 		if season_filter: aired_list = filter(lambda x: x.s_id in season_filter, aired_list)
 		if episode_filter: aired_list = filter(lambda x: aired_list.index(x) in map(lambda x: x-1,episode_filter), aired_list)
 		return aired_list
