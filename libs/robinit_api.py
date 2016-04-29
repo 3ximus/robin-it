@@ -44,11 +44,47 @@ class UserContent:
 		else: self.user_name = ''
 		self.tvdb_apikey = '' # TODO API KEY
 		self.shows = {} # following tv shows
+		self.episode_queue = []
 
 # ==========================================
-# 	          GENERIC METHODS
+# 	          BASIC METHODS
 # ==========================================
 
+	def get_show(self, show, selection_handler = None):
+		'''Get a specific show
+		Parameters:
+			show -- name of a show
+			selection_handler -- is a function that must return an integer (or None if canceled) and receives
+				a list of strings, this function must then return the user selection.
+					NOTE: This argument is mandatory! See top Documentation
+		'''
+		show_name = self.find_item(show, selection_handler)
+		if show_name: return self.shows[show_name]
+		return None
+
+	def enqueue(self, episode):
+		'''Add an episode or a list of episodes to the queue'''
+		if isinstance(episode, list): self.episode_queue.extend(episode)
+		else: self.episode_queue.append(episode)
+
+	def dequeue(self, i):
+		'''Remove element from the queue'''
+		del self.episode_queue[i]
+
+	def clear_queue(self):
+		'''Make queue empy'''
+		self.episode_queue = []
+
+	def stat_queue(self):
+		'''Return stats in the form of a dictionary where keys are show names and value the corresponding episode count'''
+		stats = {}
+		for item in self.episode_queue: # build status to present
+			stats[item.tv_show.name] = 1 if item.tv_show.name not in stats else stats[item.tv_show.name]+1
+		return stats
+
+# ==========================================
+# 	           MAIN METHODS
+# ==========================================
 
 	def save_state(self, path = None, fd = None):
 		'''Saves the current class state to a file
@@ -93,18 +129,6 @@ class UserContent:
 			selection = selection_handler(matches)
 			if selection: return matches[selection]
 			else: return None
-
-	def get_show(self, show, selection_handler = None):
-		'''Get a specific show
-		Parameters:
-			show -- name of a show
-			selection_handler -- is a function that must return an integer (or None if canceled) and receives
-				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See top Documentation
-		'''
-		show_name = self.find_item(show, selection_handler)
-		if show_name: return self.shows[show_name]
-		return None
 
 	def force_update(self, name = None, selection_handler = None):
 		'''Force update

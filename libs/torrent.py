@@ -32,23 +32,3 @@ class Torrent():
 		self.peers = peers
 		self.host = host
 
-#	def __str__(self):
-#		return "name: %s 					\
-#					\nlink: %s				\
-#					\nmagnet: %s			\
-#					\ntorrent file: %s		\
-#					\nsize: %s				\
-#					\nfiles: %s				\
-#					\nage: %s				\
-#					\nseeds: %s				\
-#					\npeers: %s				\
-#					\nhost: %s\n====" % (self.link,
-#										self.name,
-#										self.magnet,
-#										self.tor_file,
-#										self.size,
-#										self.files,
-#										self.age,
-#										self.seeds,
-#										self.peers,
-#										self.host)

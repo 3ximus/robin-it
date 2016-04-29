@@ -39,10 +39,16 @@ def selection_handler(results):
 		except ValueError: print "Please Insert Valid Input"
 	return choice
 
+def stat_episode_queue(user_state):
+	'''Print stats of episode queue'''
+	print "Your List Contains: "
+	for key, value in user_state.stat_queue().iteritems():
+		print "\t%s -- %s" % (key, value)
+
 def make_queue(user_state):
-# TODO MAKE THIS GLOBAL?
+	'''Function for making user interaction to make an episode queue, gathering torrent information for each one'''
+
 	print "\033[3;33mTo Cancel this process use Ctrl-C at any time\033[0m"
-	episode_list = []
 	while True:
 		show = user_state.get_show(raw_input("TV Show name: "), selection_handler = selection_handler)
 		if not show:
@@ -57,34 +63,35 @@ def make_queue(user_state):
 		except ValueError:
 			print "Invalid input. Aborting..."
 			continue
-		episode_list.extend(user_state.get_episodes_in_range(show=show,
+		user_state.enqueue(user_state.get_episodes_in_range(show=show,
 															season_filter=seasons if seasons != [None] else None,
 															episode_filter=episodes if episodes != [None] else None,
 															reverse=reverse,
 															selection_handler=selection_handler))
-		stats = {}
-		for item in episode_list: # build status to present
-			stats[item.tv_show.name] = 1 if item.tv_show.name not in stats else stats[item.tv_show.name]+1
-		print "Your List Contains: "
-		for key, value in stats.iteritems():
-			print "\t%s -- %s" % (key, value)
+		stat_episode_queue(user_state)
 		if raw_input("Keep adding? (y) ") != "y":
 			break
 	print "\n\033[0;33mLinking torrents with episodes...\033[0m"
 	failed_ep = []
 	counter = 0
-	for episode, flag in user_state.assign_torrents(episode_list,
+	for episode, flag in user_state.assign_torrents(user_state.episode_queue,
 											force = True if raw_input("Force? (y) ") == "y" else False,
 											selection_handler = selection_handler if raw_input("Select individually? (y) ") == "y" else None):
 		if not flag: failed_ep.append(episode)
 		counter += 1
-		print "\rGathering: %d/%d -- %s S%02dE%02d -- %s\033[0m%s\r" % (counter,len(episode_list),episode.tv_show.name,int(episode.s_id),int(episode.e_id), "\033[0;32mSucess" if flag else "\033[0;31mFailed", " "*20),
+		print "\rGathering: %d/%d -- %s S%02dE%02d -- %s\033[0m%s\r" % (counter,
+																		len(user_state.episode_queue),
+																		episode.tv_show.name,
+																		int(episode.s_id),
+																		int(episode.e_id),
+																		"\033[0;32mSucess" if flag else "\033[0;31mFailed", " "*20),
 		sys.stdout.flush()
-	print "\rGathered: %d/%d Episodes%s" % (counter, len(episode_list), " "*40)
-# TODO RETRY FAILURES??
+
+	print "\rGathered: %d/%d Episodes%s" % (counter, len(user_state.episode_queue), " "*40)
 
 def user_interaction(user_state):
 	'''Menu for User interaction'''
+
 	while True:
 		# Display Menu
 		print "\n\033[1;33;40mChoose an action:\033[0m"
@@ -92,45 +99,67 @@ def user_interaction(user_state):
 		print "| 2. Remove Shows\t| 6. Schedule Download"
 		print "| 3. List Shows\t\t| 7. Download Now (Uses Queue)"
 		print "| 4. View Queue\t\t| 8. Save and Exit\n"
+
 		try: option = int(raw_input("> "))
 		except ValueError:
 			print "Invalid Option"
 			continue
 		if option == 1: # add new shows
+			'''Allows user to add multiple shows'''
+
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
 			for s in raw_input("TV Show name: ").split(','):
 				state = user_state.add_show(s, selection_handler = selection_handler)
 				if state: print "\033[32mShow added:\033[0m %s" % state
 				elif state == False: print "\033[3;31mShow Not Found\033[0m"
 				elif state == None: print "\033[3;33mAborted...\033[0m"
+
 		elif option == 2: # remove shows
+			'''Allows user to remove multiple shows'''
+
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
 			for s in raw_input("TV Show name: ").split(','):
 				state = user_state.remove_show(s, selection_handler = selection_handler)
 				if state: print "\033[31mDeleted Show:\033[0m %s" % state
 				elif state == False: print "\033[3;31mShow Not Found\033[0m"
 				elif state == None: print "\033[3;33mAborted...\033[0m"
+
 		elif option == 3: # list shows
+			'''Displays info of added shows'''
+
 			print "\033[3;33mShows:\033[0m"
 			s = False
 			for key in user_state.shows:
 				s = True
 				print '\t' + key
 			if not s: print "\t- No Shows added yet"
+
 		elif option == 4: # view queue
-			print "NOT IMPLEMENTED"
-		elif option == 5: # make queue
+			'''Displays info of queued episodes'''
+
+			stat_episode_queue(user_state)
+
+		elif option == 5: # build queue
+			'''Prompts user for making or clear the episode queue'''
+			if user_state.episode_queue != []:
+				stat_episode_queue(user_state)
+				if True if raw_input("Clear Queue? (y) ") == "y" else False:
+					user_state.clear_queue()
 			try: make_queue(user_state)
 			except KeyboardInterrupt:
 				print "\n\033[3;33mAborted...\033[0m"
+
 		elif option == 6: # download now
 			print "NOT IMPLEMENTED"
+
 		elif option == 7: # schedule downloads
 			print "NOT IMPLEMENTED"
+
 		elif option == 8:
 			user_state.save_state(path = USER_STATE_DIR)
 			print "Bye"
 			break
+
 		else: print "Invalid Option"
 	return user_state
 
@@ -144,10 +173,12 @@ user_name = raw_input("Insert your username: ")
 if user_name == "": sys.exit("Invalid username. Exiting...")
 # handle data loading or new profile generation
 USER_STATE_FILE = "%srobinit_%s_%s%s" % (USER_STATE_DIR, __version__, user_name, '.pkl') # Only used to look for state file
+
 if not os.path.exists(USER_STATE_FILE): # no previous save file?
 	print "No user files in %s. Generating new user \"%s\"" % (USER_STATE_DIR, user_name)
 	try: User_State = first_use(user_name) # make new one
 	except KeyboardInterrupt: sys.exit('\n\033[1;33mAborting...\033[0m')
+
 else: # exists then load the previous state
 	User_State = UserContent(user_name)
 	User_State.load_state(USER_STATE_DIR)
