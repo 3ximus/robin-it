@@ -283,11 +283,23 @@ class UserContent:
 						results = gatherer.search(gatherer.KICKASS, search_term)
 						if selection_handler:
 							choice = selection_handler(gatherer.present_results(results, header=False, output=False))
-							if choice: e.torrent = results[choice]
-						else: e.torrent = results[0] # TODO ADD A BETTER METHOD FOR THIS
-					except UtillibError: status = False
-					else: status = True
+							if choice:
+								e.torrent = results[choice]
+								status = True
+						else:
+							if not results: status = False
+							else:
+								e.torrent = results[0] # TODO ADD A BETTER METHOD FOR THIS
+								status = True
+					except UtillibError:
+						status = False
 			yield e, status
+
+	def download_torrents(self, episode_queue):
+		'''Download torrents from the episode list'''
+		for torrent, name, flag in gatherer.download_torrents(map(lambda x: x.torrent, episode_queue)):
+			yield torrent, name, flag
+
 
 
 

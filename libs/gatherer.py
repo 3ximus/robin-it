@@ -89,15 +89,21 @@ def present_results(torrent_list, header=True, output=True):
 def download_torrents(torrent_list, name_parser = False, location = './storage/'):
 	'''Downloads all torrents passed as a list of Torrent instances
 
-	Name parser is used to determine the names of the downloaded torrents
+	Parameters:
+		torrent_list -- list of torrents to download
+		name_parser -- used to determine the names of the downloaded torrents
+		location -- location to save the torrents
+	Note: this function yields 2 values (instance of downloaded torrent and the filename)
 	'''
 	if type(torrent_list) is not list: torrent_list = [torrent_list,] # convert to list
-	file_list = []
+	status = True
 	for torrent in torrent_list:
-		link = "https:%s.torrent" % torrent.tor_file
-		filename = utillib.download_file(link, torrent.name, location=location, extension = '.torrent')
-		file_list.append(filename) # add the new downloaded filename to the file list
-	return file_list
+		if not torrent: status = False
+		else:
+			link = "https:%s.torrent" % torrent.tor_file
+			filename = utillib.download_file(link, torrent.name, location=location, extension = '.torrent')
+			status = True
+		yield torrent, filename, status
 
 def get_magnets(torrent_list):
 	'''Get magnet links from a Torrent list

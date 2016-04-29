@@ -66,8 +66,7 @@ def make_queue(user_state):
 		user_state.enqueue(user_state.get_episodes_in_range(show=show,
 															season_filter=seasons if seasons != [None] else None,
 															episode_filter=episodes if episodes != [None] else None,
-															reverse=reverse,
-															selection_handler=selection_handler))
+															reverse=reverse, selection_handler=selection_handler))
 		stat_episode_queue(user_state)
 		if raw_input("Keep adding? (y) ") != "y":
 			break
@@ -79,15 +78,32 @@ def make_queue(user_state):
 											selection_handler = selection_handler if raw_input("Select individually? (y) ") == "y" else None):
 		if not flag: failed_ep.append(episode)
 		counter += 1
-		print "\rGathering: %d/%d -- %s S%02dE%02d -- %s\033[0m%s\r" % (counter,
-																		len(user_state.episode_queue),
-																		episode.tv_show.name,
-																		int(episode.s_id),
-																		int(episode.e_id),
+		print "\rGathering: %d/%d -- %s S%02dE%02d -- %s\033[0m%s\r" % (counter, len(user_state.episode_queue),
+																		episode.tv_show.name, int(episode.s_id), int(episode.e_id),
 																		"\033[0;32mSucess" if flag else "\033[0;31mFailed", " "*20),
 		sys.stdout.flush()
 
-	print "\rGathered: %d/%d Episodes%s" % (counter, len(user_state.episode_queue), " "*40)
+	print "\rGathered: %d/%d Episodes%s" % (counter - len(failed_ep), len(user_state.episode_queue), " "*40)
+	if not failed_ep == []:
+		print "\n\033[3;31mFailed to get episodes:\033[0m"
+		for ep in failed_ep: print "%s S%02dE%02d" % (ep.tv_show.name, int(ep.s_id), int(ep.e_id))
+# TODO RETRY ERRORS!!
+
+def download_queue(user_state):
+	'''Download torrents of a given episode queues list'''
+
+	print "\033[3;33mTo Cancel this process use Ctrl-C at any time\033[0m"
+	counter = 0
+	failed_torrents = []
+	print "Downloading..."
+	for torrent, name, flag in user_state.download_torrents(user_state.episode_queue):
+# TODO MAKE THIS RETRIEVE NAME BEFORE AND AFTER DOWNLOAD MAKING A LIST OF OUTPUT
+		if not flag: failed_torrents.append(torrent)
+		counter += 1
+		print "\rDownloaded: %d/%d -- %s -- %s\033[0m%s\r" % (counter, len(user_state.episode_queue), name[:40],
+															"\033[0;32mSucess" if flag else "\033[0;31mFailed", " "*20),
+		sys.stdout.flush()
+	print "\rDownloaded: %d/%d Torrents%s" % (counter - len(failed_torrents), len(user_state.episode_queue), " "*80)
 
 def user_interaction(user_state):
 	'''Menu for User interaction'''
@@ -96,8 +112,8 @@ def user_interaction(user_state):
 		# Display Menu
 		print "\n\033[1;33;40mChoose an action:\033[0m"
 		print "| 1. Add TV Shows\t| 5. Build Queue"
-		print "| 2. Remove Shows\t| 6. Schedule Download"
-		print "| 3. List Shows\t\t| 7. Download Now (Uses Queue)"
+		print "| 2. Remove Shows\t| 6. Download Now (Uses Queue)"
+		print "| 3. List Shows\t\t| 7. Schedule Download"
 		print "| 4. View Queue\t\t| 8. Save and Exit\n"
 
 		try: option = int(raw_input("> "))
@@ -141,6 +157,7 @@ def user_interaction(user_state):
 
 		elif option == 5: # build queue
 			'''Prompts user for making or clear the episode queue'''
+
 			if user_state.episode_queue != []:
 				stat_episode_queue(user_state)
 				if True if raw_input("Clear Queue? (y) ") == "y" else False:
@@ -150,7 +167,11 @@ def user_interaction(user_state):
 				print "\n\033[3;33mAborted...\033[0m"
 
 		elif option == 6: # download now
-			print "NOT IMPLEMENTED"
+			'''Downloads episodes on the queue'''
+			stat_episode_queue(user_state)
+			try: download_queue(user_state)
+			except KeyboardInterrupt:
+				print "\n\033[3;33mAborted...\033[0m"
 
 		elif option == 7: # schedule downloads
 			print "NOT IMPLEMENTED"

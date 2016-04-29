@@ -347,7 +347,6 @@ class Episode:
 		'''Set torrent instance associated with this episode'''
 		self.torrent=torrent
 
-
 	def update_watched(self):
 		''' Update watched state according to its content'''
 		# call update on the belonging season

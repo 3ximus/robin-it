@@ -8,8 +8,7 @@ Created - 11.12.15
 Copyright (C) 2015 - eximus
 '''
 
-import libs.gatherer
-print gatherer
+from libs.gatherer import *
 from libs.utillib import UtillibError
 import sys, re
 
@@ -42,17 +41,18 @@ for s in seasons:
 			sys.exit(-1)
 		search_term = '%s %s %s' % (tv_show, ep_id, quality)
 		print 'Searching: %s' % search_term
-		try: search_results = gatherer.search(gatherer.KICKASS, search_term)
+		try: search_results = search(KICKASS, search_term)
 		except UtillibError:
 			print "No results found"
 			continue
-		gatherer.present_results(search_results)
+		present_results(search_results)
 
 		downloads = []
 		choice = raw_input("\nSelection: ")
 		for c in choice.split(' '):
 			downloads.append(search_results[int(c)])
 
-		files_downloaded = gatherer.download_torrents(downloads, location=DOWNLOAD_PATH)
-		print 'Files Downloaded: %d, to %s' % (len(files_downloaded), DOWNLOAD_PATH)
+		files_downloaded = None
+		for a,b,c in download_torrents(downloads, location=DOWNLOAD_PATH, file_list=files_downloaded)
+		print 'Files Downloaded: %d, to %s' % (len(files_downloaded) if files_downloaded else 0, DOWNLOAD_PATH)
 
