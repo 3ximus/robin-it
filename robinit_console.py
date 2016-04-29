@@ -41,6 +41,7 @@ def selection_handler(results):
 
 def make_queue(user_state):
 # TODO MAKE THIS GLOBAL?
+	print "\033[3;33mTo Cancel this process use Ctrl-C at any time\033[0m"
 	episode_list = []
 	while True:
 		show = user_state.get_show(raw_input("TV Show name: "), selection_handler = selection_handler)
@@ -62,15 +63,14 @@ def make_queue(user_state):
 															reverse=reverse,
 															selection_handler=selection_handler))
 		stats = {}
-# TODO MOVE ALL THIS TO THE FUNCTION
-		for item in episode_list:
+		for item in episode_list: # build status to present
 			stats[item.tv_show.name] = 1 if item.tv_show.name not in stats else stats[item.tv_show.name]+1
 		print "Your List Contains: "
 		for key, value in stats.iteritems():
 			print "\t%s -- %s" % (key, value)
 		if raw_input("Keep adding? (y) ") != "y":
 			break
-	print "Linking torrents with episodes..."
+	print "\n\033[0;33mLinking torrents with episodes...\033[0m"
 	failed_ep = []
 	counter = 0
 	for episode, flag in user_state.assign_torrents(episode_list,
@@ -88,7 +88,7 @@ def user_interaction(user_state):
 	while True:
 		# Display Menu
 		print "\n\033[1;33;40mChoose an action:\033[0m"
-		print "| 1. Add TV Shows\t| 5. Make Queue"
+		print "| 1. Add TV Shows\t| 5. Build Queue"
 		print "| 2. Remove Shows\t| 6. Schedule Download"
 		print "| 3. List Shows\t\t| 7. Download Now (Uses Queue)"
 		print "| 4. View Queue\t\t| 8. Save and Exit\n"
@@ -120,7 +120,9 @@ def user_interaction(user_state):
 		elif option == 4: # view queue
 			print "NOT IMPLEMENTED"
 		elif option == 5: # make queue
-			make_queue(user_state)
+			try: make_queue(user_state)
+			except KeyboardInterrupt:
+				print "\n\033[3;33mAborted...\033[0m"
 		elif option == 6: # download now
 			print "NOT IMPLEMENTED"
 		elif option == 7: # schedule downloads
@@ -145,10 +147,10 @@ USER_STATE_FILE = "%srobinit_%s_%s%s" % (USER_STATE_DIR, __version__, user_name,
 if not os.path.exists(USER_STATE_FILE): # no previous save file?
 	print "No user files in %s. Generating new user \"%s\"" % (USER_STATE_DIR, user_name)
 	try: User_State = first_use(user_name) # make new one
-	except KeyboardInterrupt: sys.exit('\033[1;33mAborting...\033[0m')
+	except KeyboardInterrupt: sys.exit('\n\033[1;33mAborting...\033[0m')
 else: # exists then load the previous state
 	User_State = UserContent(user_name)
 	User_State.load_state(USER_STATE_DIR)
 	try: user_interaction(User_State)
-	except KeyboardInterrupt: sys.exit('\033[1;33mAborting...\033[0m')
+	except KeyboardInterrupt: sys.exit('\n\033[1;33mAborting...\033[0m')
 

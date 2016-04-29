@@ -54,7 +54,7 @@ def search(main_url, search_term, parser=parserlib.Torrent_BS4(), page = 1, orde
 	except utillib.UtillibError: raise # re-raise the exception
 	return parse_page_links(html, parser) # return list of Torrent instances
 
-def present_results(torrent_list, header=True, output=False):
+def present_results(torrent_list, header=True, output=True):
 	'''Receives a list with Torrent instances and outputs it in presentable form
 
 	Parameters:
@@ -66,13 +66,12 @@ def present_results(torrent_list, header=True, output=False):
 	results=[]
 	if header: results.append(' #. Rat | Name \t\t\t\t\t\t\t| Size\t\t| Age\t\t| Seeds\t| Peers |')
 	for i, torrent in enumerate(torrent_list):
-		# tor class feature not working
+		# TODO tor class feature not working
 		if re.search(TRUSTED_SOURCES, torrent.name): tor_class =  '\033[0m[\033[0;32mV\033[0m]'
 		elif re.search(TRUSTED_FORMAT, torrent.name): tor_class = '\033[0m[\033[0;33m-\033[0m]'
 		else: tor_class = '  '
-		results.append('%s%2d. %s%s %50s\t %10s\t %10s\t %s\t %s\t%s' % (
+		torrent_string = '%s%s%s %50s\t %10s\t %10s\t %s\t %s\t%s' % (
 				'\033[34m' if bold else '',
-				i,
 				tor_class ,
 				'\033[34m' if bold else '',
 				torrent.name[:50],
@@ -80,11 +79,12 @@ def present_results(torrent_list, header=True, output=False):
 				torrent.age,
 				torrent.seeds,
 				torrent.peers,
-				'\033[0m' if bold else ''))
+				'\033[0m' if bold else '')
+		results.append(torrent_string)
 		bold = not bold # toogle
-		if output:
-			for r in results: print r
-		return results
+	if output:
+		for r in results: print r
+	return results
 
 def download_torrents(torrent_list, name_parser = False, location = './storage/'):
 	'''Downloads all torrents passed as a list of Torrent instances

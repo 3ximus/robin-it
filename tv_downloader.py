@@ -9,6 +9,7 @@ Copyright (C) 2015 - eximus
 '''
 
 import libs.gatherer
+print gatherer
 from libs.utillib import UtillibError
 import sys, re
 

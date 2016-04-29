@@ -258,7 +258,7 @@ class UserContent:
 					try:
 						results = gatherer.search(gatherer.KICKASS, search_term)
 						if selection_handler:
-							choice = selection_handler(results)
+							choice = selection_handler(gatherer.present_results(results, header=False, output=False))
 							if choice: e.torrent = results[choice]
 						else: e.torrent = results[0] # TODO ADD A BETTER METHOD FOR THIS
 					except UtillibError: status = False
