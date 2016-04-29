@@ -239,7 +239,24 @@ class UserContent:
 		if episode_filter: aired_list = filter(lambda x: aired_list.index(x) in map(lambda x: x-1,episode_filter), aired_list)
 		return aired_list
 
-	def assign_torrents(self, episode_list):
-		pass
+	def assign_torrents(self, episode_list, force=False, selection_handler=None):
+		'''Assign torrents to every episode given
+
+		Parameters:
+			episode_list -- list with episode instances
+			force -- force overwrite of torrents if already defined
+			selection_handler -- is a function that must return an integer (or None if canceled) and receives
+				a list of strings, this function must then return the user selection.
+					NOTE: This argument is mandatory! See top Documentation
+		'''
+		for e in episode_list:
+			if not e.torrent or force:
+					search_term = '%s %s %s' % (e.tv_show.name, 'S%02d' % int(e.s_id) + 'E%02d' % int(e.e_id), "720p")
+					results = gatherer.search(gatherer.KICKASS, search_term)
+					if selection_handler:
+						choice = selection_handler(results)
+						if choice: e.torrent = results[choice]
+					else: e.torrent = results[0] # TODO ADD A BETTER METHOD FOR THIS
+
 
 

@@ -39,7 +39,8 @@ def selection_handler(results):
 		except ValueError: print "Please Insert Valid Input"
 	return choice
 
-def download_episodes(episode_list):
+def download_episodes(user_state, episode_list):
+	user_state.assign_torrents(episode_list, force = True if raw_input("Force? (y) ") == "y" else False)
 	print "Downloading..."
 	pass
 
@@ -107,7 +108,7 @@ def user_interaction(user_state):
 				for key, value in stats.iteritems():
 					print "\t%s -- %s" % (key, value)
 				if raw_input("Keep adding? (y) ") != "y":
-					download_episodes(episode_list)
+					download_episodes(user_state, episode_list)
 					break
 		elif option == 6:
 			user_state.save_state(path = USER_STATE_DIR)

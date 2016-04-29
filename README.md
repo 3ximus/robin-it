@@ -21,10 +21,6 @@ Searches for available tv shows torrents at given a show name, quality (optional
 
 Searches thetvdb.com and gathers TV show information
 
-*Usage*:
-
-- Follow example usage at the end of the api
-
 ##RobinIt API - User Information and Content (latest v1.3)##
 
 Stores user information such as following shows and movies (movies not added as of v1.3)
@@ -54,22 +50,6 @@ ex:
 	. pacman -S python-lxml
 
 or through their website -> [lxml](http://lxml.de/installation.html)
-
-###TODO###
-
-- Maintain a version control over tv_shows.py classes in order to load correctly, same for user content ( possibly later add multiple ways to convert user saved data to current releases )
-
-- Add a torrent url and magnet to an episode / movie so that it gets saved
-
-- Get apikey for thetvdb API for the user (prompt user to register the website) - later implementation of this is to get a login screen that gets the apikey)
-
-- Use `https://pirateproxy.tv/` as a backup for when kickass is missing torrents
-
-- Select range of episodes to download
-
-- Schedule range of episodes to be downloaded periodically
-
-*Notes* : Use Kickass API instead of parsing when/if available
 
 --------------------------------
 
