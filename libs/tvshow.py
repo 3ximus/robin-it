@@ -5,7 +5,7 @@ Updates are cached in ./cache/ directory
 Example usage program in the end
 # note that seasons and episodes are indexed with zero base
 
-Latest Update - v1.3
+Latest Update - v1.0
 Created - 30.12.15
 Copyright (C) 2015 - eximus
 '''
