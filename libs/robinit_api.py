@@ -239,6 +239,7 @@ class UserContent:
 		if episode_filter: aired_list = filter(lambda x: aired_list.index(x) in map(lambda x: x-1,episode_filter), aired_list)
 		return aired_list
 
-	def assign_torrents
+	def assign_torrents(self, episode_list):
+		pass
 
 
