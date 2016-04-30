@@ -71,14 +71,8 @@ def present_results(torrent_list, header=True, output=True):
 		elif re.search(TRUSTED_FORMAT, torrent.name): tor_class = '\033[0m[\033[0;33m-\033[0m]'
 		else: tor_class = '  '
 		torrent_string = '%s%s%s %50s\t %10s\t %10s\t %s\t %s\t%s' % (
-				'\033[34m' if bold else '',
-				tor_class ,
-				'\033[34m' if bold else '',
-				torrent.name[:50],
-				torrent.size,
-				torrent.age,
-				torrent.seeds,
-				torrent.peers,
+				'\033[34m' if bold else '', tor_class , '\033[34m' if bold else '',
+				torrent.name[:50], torrent.size, torrent.age, torrent.seeds, torrent.peers,
 				'\033[0m' if bold else '')
 		results.append(torrent_string)
 		bold = not bold # toogle
@@ -97,6 +91,7 @@ def download_torrents(torrent_list, name_parser = False, location = './storage/'
 	'''
 	if type(torrent_list) is not list: torrent_list = [torrent_list,] # convert to list
 	status = True
+	filename = None
 	for torrent in torrent_list:
 		if not torrent: status = False
 		else:

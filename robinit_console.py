@@ -9,7 +9,10 @@ Copyright (C) 2016 - eximus
 __version__ = '1.0.0'
 
 import os, sys
+from colorama import init
 from libs.robinit_api import UserContent
+
+init() # make ANSI escape sequences work on windows too
 
 USER_STATE_DIR = "user/"
 
