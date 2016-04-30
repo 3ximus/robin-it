@@ -1,7 +1,7 @@
 #Robin It#
 ================================
 
-*Version 1.0.0*
+*Version 1.0.1*
 
 Python web crawler and TV Shows tracker to automaticly searches and gatheres torrents.
 
@@ -28,14 +28,20 @@ After building the compiled executable should be in the build directory under `r
 
 ## Changelog
 
+**New in v1.0.1**
+
+- Windows color support
+- Fixed profile saving bug
+- Compatibility fix for windows
+
 **New in v1.0.0**
 
-*RobinIt Console (latest v1.0.0)*
+*RobinIt Console*
 
-- Possible to build a persistent list of episodes 
+- Possible to build a persistent list of episodes
 - Use previously built list to download episodes torrents
 
-*TV Downloader script (latest v1.0.0)*
+*TV Downloader script*
 
 - Searches for available tv shows torrents at given a show name, quality (optional), season and episodes (optional) (Only Working for Kickass Torrents)
 
