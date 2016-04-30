@@ -11,11 +11,11 @@ if _platform =="linux" or _platform == "linux2":
 	base = 'Console'
 
 	executables = [
-	    Executable('robinit_console.py', base=base, targetName = 'robinit_console_v1.0.0')
+	    Executable('robinit_console.py', base=base, targetName = 'robinit_console_v1_0_1')
 	]
 
 	setup(name='robinit',
-	      version = '1.0.0',
+	      version = '1.0.1',
 	      description = 'TV Show Tracker and downloader -- console version',
 	      options = dict(build_exe = buildOptions),
 	      executables = executables)
