@@ -5,7 +5,6 @@ Created - 28.12.15
 Copyright (C) 2015 - eximus
 '''
 import re
-from sgmllib import SGMLParser
 from bs4 import BeautifulSoup
 from torrent import Torrent
 

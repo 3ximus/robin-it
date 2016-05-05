@@ -9,16 +9,9 @@ Python web crawler and TV Shows tracker to automaticly searches and gatheres tor
 
 ##Instalation
 
+Before manually installing try one of the compiled builds on the branches "releases-<arch>", if that does not work follow this:
+
 The main dependencies are listed in the requirements.txt, and can be installed through `pip install -r requirements.txt`
-
-You may also need python-lxml wich you can get through your package manager:
-ex:
-
-	. apt-get install python-lxml
-
-	. pacman -S python-lxml
-
-or through their website -> [lxml](http://lxml.de/installation.html)
 
 then just run `python2 setup.py build`
 
