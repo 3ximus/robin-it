@@ -2,8 +2,6 @@
 
 '''
 Module containing methods to search and download torrents / get magnet links
-Also containts function to return torrents from the page in the form of a list of Torrent instances
-It can be executed using ./torrent_api <search-terms> to search and download torrents from KICKASS by default
 Latest Update - v1.1
 Created - 24.11.15
 Copyright (C) 2015 - eximus
@@ -87,18 +85,18 @@ def download_torrents(torrent_list, name_parser = False, location = './storage/'
 		torrent_list -- list of torrents to download
 		name_parser -- used to determine the names of the downloaded torrents
 		location -- location to save the torrents
-	Note: this function yields 2 values (instance of downloaded torrent and the filename)
+	Note: this function yields 3 values (State of donwnload torrent (True - downloading / false - finished), instance of downloaded torrent and download status)
 	'''
 	if type(torrent_list) is not list: torrent_list = [torrent_list,] # convert to list
 	status = True
-	filename = None
 	for torrent in torrent_list:
+		yield False, torrent, status
 		if not torrent: status = False
 		else:
 			link = "https:%s.torrent" % torrent.tor_file
-			filename = utillib.download_file(link, torrent.name, location=location, extension = '.torrent')
+			utillib.download_file(link, torrent.name, location=location, extension = '.torrent')
 			status = True
-		yield torrent, filename, status
+		yield True, torrent, status
 
 def get_magnets(torrent_list):
 	'''Get magnet links from a Torrent list
@@ -109,20 +107,4 @@ def get_magnets(torrent_list):
 	for torrent in torrent_list:
 		magnets.append(torrent.magnet)
 	return magnets
-
-
-if __name__ == '__main__':
-	'''Sample program'''
-	try: search_terms = sys.argv[1]
-	except IndexError: sys.exit("No search term given")
-	try: results = search(KICKASS, search_terms)
-	except utillib.UtillibError: sys.exit("No results found")
-	present_results(results)
-	try: choice = eval(raw_input("\nSelection: "))
-	except (NameError, SyntaxError): sys.exit("%s Use a number" % ERROR_MSG)
-	try: downloads = download_torrents(results[choice])
-	except IndexError: sys.exit("%s Unexistent Option" % ERROR_MSG)
-	for d in downloads:
-		print "Downloaded: %s" % d
-	print "\nDONE"
 

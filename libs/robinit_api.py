@@ -142,7 +142,7 @@ class UserContent:
 			name -- if this is not given everything is updated
 		'''
 		if name: # if name was given
-			show = find_item(name, selection_handler = selection_handler)
+			show = self.find_item(name, selection_handler = selection_handler)
 			if show:
 				yield show
 				self.shows[show].update_info()
@@ -170,7 +170,7 @@ class UserContent:
 				if i == None: return None
 				new_show.build_with_result(i) # use choise to build content
 		except tvshow.UnknownTVShowException:
-			return False
+			return None
 		self.shows.update({new_show.name:new_show})
 		return new_show.name
 
@@ -277,6 +277,7 @@ class UserContent:
 		'''
 		status = True
 		for e in episode_list:
+			yield False, e, status
 			if not e.torrent or force:
 					search_term = '%s %s %s' % (e.tv_show.name, 'S%02d' % int(e.s_id) + 'E%02d' % int(e.e_id), "720p")
 					try:
@@ -293,12 +294,12 @@ class UserContent:
 								status = True
 					except UtillibError:
 						status = False
-			yield e, status
+			yield True, e, status
 
 	def download_torrents(self, episode_queue):
 		'''Download torrents from the episode list'''
-		for torrent, name, flag in gatherer.download_torrents(map(lambda x: x.torrent, episode_queue)):
-			yield torrent, name, flag
+		for state, torrent, flag in gatherer.download_torrents(map(lambda x: x.torrent, episode_queue)):
+			yield state, torrent, flag
 
 
 

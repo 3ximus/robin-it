@@ -60,9 +60,9 @@ def make_queue(user_state):
 		print "\033[3;32mFound: %s\033[0m\nFor multiple selections separate with ','" % show.name
 		try:
 # TODO ADD RANGES
-			seasons = map(lambda x: int(x) if x!="" else None, raw_input("Season: ").split(',')) # convert input to list of integers
+			seasons = map(lambda x: int(x) if x!="" else None, raw_input("Season: ").split(','))
 			reverse = True if raw_input("Get episodes in reverse order? (y) ") == "y" else False
-			episodes = map(lambda x: int(x) if x!="" else None, raw_input("Episodes: ").split(',')) # convert input to list of integers
+			episodes = map(lambda x: int(x) if x!="" else None, raw_input("Episodes: ").split(','))
 		except ValueError:
 			print "Invalid input. Aborting..."
 			continue
@@ -76,15 +76,22 @@ def make_queue(user_state):
 	print "\n\033[0;33mLinking torrents with episodes...\033[0m"
 	failed_ep = []
 	counter = 0
-	for episode, flag in user_state.assign_torrents(user_state.episode_queue,
+	for state, episode, flag in user_state.assign_torrents(user_state.episode_queue,
 											force = True if raw_input("Force? (y) ") == "y" else False,
 											selection_handler = selection_handler if raw_input("Select individually? (y) ") == "y" else None):
 		if not flag: failed_ep.append(episode)
-		counter += 1
-		print "\rGathering: %d/%d -- %s S%02dE%02d -- %s\033[0m%s\r" % (counter, len(user_state.episode_queue),
-																		episode.tv_show.name, int(episode.s_id), int(episode.e_id),
-																		"\033[0;32mSucess" if flag else "\033[0;31mFailed", " "*20),
-		sys.stdout.flush()
+		if not state:
+			counter += 1
+			print "Gathering: %d/%d -- %s S%02dE%02d -- %s%s\r" % (counter, len(user_state.episode_queue),
+					episode.tv_show.name, int(episode.s_id), int(episode.e_id),
+					"\033[0;32mSucess\033[0m" if flag else "\033[0;31mFailed\033[0m", " "*20),
+			sys.stdout.flush()
+		else:
+
+			print "Gathered: %d/%d -- %s S%02dE%02d -- %s%s" % (counter, len(user_state.episode_queue),
+					episode.tv_show.name, int(episode.s_id), int(episode.e_id),
+					"\033[0;32mSucess\033[0m" if flag else "\033[0;31mFailed\033[0m", " "*20)
+			sys.stdout.flush()
 
 	print "\rGathered: %d/%d Episodes%s" % (counter - len(failed_ep), len(user_state.episode_queue), " "*40)
 	if not failed_ep == []:
@@ -99,14 +106,21 @@ def download_queue(user_state):
 	counter = 0
 	failed_torrents = []
 	print "Downloading..."
-	for torrent, name, flag in user_state.download_torrents(user_state.episode_queue):
-# TODO MAKE THIS RETRIEVE NAME BEFORE AND AFTER DOWNLOAD MAKING A LIST OF OUTPUT
-		if not flag: failed_torrents.append(torrent)
-		counter += 1
-		print "\rDownloaded: %d/%d -- %s -- %s\033[0m%s\r" % (counter, len(user_state.episode_queue), name[:40],
-															"\033[0;32mSucess" if flag else "\033[0;31mFailed", " "*20),
-		sys.stdout.flush()
-	print "\rDownloaded: %d/%d Torrents%s" % (counter - len(failed_torrents), len(user_state.episode_queue), " "*80)
+	for state, torrent, flag in user_state.download_torrents(user_state.episode_queue):
+		if torrent == None and state:
+			print "Failed torrent: %d/%d" % (counter, len(user_state.episode_queue)) # TODO FIX THIS
+			continue
+		if not state:
+			counter += 1
+			print "Downloading: %d/%d -- %s -- %s\r" % (counter, len(user_state.episode_queue), torrent.name[:40],
+					"\033[0;32mSucess\033[0m" if flag else "\033[0;31mFailed\033[0m"),
+			sys.stdout.flush()
+		else:
+			if not flag: failed_torrents.append(torrent)
+			print "Downloaded: %d/%d -- %s -- %s%s" % (counter, len(user_state.episode_queue), torrent.name[:40],
+					"\033[0;32mSucess\033[0m" if flag else "\033[0;31mFailed\033[0m", " "*15)
+			sys.stdout.flush()
+	print "\nDownloaded: %d/%d Torrents%s" % (counter - len(failed_torrents), len(user_state.episode_queue), " "*80)
 
 def user_interaction(user_state):
 	'''Menu for User interaction'''
