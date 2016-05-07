@@ -353,6 +353,7 @@ class Episode:
 		self.tv_show.seasons[s_id].update_watched()
 
 	def already_aired(self):
+		if self.airdate == None: return False
 		date_split = self.airdate.split('-')
 		return datetime.date.today() > datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
 

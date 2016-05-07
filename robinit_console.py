@@ -82,9 +82,8 @@ def make_queue(user_state):
 		if not flag: failed_ep.append(episode)
 		if not state:
 			counter += 1
-			print "Gathering: %d/%d -- %s S%02dE%02d -- %s%s\r" % (counter, len(user_state.episode_queue),
-					episode.tv_show.name, int(episode.s_id), int(episode.e_id),
-					"\033[0;32mSucess\033[0m" if flag else "\033[0;31mFailed\033[0m", " "*20),
+			print "Gathering: %d/%d -- %s S%02dE%02d%s\r" % (counter, len(user_state.episode_queue),
+					episode.tv_show.name, int(episode.s_id), int(episode.e_id)," "*30),
 			sys.stdout.flush()
 		else:
 
@@ -112,8 +111,7 @@ def download_queue(user_state):
 			continue
 		if not state:
 			counter += 1
-			print "Downloading: %d/%d -- %s -- %s\r" % (counter, len(user_state.episode_queue), torrent.name[:40],
-					"\033[0;32mSucess\033[0m" if flag else "\033[0;31mFailed\033[0m"),
+			print "Downloading: %d/%d -- %s\r" % (counter, len(user_state.episode_queue), torrent.name[:40]),
 			sys.stdout.flush()
 		else:
 			if not flag: failed_torrents.append(torrent)
