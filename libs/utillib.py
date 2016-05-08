@@ -9,7 +9,6 @@ Copyright (C) 2015 - eximus
 import urllib2, urllib, requests
 import re, os, sys
 
-
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 ERROR_MSG = "[\033[1;31mERROR\033[0m]"
 

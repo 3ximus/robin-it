@@ -78,12 +78,11 @@ def present_results(torrent_list, header=True, output=True):
 		for r in results: print r
 	return results
 
-def download_torrents(torrent_list, name_parser = False, location = './storage/'):
+def download_torrents(torrent_list, location = './storage/'):
 	'''Downloads all torrents passed as a list of Torrent instances
 
 	Parameters:
 		torrent_list -- list of torrents to download
-		name_parser -- used to determine the names of the downloaded torrents
 		location -- location to save the torrents
 	Note: this function yields 3 values (State of donwnload torrent (True - downloading / false - finished), instance of downloaded torrent and download status)
 	'''
