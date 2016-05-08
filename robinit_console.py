@@ -10,6 +10,7 @@ __version__ = '1.0.1'
 
 import os, sys
 from colorama import init
+from libs.tvshow import NoConnectionException
 from libs.robinit_api import UserContent
 
 init() # make ANSI escape sequences work on windows too
@@ -140,7 +141,10 @@ def user_interaction(user_state):
 
 			print "\t\033[3;29mseparate names with \',\' for multiple names at once\033[0m"
 			for s in raw_input("TV Show name: ").split(','):
-				state = user_state.add_show(s, selection_handler = selection_handler)
+				try: state = user_state.add_show(s, selection_handler = selection_handler)
+				except NoConnectionException:
+					print "\033[31mError\033[0m Can't connect to thetvdb.com to get show info."
+					break
 				if state: print "\033[32mShow added:\033[0m %s" % state
 				elif state == False: print "\033[3;31mShow Not Found\033[0m"
 				elif state == None: print "\033[3;33mAborted...\033[0m"

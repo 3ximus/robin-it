@@ -11,6 +11,7 @@ Copyright (C) 2015 - eximus
 '''
 
 from tvdb_api import Tvdb
+from tvdb_exceptions import tvdb_error
 from torrent import Torrent
 import datetime
 import os
@@ -26,6 +27,11 @@ class TVError(Exception):
 class UnknownTVShowException(TVError):
 	'''Unknown tv show error'''
 	pass
+
+class NoConnectionException(TVError):
+	'''No connection to server error'''
+	pass
+
 
 class Show:
 	'''Class Containing Show information
@@ -65,7 +71,9 @@ class Show:
 		self.search_results = [] # store search results
 
 		# search for available TV Shows
-		self.search_results = Tvdb(cache = CACHE, banners = True).search(name)
+		try:
+			self.search_results = Tvdb(cache = CACHE, banners = True).search(name)
+		except tvdb_error: raise NoConnectionException
 		results_amount = len(self.search_results)
 		if results_amount == 0: raise UnknownTVShowException("Unexistent tv_show \"%s\"" % name)
 		if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
