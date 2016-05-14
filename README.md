@@ -3,7 +3,8 @@
 
 *Version 1.0.1*
 
-Python web crawler and TV Shows tracker to automaticly searches and gatheres torrents.
+Python web crawler that automaticly searches and gatheres torrents.
+Console Version.
 
 --------------------------------
 
