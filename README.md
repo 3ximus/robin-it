@@ -14,7 +14,7 @@ Before manually installing try one of the compiled builds on the branches "relea
 
 The main dependencies are listed in the requirements.txt, and can be installed through `pip install -r requirements.txt`
 
-then just run `python2 setup.py build`
+then just run `python2 setup.py build` on windows, or `./python2 setup.py build` on linux
 
 ## Usage
 
