@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+	<qresource prefix="/resources">
+		<file>images/robinit.ico</file>
+		<file>images/robinit_desaturated.ico</file>
+	</qresource>
+</RCC>

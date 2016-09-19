@@ -8,7 +8,7 @@ import re
 from bs4 import BeautifulSoup
 from torrent import Torrent
 
-KICKASS = "http://kickass.unblocked.la/"
+KICKASS = "http://kickasstorrents.to/"
 
 class Torrent_BS4():
 	'''Beautiful Soup 4 Custom parser
@@ -48,6 +48,7 @@ class Torrent_BS4():
 
 		# get everything nice and sorted as list of Torrent structures
 		# compensate the fact that links and info are sequentialy on the list
+		print torrent_info
 		for i, n in enumerate(torrent_ids):
 			to_add = Torrent(name = n[0],
 					link = n[1],

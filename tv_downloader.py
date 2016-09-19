@@ -53,6 +53,6 @@ for s in seasons:
 			downloads.append(search_results[int(c)])
 
 		files_downloaded = None
-		for a,b,c in download_torrents(downloads, location=DOWNLOAD_PATH, file_list=files_downloaded)
-		print 'Files Downloaded: %d, to %s' % (len(files_downloaded) if files_downloaded else 0, DOWNLOAD_PATH)
+		for a,b,c in download_torrents(downloads, location=DOWNLOAD_PATH, file_list=files_downloaded):
+			print 'Files Downloaded: %d, to %s' % (len(files_downloaded) if files_downloaded else 0, DOWNLOAD_PATH)
 
