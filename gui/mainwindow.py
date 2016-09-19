@@ -297,4 +297,4 @@ class Ui_mainWindow(object):
         self.shows_button.setText(_translate("mainWindow", "TV Shows", None))
         self.label.setText(_translate("mainWindow", "Robin it", None))
 
-#import resources_rc
+import gui.resources_rc
