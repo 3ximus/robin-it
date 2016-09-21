@@ -27,8 +27,11 @@ __version__ = '1.0.1'
 
 from utillib import UtillibError
 import tvshow
+from os import mkdir, path
 import gatherer
 import cPickle
+
+USER_STATE_DIR = 'user/'
 
 class UserContent:
 	'''User TV Shows Content Class
@@ -42,9 +45,13 @@ class UserContent:
 			if uname != '': self.user_name = uname
 			else: raise ValueError("Username cannot be empty")
 		else: self.user_name = ''
+
 		self.tvdb_apikey = '' # TODO API KEY
 		self.shows = {} # following tv shows
 		self.episode_queue = []
+
+		if not self.load_state(USER_STATE_DIR):
+			if not path.exists(USER_STATE_DIR): mkdir(USER_STATE_DIR)
 
 # ==========================================
 # 	          BASIC METHODS
@@ -92,7 +99,7 @@ class UserContent:
 		This method closes the file if given
 		'''
 		if path:
-			path = "%srobinit_%s_%s%s" % (path, __version__, self.user_name, '.pkl')
+			path = "%srobinit_%s_%s%s" % (path, __version__.split('.')[0], self.user_name, '.pkl')
 			fd = open(path, 'wb')
 		if not fd: raise ValueError("No path or file passed to save method")
 		cPickle.dump(self.__dict__, fd, cPickle.HIGHEST_PROTOCOL)
@@ -104,12 +111,16 @@ class UserContent:
 		This method closes the file if given
 		'''
 		if path:
-			path = "%srobinit_%s_%s%s" % (path, __version__, self.user_name, '.pkl')
-			fd = open(path, 'rb')
+			path = "%srobinit_%s_%s%s" % (path, __version__.split('.')[0], self.user_name, '.pkl')
+			try:
+				fd = open(path, 'rb')
+			except IOError:
+				return False
 		if not fd: raise ValueError("No path or file passed to load method")
 		tmp_dict = cPickle.load(fd)
 		fd.close()
 		self.__dict__.update(tmp_dict)
+		return True
 
 	def find_item(self, name, selection_handler = None):
 		'''Find a key in a dictionary using a partial name returning correct name
