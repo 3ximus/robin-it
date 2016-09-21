@@ -1,15 +1,21 @@
+#! /usr/bin/env python2
 
+'''
+Frontend Aplication GUI
+Latest Update - v1.0.1
+Created - 21.9.16
+Copyright (C) 2016 - eximus
+'''
+__version__ = '0.0.1'
 
-
-from PyQt4 import QtCore, QtGui
 import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from gui.mainwindow import Ui_mainWindow
 
-import gui.mainwindow
-
-app = QtGui.QApplication(sys.argv)
-gui_module = gui.mainwindow.QtGui.QMainWindow()
-uiform = gui.mainwindow.Ui_mainWindow()
-uiform.setupUi(gui_module)
-gui_module.show()
-app.exec_()
+app = QApplication(sys.argv)
+window = QMainWindow()
+ui = Ui_mainWindow()
+ui.setupUi(window)
+window.show()
+sys.exit(app.exec_())
 
