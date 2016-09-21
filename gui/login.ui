@@ -1028,7 +1028,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="loggin_button">
+         <widget class="QPushButton" name="login_button">
           <property name="maximumSize">
            <size>
             <width>40</width>

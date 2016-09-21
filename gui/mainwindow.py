@@ -8,11 +8,10 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_mainWindow(object):
-    def setupUi(self, mainWindow):
-        mainWindow.setObjectName("mainWindow")
-        mainWindow.setEnabled(True)
-        mainWindow.resize(902, 400)
+class Ui_mainwindow(object):
+    def setupUi(self, mainwindow):
+        mainwindow.setObjectName("mainwindow")
+        mainwindow.resize(902, 400)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -149,18 +148,18 @@ class Ui_mainWindow(object):
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
-        mainWindow.setPalette(palette)
+        mainwindow.setPalette(palette)
         font = QtGui.QFont()
         font.setFamily("Hack")
         font.setItalic(True)
-        mainWindow.setFont(font)
-        mainWindow.setWindowTitle("Robin_it_v0.1")
+        mainwindow.setFont(font)
+        mainwindow.setWindowTitle("Robin_it_v0.1")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit_desaturated.ico"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit_desaturated.ico"), QtGui.QIcon.Disabled, QtGui.QIcon.On)
-        mainWindow.setWindowIcon(icon)
-        self.centralwidget = QtWidgets.QWidget(mainWindow)
+        mainwindow.setWindowIcon(icon)
+        self.centralwidget = QtWidgets.QWidget(mainwindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout_2.setObjectName("gridLayout_2")
@@ -249,18 +248,18 @@ class Ui_mainWindow(object):
         self.shows_button.setObjectName("shows_button")
         self.horizontalLayout.addWidget(self.shows_button)
         self.gridLayout_2.addLayout(self.horizontalLayout, 1, 0, 1, 1)
-        mainWindow.setCentralWidget(self.centralwidget)
-        self.statusBar = QtWidgets.QStatusBar(mainWindow)
+        mainwindow.setCentralWidget(self.centralwidget)
+        self.statusBar = QtWidgets.QStatusBar(mainwindow)
         self.statusBar.setObjectName("statusBar")
-        mainWindow.setStatusBar(self.statusBar)
+        mainwindow.setStatusBar(self.statusBar)
 
-        self.retranslateUi(mainWindow)
-        QtCore.QMetaObject.connectSlotsByName(mainWindow)
+        self.retranslateUi(mainwindow)
+        QtCore.QMetaObject.connectSlotsByName(mainwindow)
 
-    def retranslateUi(self, mainWindow):
+    def retranslateUi(self, mainwindow):
         _translate = QtCore.QCoreApplication.translate
-        self.robin_label.setText(_translate("mainWindow", "> run robin_it"))
-        self.movies_button.setText(_translate("mainWindow", "> load movies"))
-        self.shows_button.setText(_translate("mainWindow", "> load tv_shows"))
+        self.robin_label.setText(_translate("mainwindow", "> run robin_it"))
+        self.movies_button.setText(_translate("mainwindow", "> load movies"))
+        self.shows_button.setText(_translate("mainwindow", "> load tv_shows"))
 
 import resources_rc

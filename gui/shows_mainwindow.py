@@ -8,10 +8,10 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(993, 600)
+class Ui_shows_mainwindow(object):
+    def setupUi(self, shows_mainwindow):
+        shows_mainwindow.setObjectName("shows_mainwindow")
+        shows_mainwindow.resize(993, 600)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -148,16 +148,16 @@ class Ui_MainWindow(object):
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
-        MainWindow.setPalette(palette)
+        shows_mainwindow.setPalette(palette)
         font = QtGui.QFont()
         font.setFamily("Hack")
-        MainWindow.setFont(font)
+        shows_mainwindow.setFont(font)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit_desaturated.ico"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit_desaturated.ico"), QtGui.QIcon.Disabled, QtGui.QIcon.On)
-        MainWindow.setWindowIcon(icon)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        shows_mainwindow.setWindowIcon(icon)
+        self.centralwidget = QtWidgets.QWidget(shows_mainwindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -412,6 +412,7 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.hd_button.setFont(font)
         self.hd_button.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.hd_button.setChecked(True)
         self.hd_button.setObjectName("hd_button")
         self.horizontalLayout_3.addWidget(self.hd_button)
         self.gridLayout.addLayout(self.horizontalLayout_3, 3, 0, 1, 1)
@@ -422,23 +423,23 @@ class Ui_MainWindow(object):
         self.page_2.setObjectName("page_2")
         self.stackedWidget.addWidget(self.page_2)
         self.horizontalLayout.addWidget(self.stackedWidget)
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        shows_mainwindow.setCentralWidget(self.centralwidget)
+        self.statusbar = QtWidgets.QStatusBar(shows_mainwindow)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        shows_mainwindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
+        self.retranslateUi(shows_mainwindow)
         self.stackedWidget.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(shows_mainwindow)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, shows_mainwindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Robin_it_v0.1"))
-        self.sign_label.setText(_translate("MainWindow", ">"))
-        self.search_box.setPlaceholderText(_translate("MainWindow", "show name"))
-        self.search_button.setText(_translate("MainWindow", ">>"))
-        self.shows_label.setText(_translate("MainWindow", "> search tv_shows"))
-        self.sd_button.setText(_translate("MainWindow", "s&tandard definition"))
-        self.hd_button.setText(_translate("MainWindow", "hi&gh definition"))
+        shows_mainwindow.setWindowTitle(_translate("shows_mainwindow", "Robin_it_v0.1"))
+        self.sign_label.setText(_translate("shows_mainwindow", ">"))
+        self.search_box.setPlaceholderText(_translate("shows_mainwindow", "show name"))
+        self.search_button.setText(_translate("shows_mainwindow", ">>"))
+        self.shows_label.setText(_translate("shows_mainwindow", "> search tv_shows"))
+        self.sd_button.setText(_translate("shows_mainwindow", "s&tandard definition"))
+        self.hd_button.setText(_translate("shows_mainwindow", "hi&gh definition"))
 
 import resources_rc
