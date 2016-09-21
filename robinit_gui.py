@@ -9,6 +9,7 @@ Copyright (C) 2016 - eximus
 __version__ = '0.0.1'
 
 import sys
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from gui.mainwindow import Ui_mainwindow
 from gui.shows_mainwindow import Ui_shows_mainwindow
@@ -24,7 +25,22 @@ class ShowsWindow(QMainWindow):
 		# set up UI from QtDesigner
 		self.ui = Ui_shows_mainwindow()
 		self.ui.setupUi(self)
+		self.ui.search_box.setFrame(False)
 		self.ui.search_box.setFocus()
+
+		self.ui.search_box.returnPressed.connect(self.search)
+		self.ui.search_button.clicked.connect(self.search)
+
+	def search(self):
+		'''Searches for TV Show displaying results on page 1'''
+		#hideAnimation = QtCore.QPropertyAnimation(self.ui.shows_label, "geometry")
+		#hideAnimation.setDuration(10000)
+		#hideAnimation.setStartValue(self.ui.shows_label.geometry()) # start at current position
+		#finalGeometry = QtCore.QRect(100,100, 100,100)
+		#hideAnimation.setEndValue(finalGeometry)
+		#hideAnimation.start()
+
+		self.ui.stackedWidget.setCurrentIndex(1)
 
 class MainWindow(QMainWindow):
 	def __init__(self):
@@ -66,11 +82,13 @@ class LoginWindow(QMainWindow):
 		self.ui = Ui_loginwindow()
 		self.ui.setupUi(self)
 
+		self.ui.login_box.setFrame(False)
+		self.ui.login_box.setFocus()
+
 		# connect buttons
 		self.ui.login_button.clicked.connect(self.login)
 		self.ui.autologin_checkbox.stateChanged.connect(self.toogle_autologin)
 		self.ui.login_box.returnPressed.connect(self.login)
-		self.ui.login_box.setFocus()
 
 		self.autologin = False
 
