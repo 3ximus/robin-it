@@ -30,9 +30,9 @@ class ShowWindow(QMainWindow):
 		self.ui.setupUi(self)
 
 class SettingsWindow(QMainWindow):
-	def __init__(self, return_to):
+	def __init__(self, main_window):
 		super(SettingsWindow, self).__init__()
-		self.return_to=return_to
+		self.main_window=main_window
 
 		# set up UI from QtDesigner
 		self.ui = Ui_settings_window()
@@ -41,9 +41,11 @@ class SettingsWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.go_back)
 
 	def go_back(self):
+		#self.main_window.move(self.x(),self.y())
+		self.main_window.show()
+		self.main_window.setEnabled(True)
 		self.close()
-		self.return_to.move(self.x(),self.y())
-		self.return_to.show()
+		self.destroy()
 
 class ShowsMainWindow(QMainWindow):
 	def __init__(self, return_to):
@@ -105,7 +107,7 @@ class LoginWindow(QMainWindow):
 		self.ui.autologin_checkbox.stateChanged.connect(self.toogle_autologin)
 		self.ui.login_box.returnPressed.connect(self.login)
 
-		self.autologin = False
+		self.autologin = False #placeholder
 
 	def login(self):
 		'''If a username is given it loads the user profile or creates a new one'''
@@ -128,24 +130,31 @@ class MainWindow(QMainWindow):
 		self.ui.setupUi(self)
 
 		# init window at center
-		self.move(QApplication.desktop().screen().rect().center()- self.rect().center())
+		self.move(QApplication.desktop().screen().rect().center()-self.rect().center())
 		self.show()
 		self.setEnabled(False)
 
+		# create login window
 		self.loginwindow = LoginWindow(main_window=self)
-		self.loginwindow.move(self.x()+200,self.y()+100) # position login window
+		self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
 		self.loginwindow.show()
 
 		self.ui.shows_button.clicked.connect(partial(self.display_window, window=ShowsMainWindow(return_to=self)))
-		self.ui.config_button.clicked.connect(partial(self.display_window, window=SettingsWindow(return_to=self)))
+		self.ui.config_button.clicked.connect(self.display_settings)
 
 		# User
 		self.user_state = None
 
 	def display_window(self, window):
-		window.move(self.x(),self.y()) # position new window at the same position
+		window.move(self.pos()+self.rect().center()-window.rect().center()) # position new window at the center position
 		window.show()
 		self.close()
+
+	def display_settings(self):
+		self.settings = SettingsWindow(main_window=self)
+		self.settings.move(self.pos()+self.rect().center()-self.settings.rect().center()) # position new window at the center position
+		self.settings.show()
+		self.setEnabled(False)
 
 	def set_user_state(self, user_state):
 		'''Sets user state to a given UserContent instance'''
