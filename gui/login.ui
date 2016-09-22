@@ -695,6 +695,9 @@
           <property name="text">
            <string/>
           </property>
+          <property name="frame">
+           <bool>false</bool>
+          </property>
           <property name="placeholderText">
            <string>username</string>
           </property>

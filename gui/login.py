@@ -257,6 +257,7 @@ class Ui_loginwindow(object):
         font.setWeight(75)
         self.login_box.setFont(font)
         self.login_box.setText("")
+        self.login_box.setFrame(False)
         self.login_box.setObjectName("login_box")
         self.horizontalLayout.addWidget(self.login_box)
         self.login_button = QtWidgets.QPushButton(self.centralwidget)

@@ -15,8 +15,19 @@ from gui.mainwindow import Ui_mainwindow
 from gui.shows_mainwindow import Ui_shows_mainwindow
 from gui.login import Ui_loginwindow
 from gui.settings import Ui_settings_window
+from gui.show import Ui_show_window
 from libs.robinit_api import UserContent
+from functools import partial
 
+
+class ShowWindow(QMainWindow):
+	def __init__(self, return_to):
+		super(ShowWindow, self).__init__()
+		self.return_to=return_to
+
+		# set up UI from QtDesigner
+		self.ui = Ui_show_window()
+		self.ui.setupUi(self)
 
 class SettingsWindow(QMainWindow):
 	def __init__(self, return_to):
@@ -26,7 +37,6 @@ class SettingsWindow(QMainWindow):
 		# set up UI from QtDesigner
 		self.ui = Ui_settings_window()
 		self.ui.setupUi(self)
-		self.ui.storage_box.setFrame(False)
 
 		self.ui.back_button.clicked.connect(self.go_back)
 
@@ -35,24 +45,22 @@ class SettingsWindow(QMainWindow):
 		self.return_to.move(self.x(),self.y())
 		self.return_to.show()
 
-class ShowsWindow(QMainWindow):
+class ShowsMainWindow(QMainWindow):
 	def __init__(self, return_to):
-		super(ShowsWindow, self).__init__()
+		super(ShowsMainWindow, self).__init__()
 		self.return_to=return_to
 
 		# set up UI from QtDesigner
 		self.ui = Ui_shows_mainwindow()
 		self.ui.setupUi(self)
-		self.ui.filter_box.setFrame(False)
-		self.ui.search_box.setFrame(False)
 		self.ui.search_box.setFocus()
 
 		self.ui.search_box.returnPressed.connect(self.search)
 		self.ui.search_button.clicked.connect(self.search)
 
 		self.ui.back_button_0.clicked.connect(self.go_back)
-		self.ui.back_button_1.clicked.connect(lambda: self.go_to(0))
-		self.ui.back_button_2.clicked.connect(lambda: self.go_to(0))
+		self.ui.back_button_1.clicked.connect(partial(self.go_to, index=0))
+		self.ui.back_button_2.clicked.connect(partial(self.go_to, index=0))
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
 		self.ui.search_box.textChanged.connect(self.update_search)
@@ -95,19 +103,12 @@ class MainWindow(QMainWindow):
 		self.loginwindow.move(self.x()+200,self.y()+100) # position login window
 		self.loginwindow.show()
 
-		self.ui.shows_button.clicked.connect(lambda: self.display_window(ShowsWindow(return_to=self)))
-		#self.ui.config_button.clicked.connect(lambda: self.display_window(SettingsWindow(return_to=self)))
-		self.ui.config_button.clicked.connect(self.disp_sett) # XXX PLACEHOLDER
+		self.ui.shows_button.clicked.connect(partial(self.display_window, window=ShowsMainWindow(return_to=self)))
+		self.ui.config_button.clicked.connect(partial(self.display_window, window=SettingsWindow(return_to=self)))
 
-	def display_window(self, window): # FIXME not working
+	def display_window(self, window):
 		window.move(self.x(),self.y()) # position new window at the same position
 		window.show()
-		self.close()
-
-	def disp_sett(self): # XXX PLACEHOLDER
-		window2 = SettingsWindow(return_to=self)
-		window2.move(self.x(),self.y()) # position new window at the same position
-		window2.show()
 		self.close()
 
 	def set_user_state(self, user_state):
@@ -123,7 +124,6 @@ class LoginWindow(QMainWindow):
 		self.ui = Ui_loginwindow()
 		self.ui.setupUi(self)
 
-		self.ui.login_box.setFrame(False)
 		self.ui.login_box.setFocus()
 
 		# connect buttons
