@@ -478,7 +478,7 @@
            <number>3</number>
           </property>
           <item>
-           <widget class="QPushButton" name="shows_button">
+           <widget class="QPushButton" name="myshows_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -547,7 +547,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="myshows_button">
+           <widget class="QPushButton" name="towatch_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -1664,6 +1664,9 @@
         </item>
         <item row="1" column="0">
          <widget class="QScrollArea" name="scrollArea_3">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
@@ -1672,8 +1675,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>898</width>
-             <height>518</height>
+             <width>902</width>
+             <height>522</height>
             </rect>
            </property>
           </widget>

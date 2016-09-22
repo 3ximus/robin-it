@@ -9,7 +9,7 @@ Copyright (C) 2016 - eximus
 __version__ = '0.0.1'
 
 import sys
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from gui.mainwindow import Ui_mainwindow
 from gui.shows_mainwindow import Ui_shows_mainwindow
@@ -61,6 +61,10 @@ class ShowsMainWindow(QMainWindow):
 		self.ui.back_button_0.clicked.connect(self.go_back)
 		self.ui.back_button_1.clicked.connect(partial(self.go_to, index=0))
 		self.ui.back_button_2.clicked.connect(partial(self.go_to, index=0))
+		self.ui.back_button_3.clicked.connect(partial(self.go_to, index=0))
+
+		self.ui.myshows_button.clicked.connect(partial(self.go_to, index=2))
+		self.ui.towatch_button.clicked.connect(partial(self.go_to, index=3))
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
 		self.ui.search_box.textChanged.connect(self.update_search)
@@ -84,36 +88,6 @@ class ShowsMainWindow(QMainWindow):
 	def update_search(self):
 		'''Display suggested shows according to typed content'''
 		pass
-
-class MainWindow(QMainWindow):
-	def __init__(self):
-		super(MainWindow, self).__init__()
-
-		# set up UI from QtDesigner
-		self.ui = Ui_mainwindow()
-		self.ui.setupUi(self)
-
-		self.user_state = None
-
-		self.move(200,200)
-		self.show()
-		self.setEnabled(False)
-
-		self.loginwindow = LoginWindow(main_window=self)
-		self.loginwindow.move(self.x()+200,self.y()+100) # position login window
-		self.loginwindow.show()
-
-		self.ui.shows_button.clicked.connect(partial(self.display_window, window=ShowsMainWindow(return_to=self)))
-		self.ui.config_button.clicked.connect(partial(self.display_window, window=SettingsWindow(return_to=self)))
-
-	def display_window(self, window):
-		window.move(self.x(),self.y()) # position new window at the same position
-		window.show()
-		self.close()
-
-	def set_user_state(self, user_state):
-		'''Sets user state to a given UserContent instance'''
-		self.user_state=user_state
 
 class LoginWindow(QMainWindow):
 	def __init__(self, main_window):
@@ -144,6 +118,38 @@ class LoginWindow(QMainWindow):
 
 	def toogle_autologin(self):
 		self.autologin = not self.autologin
+
+class MainWindow(QMainWindow):
+	def __init__(self):
+		super(MainWindow, self).__init__()
+
+		# set up UI from QtDesigner
+		self.ui = Ui_mainwindow()
+		self.ui.setupUi(self)
+
+		# init window at center
+		self.move(QApplication.desktop().screen().rect().center()- self.rect().center())
+		self.show()
+		self.setEnabled(False)
+
+		self.loginwindow = LoginWindow(main_window=self)
+		self.loginwindow.move(self.x()+200,self.y()+100) # position login window
+		self.loginwindow.show()
+
+		self.ui.shows_button.clicked.connect(partial(self.display_window, window=ShowsMainWindow(return_to=self)))
+		self.ui.config_button.clicked.connect(partial(self.display_window, window=SettingsWindow(return_to=self)))
+
+		# User
+		self.user_state = None
+
+	def display_window(self, window):
+		window.move(self.x(),self.y()) # position new window at the same position
+		window.show()
+		self.close()
+
+	def set_user_state(self, user_state):
+		'''Sets user state to a given UserContent instance'''
+		self.user_state=user_state
 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
