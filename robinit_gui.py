@@ -14,8 +14,26 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from gui.mainwindow import Ui_mainwindow
 from gui.shows_mainwindow import Ui_shows_mainwindow
 from gui.login import Ui_loginwindow
+from gui.settings import Ui_settings_window
 from libs.robinit_api import UserContent
 
+
+class SettingsWindow(QMainWindow):
+	def __init__(self, return_to):
+		super(SettingsWindow, self).__init__()
+		self.return_to=return_to
+
+		# set up UI from QtDesigner
+		self.ui = Ui_settings_window()
+		self.ui.setupUi(self)
+		self.ui.storage_box.setFrame(False)
+
+		self.ui.back_button.clicked.connect(self.go_back)
+
+	def go_back(self):
+		self.close()
+		self.return_to.move(self.x(),self.y())
+		self.return_to.show()
 
 class ShowsWindow(QMainWindow):
 	def __init__(self, return_to):
@@ -25,22 +43,39 @@ class ShowsWindow(QMainWindow):
 		# set up UI from QtDesigner
 		self.ui = Ui_shows_mainwindow()
 		self.ui.setupUi(self)
+		self.ui.filter_box.setFrame(False)
 		self.ui.search_box.setFrame(False)
 		self.ui.search_box.setFocus()
 
 		self.ui.search_box.returnPressed.connect(self.search)
 		self.ui.search_button.clicked.connect(self.search)
 
+		self.ui.back_button_0.clicked.connect(self.go_back)
+		self.ui.back_button_1.clicked.connect(lambda: self.go_to(0))
+		self.ui.back_button_2.clicked.connect(lambda: self.go_to(0))
+
+		self.ui.filter_box.textChanged.connect(self.update_filter)
+		self.ui.search_box.textChanged.connect(self.update_search)
+
 	def search(self):
 		'''Searches for TV Show displaying results on page 1'''
-		#hideAnimation = QtCore.QPropertyAnimation(self.ui.shows_label, "geometry")
-		#hideAnimation.setDuration(10000)
-		#hideAnimation.setStartValue(self.ui.shows_label.geometry()) # start at current position
-		#finalGeometry = QtCore.QRect(100,100, 100,100)
-		#hideAnimation.setEndValue(finalGeometry)
-		#hideAnimation.start()
-
 		self.ui.stackedWidget.setCurrentIndex(1)
+
+	def go_back(self):
+		self.close()
+		self.return_to.move(self.x(),self.y())
+		self.return_to.show()
+
+	def go_to(self, index):
+		self.ui.stackedWidget.setCurrentIndex(index)
+
+	def update_filter(self):
+		'''Updates scroll box content according to content of filter_box'''
+		print self.ui.filter_box.text()
+
+	def update_search(self):
+		'''Display suggested shows according to typed content'''
+		pass
 
 class MainWindow(QMainWindow):
 	def __init__(self):
@@ -60,18 +95,24 @@ class MainWindow(QMainWindow):
 		self.loginwindow.move(self.x()+200,self.y()+100) # position login window
 		self.loginwindow.show()
 
-		self.ui.shows_button.clicked.connect(self.display_shows_window)
+		self.ui.shows_button.clicked.connect(lambda: self.display_window(ShowsWindow(return_to=self)))
+		#self.ui.config_button.clicked.connect(lambda: self.display_window(SettingsWindow(return_to=self)))
+		self.ui.config_button.clicked.connect(self.disp_sett) # XXX PLACEHOLDER
 
-	def display_shows_window(self):
+	def display_window(self, window): # FIXME not working
+		window.move(self.x(),self.y()) # position new window at the same position
+		window.show()
 		self.close()
-		self.showswindow = ShowsWindow(return_to=self)
-		self.showswindow.move(self.x(),self.y()) # position new window at the same position
-		self.showswindow.show()
+
+	def disp_sett(self): # XXX PLACEHOLDER
+		window2 = SettingsWindow(return_to=self)
+		window2.move(self.x(),self.y()) # position new window at the same position
+		window2.show()
+		self.close()
 
 	def set_user_state(self, user_state):
 		'''Sets user state to a given UserContent instance'''
 		self.user_state=user_state
-
 
 class LoginWindow(QMainWindow):
 	def __init__(self, main_window):

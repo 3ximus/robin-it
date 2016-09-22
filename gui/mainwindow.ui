@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>mainwindow</class>
  <widget class="QMainWindow" name="mainwindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -52,9 +55,9 @@
      <colorrole role="Dark">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>1</red>
-        <green>83</green>
-        <blue>49</blue>
+        <red>67</red>
+        <green>72</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -189,9 +192,9 @@
      <colorrole role="Dark">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>1</red>
-        <green>83</green>
-        <blue>49</blue>
+        <red>67</red>
+        <green>72</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -290,9 +293,9 @@
      <colorrole role="WindowText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>1</red>
-        <green>83</green>
-        <blue>49</blue>
+        <red>67</red>
+        <green>72</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -326,9 +329,9 @@
      <colorrole role="Dark">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>1</red>
-        <green>83</green>
-        <blue>49</blue>
+        <red>67</red>
+        <green>72</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -344,9 +347,9 @@
      <colorrole role="Text">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>1</red>
-        <green>83</green>
-        <blue>49</blue>
+        <red>67</red>
+        <green>72</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -362,9 +365,9 @@
      <colorrole role="ButtonText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>1</red>
-        <green>83</green>
-        <blue>49</blue>
+        <red>67</red>
+        <green>72</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -444,37 +447,13 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <widget class="QLabel" name="robin_label">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="palette">
        <palette>
         <active>
          <colorrole role="WindowText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-         <colorrole role="Text">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-         <colorrole role="Shadow">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-         <colorrole role="ToolTipText">
           <brush brushstyle="SolidPattern">
            <color alpha="255">
             <red>255</red>
@@ -494,68 +473,14 @@
            </color>
           </brush>
          </colorrole>
-         <colorrole role="Text">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-         <colorrole role="Shadow">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-         <colorrole role="ToolTipText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
         </inactive>
         <disabled>
          <colorrole role="WindowText">
           <brush brushstyle="SolidPattern">
            <color alpha="255">
-            <red>1</red>
-            <green>83</green>
-            <blue>49</blue>
-           </color>
-          </brush>
-         </colorrole>
-         <colorrole role="Text">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>1</red>
-            <green>83</green>
-            <blue>49</blue>
-           </color>
-          </brush>
-         </colorrole>
-         <colorrole role="Shadow">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-         <colorrole role="ToolTipText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
+            <red>67</red>
+            <green>72</green>
+            <blue>72</blue>
            </color>
           </brush>
          </colorrole>
@@ -578,10 +503,7 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="spacing">
-       <number>30</number>
-      </property>
+     <layout class="QGridLayout" name="gridLayout">
       <property name="sizeConstraint">
        <enum>QLayout::SetMinAndMaxSize</enum>
       </property>
@@ -597,7 +519,79 @@
       <property name="bottomMargin">
        <number>3</number>
       </property>
-      <item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="shows_button">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>400</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>1</red>
+              <green>83</green>
+              <blue>49</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
+        <property name="font">
+         <font>
+          <family>Hack</family>
+          <pointsize>18</pointsize>
+          <italic>false</italic>
+         </font>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::WheelFocus</enum>
+        </property>
+        <property name="text">
+         <string>&gt; load tv_shows</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
        <widget class="QPushButton" name="movies_button">
         <property name="enabled">
          <bool>false</bool>
@@ -611,13 +605,13 @@
         <property name="minimumSize">
          <size>
           <width>400</width>
-          <height>100</height>
+          <height>60</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>400</width>
-          <height>100</height>
+          <height>60</height>
          </size>
         </property>
         <property name="font">
@@ -627,15 +621,18 @@
          </font>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
+         <enum>Qt::WheelFocus</enum>
         </property>
         <property name="text">
          <string>&gt; load movies</string>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="shows_button">
+      <item row="1" column="0">
+       <widget class="QPushButton" name="other">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -645,27 +642,60 @@
         <property name="minimumSize">
          <size>
           <width>400</width>
-          <height>100</height>
+          <height>60</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>400</width>
-          <height>100</height>
+          <height>60</height>
          </size>
         </property>
         <property name="font">
          <font>
-          <family>Hack</family>
           <pointsize>18</pointsize>
           <italic>false</italic>
          </font>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
+         <enum>Qt::WheelFocus</enum>
         </property>
         <property name="text">
-         <string>&gt; load tv_shows</string>
+         <string>&gt; something_else</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="config_button">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>400</width>
+          <height>60</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+          <italic>false</italic>
+         </font>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::WheelFocus</enum>
+        </property>
+        <property name="text">
+         <string>&gt; configure</string>
         </property>
        </widget>
       </item>
