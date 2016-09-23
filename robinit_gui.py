@@ -122,9 +122,10 @@ class SettingsWindow(QMainWindow):
 			self.ui.defaultuser_box.setText(self.config['default_user'])
 
 class ShowsMainWindow(QMainWindow):
-	def __init__(self, return_to):
+	def __init__(self, return_to, user_state):
 		super(ShowsMainWindow, self).__init__()
 		self.return_to=return_to
+		self.user_state=user_state
 
 		# set up UI from QtDesigner
 		self.ui = Ui_shows_mainwindow()
@@ -146,8 +147,14 @@ class ShowsMainWindow(QMainWindow):
 		self.ui.search_box.textChanged.connect(self.update_search)
 
 	def search(self):
-		'''Searches for TV Show displaying results on page 1'''
+		'''Searches for TV Show'''
+		self.user_state.add_show(name=self.ui.search_box.text(), selection_handler=self.display_results)
 		self.ui.stackedWidget.setCurrentIndex(1)
+
+	def display_results(self, results):
+		'''Displays TV show results on stack widget page 1'''
+		print results
+		return None
 
 	def go_back(self):
 		self.close()
@@ -210,6 +217,9 @@ class MainWindow(QMainWindow):
 		self.move(QApplication.desktop().screen().rect().center()-self.rect().center())
 		self.show()
 
+		# User
+		self.user_state = None
+
 		self.config = load_config_file() # get configs
 		if 'default_user' in self.config.keys():
 			self.set_user_state(UserContent(self.config['default_user']))
@@ -219,12 +229,10 @@ class MainWindow(QMainWindow):
 			self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
 			self.loginwindow.show()
 
-		self.ui.shows_button.clicked.connect(partial(self.display_window, window=ShowsMainWindow(return_to=self)))
-		self.ui.config_button.clicked.connect(self.display_settings)
+		self.shows_window = ShowsMainWindow(return_to=self, user_state=self.user_state)
 		self.settings = SettingsWindow(main_window=self, config=self.config)
-
-		# User
-		self.user_state = None
+		self.ui.shows_button.clicked.connect(partial(self.display_window, window=self.shows_window))
+		self.ui.config_button.clicked.connect(self.display_settings)
 
 	def display_window(self, window):
 		window.move(self.pos()+self.rect().center()-window.rect().center()) # position new window at the center position
