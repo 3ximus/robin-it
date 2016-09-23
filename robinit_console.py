@@ -195,12 +195,12 @@ def user_interaction(user_state):
 
 User_State = None # will hold the user state
 
-user_name = raw_input("Insert your username: ")
-if user_name == "": sys.exit("Invalid username. Exiting...")
+username = raw_input("Insert your username: ")
+if username == "": sys.exit("Invalid username. Exiting...")
 
 
 
-User_State = UserContent(user_name)
+User_State = UserContent(username)
 try: user_interaction(User_State)
 except KeyboardInterrupt: sys.exit('\n\033[1;33mAborting...\033[0m')
 

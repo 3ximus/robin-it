@@ -42,9 +42,9 @@ class UserContent:
 
 	def __init__(self, uname = '', empty = False):
 		if not empty:
-			if uname != '': self.user_name = uname
+			if uname != '': self.username = uname
 			else: raise ValueError("Username cannot be empty")
-		else: self.user_name = ''
+		else: self.username = ''
 
 		self.tvdb_apikey = '' # TODO API KEY
 		self.shows = {} # following tv shows
@@ -99,7 +99,7 @@ class UserContent:
 		This method closes the file if given
 		'''
 		if path:
-			path = "%srobinit_%s_%s%s" % (path, __version__.split('.')[0], self.user_name, '.pkl')
+			path = "%srobinit_%s_%s%s" % (path, __version__.split('.')[0], self.username, '.pkl')
 			fd = open(path, 'wb')
 		if not fd: raise ValueError("No path or file passed to save method")
 		cPickle.dump(self.__dict__, fd, cPickle.HIGHEST_PROTOCOL)
@@ -111,7 +111,7 @@ class UserContent:
 		This method closes the file if given
 		'''
 		if path:
-			path = "%srobinit_%s_%s%s" % (path, __version__.split('.')[0], self.user_name, '.pkl')
+			path = "%srobinit_%s_%s%s" % (path, __version__.split('.')[0], self.username, '.pkl')
 			try:
 				fd = open(path, 'rb')
 			except IOError:

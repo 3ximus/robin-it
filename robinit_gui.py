@@ -19,7 +19,6 @@ from gui.show import Ui_show_window
 from libs.robinit_api import UserContent
 from functools import partial
 
-
 class ShowWindow(QMainWindow):
 	def __init__(self, return_to):
 		super(ShowWindow, self).__init__()
@@ -30,9 +29,10 @@ class ShowWindow(QMainWindow):
 		self.ui.setupUi(self)
 
 class SettingsWindow(QMainWindow):
-	def __init__(self, main_window):
+	def __init__(self, main_window, config):
 		super(SettingsWindow, self).__init__()
 		self.main_window=main_window
+		self.config=config
 
 		# set up UI from QtDesigner
 		self.ui = Ui_settings_window()
@@ -107,13 +107,13 @@ class LoginWindow(QMainWindow):
 		self.ui.autologin_checkbox.stateChanged.connect(self.toogle_autologin)
 		self.ui.login_box.returnPressed.connect(self.login)
 
-		self.autologin = False #placeholder
+		self.autologin = False
 
 	def login(self):
 		'''If a username is given it loads the user profile or creates a new one'''
 		if self.ui.login_box.text() != "":
-			user_state=UserContent(self.ui.login_box.text())
-			self.main_window.set_user_state(user_state)
+			if auto_login
+			self.main_window.set_user_state(UserContent(self.ui.login_box.text()))
 			self.main_window.setEnabled(True)
 			self.close()
 			self.destroy()
@@ -132,12 +132,15 @@ class MainWindow(QMainWindow):
 		# init window at center
 		self.move(QApplication.desktop().screen().rect().center()-self.rect().center())
 		self.show()
-		self.setEnabled(False)
 
-		# create login window
-		self.loginwindow = LoginWindow(main_window=self)
-		self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
-		self.loginwindow.show()
+		self.config = load_config_file() # get configs
+		if 'default_user' in self.config.keys():
+			self.set_user_state(UserContent(self.config['default_user']))
+		else: # create login window
+			self.setEnabled(False)
+			self.loginwindow = LoginWindow(main_window=self)
+			self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
+			self.loginwindow.show()
 
 		self.ui.shows_button.clicked.connect(partial(self.display_window, window=ShowsMainWindow(return_to=self)))
 		self.ui.config_button.clicked.connect(self.display_settings)
@@ -151,7 +154,7 @@ class MainWindow(QMainWindow):
 		self.close()
 
 	def display_settings(self):
-		self.settings = SettingsWindow(main_window=self)
+		self.settings = SettingsWindow(main_window=self, config=self.config)
 		self.settings.move(self.pos()+self.rect().center()-self.settings.rect().center()) # position new window at the center position
 		self.settings.show()
 		self.setEnabled(False)
@@ -159,6 +162,22 @@ class MainWindow(QMainWindow):
 	def set_user_state(self, user_state):
 		'''Sets user state to a given UserContent instance'''
 		self.user_state=user_state
+		self.ui.user_label.setText('<%s>' % self.user_state.username)
+
+
+def load_config_file():
+	content = {}
+	fp = open('robinit.conf', 'r')
+	for n, line in enumerate(fp):
+		if line[0] == '#': continue
+		line = [s.strip('\n') for s in line.split(' ')]
+		if len(line) != 2 or line[1] == "":
+			raise ValueError("\033[0;31mError in line %d : \" %s \" in robinit.conf\033[0m" % (n, ' '.join(line)))
+		key, value = line
+		content.update({key : value})
+	fp.close()
+	print content
+	return content
 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
