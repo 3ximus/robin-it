@@ -48,12 +48,11 @@ class Torrent_BS4():
 
 		# get everything nice and sorted as list of Torrent structures
 		# compensate the fact that links and info are sequentialy on the list
-		print torrent_info
 		for i, n in enumerate(torrent_ids):
 			to_add = Torrent(name = n[0],
 					link = n[1],
-					magnet = tm_links[2*i + 0],
-					tor_file = tm_links[2*i + 1],
+					#magnet = tm_links[2*i + 0], # not working on KAT
+					tor_file = tm_links[i],
 					size = torrent_info[5*i + 0],
 					files = torrent_info[5*i + 1],
 					age = torrent_info[5*i + 2],

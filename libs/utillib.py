@@ -32,8 +32,9 @@ def build_search_url(main_url, search_term, page = 1, order_results = 'seeds'):
 	if order_results == 'seeds': order_results = ORDER_SEEDS
 	elif order_results == 'age': order_results = ORDER_AGE
 	else: raise TypeError('%s Unknown order_resutls parameter' % ERROR_MSG)
-	search_url = '%susearch/%s/%d/%s' % (main_url, urllib2.quote(search_term, safe=''), page, order_results)
-	return search_url
+	#search_url = '%susearch/%s/%d/%s' % (main_url, urllib2.quote(search_term, safe=''), page, order_results)
+	search_url = '%susearch/%s/' % (main_url, urllib2.quote(search_term, safe=''))
+	return search_url.lower()
 
 def get_page_html(url):
 	'''Get html index of given page'''

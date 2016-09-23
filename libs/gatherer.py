@@ -48,6 +48,7 @@ def search(main_url, search_term, parser=parserlib.Torrent_BS4(), page = 1, orde
 		order_results -- order of results, values are : 'seeds' and 'age'
 	'''
 	url = utillib.build_search_url(main_url, search_term, page=page, order_results=order_results)
+	print url
 	try: html = utillib.get_page_html(url)
 	except utillib.UtillibError: raise # re-raise the exception
 	return parse_page_links(html, parser) # return list of Torrent instances
