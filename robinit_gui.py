@@ -39,13 +39,87 @@ class SettingsWindow(QMainWindow):
 		self.ui.setupUi(self)
 
 		self.ui.back_button.clicked.connect(self.go_back)
+		self.ui.save_button.clicked.connect(self.save)
+		self.configure()
 
 	def go_back(self):
-		#self.main_window.move(self.x(),self.y())
 		self.main_window.show()
 		self.main_window.setEnabled(True)
 		self.close()
-		self.destroy()
+
+	def save(self):
+		'''Saves configuration to a file, ignores if its set to default'''
+		keys = self.config.keys()
+		if not self.ui.kickass_checkbox.checkState(): self.config['kickass_allow'] = 'False' # default is True
+		elif 'kickass_allow' in keys: del(self.config['kickass_allow'])
+		if self.ui.rarbg_checkbox.checkState(): self.config['rarbg_allow'] = 'True' # default is False
+		elif 'rarbg_allow' in keys: del(self.config['rarbg_allow'])
+		if self.ui.piratebay_checkbox.checkState(): self.config['piratebay_allow'] = 'True' # default is False
+		elif 'piratebay_allow' in keys: del(self.config['piratebay_allow'])
+
+		if not self.ui.kickass_box.text() == "" : self.config['kickass'] = self.ui.kickass_box.text() # default is empty
+		elif 'kickass' in keys: del(self.config['kickass'])
+		if not self.ui.rarbg_box.text() == "" : self.config['rarbg'] = self.ui.rarbg_box.text() # default is empty
+		elif 'rarbg' in keys: del(self.config['rarbg'])
+		if not self.ui.piratebay_box.text() == "" : self.config['piratebay'] = self.ui.piratebay_box.text() # default is empty
+		elif 'piratebay' in keys: del(self.config['piratebay'])
+
+		if not self.ui.ensub_checkbox.checkState(): self.config['sub_en'] = 'False' # default is True
+		elif 'sub_en' in keys: del(self.config['sub_en'])
+		if not self.ui.ptsub_checkbox.checkState(): self.config['sub_pt'] = 'False' # default is True
+		elif 'sub_pt' in keys: del(self.config['sub_pt'])
+
+		if self.ui.sd_button.isChecked(): self.config['def'] = 'sd'
+		if self.ui.hd_button.isChecked(): self.config['def'] = 'hd'
+
+		if not self.ui.storage_box.text() == "": self.config['storage_dir'] = self.ui.storage_box.text() # default is empty
+		elif 'storage_dir' in keys: del(self.config['storage_dir'])
+		if not self.ui.user_box.text() == "": self.config['user_dir'] = self.ui.user_box.text() # default is empty
+		elif 'user_dir' in keys: del(self.config['user_dir'])
+		if not self.ui.cache_box.text() == "": self.config['cache_dir'] = self.ui.cache_box.text() # default is empty
+		elif 'cache_dir' in keys: del(self.config['cache_dir'])
+
+		if not self.ui.defaultuser_box.text() == "": self.config['default_user'] = self.ui.defaultuser_box.text()
+		elif 'default_user' in keys: del(self.config['default_user'])
+
+		save_config_file(self.config)
+		self.go_back()
+
+	def configure(self):
+		keys = self.config.keys()
+		if 'kickass_allow' in keys:
+			self.ui.kickass_checkbox.setCheckState(True if self.config['kickass_allow'] == 'True' else False)
+		if 'rarbg_allow' in keys:
+			self.ui.rarbg_checkbox.setCheckState(True if self.config['rarbg_allow'] == 'True' else False)
+		if 'piratebay_allow' in keys:
+			self.ui.piratebay_checkbox.setCheckState(True if self.config['piratebay_allow'] == 'True' else False)
+
+		if 'kickass' in keys:
+			self.ui.kickass_box.setText(self.config['kickass'])
+		if 'rarbg' in keys:
+			self.ui.rarbg_box.setText(self.config['rarbg'])
+		if 'piratebay' in keys:
+			self.ui.piratebay_box.setText(self.config['piratebay'])
+
+		if 'sub_en' in keys:
+			self.ui.ensub_checkbox.setCheckState(True if self.config['sub_en'] == 'True' else False)
+		if 'sub_pt' in keys:
+			self.ui.ptsub_checkbox.setCheckState(True if self.config['sub_pt'] == 'True' else False)
+
+		if 'def' in keys:
+			if self.config['def'] == 'sd':
+				self.ui.sd_button.setChecked(True)
+			elif self.config['def'] == 'hd':
+				self.ui.hd_button.setChecked(True)
+
+		if 'storage_dir' in keys:
+			self.ui.storage_box.setText(self.config['storage_dir'])
+		if 'user_dir' in keys:
+			self.ui.user_box.setText(self.config['user_dir'])
+		if 'cache_dir' in keys:
+			self.ui.cache_box.setText(self.config['cache_dir'])
+		if 'default_user' in keys:
+			self.ui.defaultuser_box.setText(self.config['default_user'])
 
 class ShowsMainWindow(QMainWindow):
 	def __init__(self, return_to):
@@ -92,9 +166,10 @@ class ShowsMainWindow(QMainWindow):
 		pass
 
 class LoginWindow(QMainWindow):
-	def __init__(self, main_window):
+	def __init__(self, main_window, config):
 		super(LoginWindow, self).__init__()
 		self.main_window=main_window
+		self.config=config
 
 		# set up UI from QtDesigner
 		self.ui = Ui_loginwindow()
@@ -112,7 +187,9 @@ class LoginWindow(QMainWindow):
 	def login(self):
 		'''If a username is given it loads the user profile or creates a new one'''
 		if self.ui.login_box.text() != "":
-			if auto_login
+			if self.autologin:
+				self.config.update({'default_user' : self.ui.login_box.text()})
+				save_config_file(self.config)
 			self.main_window.set_user_state(UserContent(self.ui.login_box.text()))
 			self.main_window.setEnabled(True)
 			self.close()
@@ -138,12 +215,13 @@ class MainWindow(QMainWindow):
 			self.set_user_state(UserContent(self.config['default_user']))
 		else: # create login window
 			self.setEnabled(False)
-			self.loginwindow = LoginWindow(main_window=self)
+			self.loginwindow = LoginWindow(main_window=self, config=self.config)
 			self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
 			self.loginwindow.show()
 
 		self.ui.shows_button.clicked.connect(partial(self.display_window, window=ShowsMainWindow(return_to=self)))
 		self.ui.config_button.clicked.connect(self.display_settings)
+		self.settings = SettingsWindow(main_window=self, config=self.config)
 
 		# User
 		self.user_state = None
@@ -154,7 +232,6 @@ class MainWindow(QMainWindow):
 		self.close()
 
 	def display_settings(self):
-		self.settings = SettingsWindow(main_window=self, config=self.config)
 		self.settings.move(self.pos()+self.rect().center()-self.settings.rect().center()) # position new window at the center position
 		self.settings.show()
 		self.setEnabled(False)
@@ -164,19 +241,26 @@ class MainWindow(QMainWindow):
 		self.user_state=user_state
 		self.ui.user_label.setText('<%s>' % self.user_state.username)
 
+def save_config_file(content):
+	if type(content) == dict:
+		fp = open('robinit.conf', 'w')
+		for key in content.keys():
+			fp.write("%s %s\n" % (key, content[key]))
+		fp.close()
 
 def load_config_file():
 	content = {}
-	fp = open('robinit.conf', 'r')
-	for n, line in enumerate(fp):
-		if line[0] == '#': continue
-		line = [s.strip('\n') for s in line.split(' ')]
-		if len(line) != 2 or line[1] == "":
-			raise ValueError("\033[0;31mError in line %d : \" %s \" in robinit.conf\033[0m" % (n, ' '.join(line)))
-		key, value = line
-		content.update({key : value})
-	fp.close()
-	print content
+	try:
+		fp = open('robinit.conf', 'r')
+		for n, line in enumerate(fp):
+			if line[0] == '#': continue
+			line = [s.strip('\n') for s in line.split(' ')]
+			if len(line) != 2 or line[1] == "":
+				raise ValueError("\033[0;31mError in line %d : \" %s \" in robinit.conf\033[0m" % (n, ' '.join(line)))
+			key, value = line
+			content.update({key : value})
+		fp.close()
+	except IOError: pass
 	return content
 
 if __name__ == "__main__":
