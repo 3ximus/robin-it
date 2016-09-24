@@ -1,7 +1,6 @@
 '''
 API for getting TV Shows information
 Queries http://thetvdb.com/ using  tvdb_api: https://github.com/dbr/tvdb_api
-Updates are cached in ./cache/ directory
 Example usage program in the end
 # note that seasons and episodes are indexed with zero base
 
@@ -12,40 +11,39 @@ Copyright (C) 2015 - eximus
 
 from tvdb_api import Tvdb
 from tvdb_exceptions import tvdb_error
+from tvdb_exceptions import tvdb_shownotfound
 from torrent import Torrent
 import datetime
 import os
 import re
 
 IMDB_TITLE = "http://www.imdb.com/title/"
-CACHE = "cache/"
+
+def search_for_show(search_term):
+	'''Auxiliar method to search for TVShows in the database, returns None if no show found'''
+	try: return Tvdb(cache=False).search(search_term)
+	except tvdb_error: raise NoConnectionException
+	except tvdb_shownotfound: return None
 
 class TVError(Exception):
 	'''Main Error Class'''
-	pass
-
-class UnknownTVShowException(TVError):
-	'''Unknown tv show error'''
 	pass
 
 class NoConnectionException(TVError):
 	'''No connection to server error'''
 	pass
 
-
 class Show:
 	'''Class Containing Show information
 
 	This class is self updated, once the method update_info is called it updates itself
-	Tv database is cached to its default location of CACHE
 	'''
 
-	def __init__(self, name, header_only = False):
+	def __init__(self, name, header_only = False, cache=False):
 		'''Class constructor
 
-		In case multiple results are found for given tv_show.real_name the search_results are stored in
-			self.search_results and the class is left on an unbuilt state. After that the method
-			build_with_result(int) should be called to complete the build process.
+		Name must be the only possibility otherwise an error will ocurr (use search_for_show method and
+			use 'seriesname' as the name to build this correctly)
 		The header only flag only builds the class with Show information and doesn't retrieve seasons
 			and episodes info
 		'''
@@ -68,47 +66,21 @@ class Show:
 		self.imdb_id = '' # imdb id
 		self.watched = False
 		self.torrent = None
-		self.search_results = [] # store search results
+		self.cache=cache
 
-		# search for available TV Shows
-		try:
-			self.search_results = Tvdb(cache = CACHE, banners = True).search(name)
-		except tvdb_error: raise NoConnectionException
-		results_amount = len(self.search_results)
-		if results_amount == 0: raise UnknownTVShowException("Unexistent tv_show \"%s\"" % name)
-		if not os.path.exists(CACHE): os.mkdir(CACHE) # make directory if unexistent
-		if results_amount == 1:
-			self.name = self.search_results[0]['seriesname'].split('(')[0]
-			self.real_name = self.search_results[0]['seriesname']
-			self.update_info(header_only = header_only) # Build class
-			self.search_results = []
-		else:
-			for i, result in enumerate(self.search_results): # make list a collection of strings
-				self.search_results[i] = result['seriesname']
+		if not os.path.exists(self.cache): os.mkdir(self.cache) # make directory if unexistent
 
-	def build_with_result(self, option, header_only = False):
-		'''This function builds class with a given self.search_results index
-
-		Its intended this is to be called after it checks the self.search_results and prompts the user
-			if multiple ones are found and builds with the selected option
-		'''
-		if option < 0 or option >= len(self.search_results): raise ValueError("Invalid option when generating class")
-		self.name = self.search_results[option].split('(')[0]
-		self.real_name = self.search_results[option]
+		self.name = name.split('(')[0]
+		self.real_name = name
 		self.update_info(header_only = header_only) # generate content
-		self.search_results = []
 
-	def update_info(self, cache = CACHE, header_only = False):
+	def update_info(self, header_only = False, override_cache=False):
 		'''Searches thetvdb.com and generates class attributes
 
 		This method function is responsible for building the entire data structure of a TV Show
-		If cache is False, update from the database is forced
 		It is mandatory that self.real_name is set otherwise build will fail
 		'''
-		if self.real_name == '': # error check
-			raise UnknownTVShowException("TV Show name not set, build class correctly")
-
-		database = Tvdb(cache = cache)
+		database = Tvdb(cache = (self.cache if not override_cache else False))
 
 		if not header_only:
 			# updates seasons list
@@ -116,7 +88,7 @@ class Show:
 			if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
 			self.seasons = []
 			for i in seasons_list: # generates the seasons list
-				new_season = Season(s_id = i, tv_show = self)
+				new_season = Season(s_id = i, tv_show = self, cache=override_cache)
 				self.seasons.append(new_season)
 
 		# update TV Show info
@@ -198,15 +170,13 @@ class Show:
 			for e in reversed(s.episodes):
 				if e.already_aired: return e
 
-
 class Season():
 	'''Class defining a TV Show Season
 
 	Its self updatable with method update_info, this updates every episode information
-	Update function generates cache on CACHE directory by default
 	'''
 
-	def __init__(self, s_id, tv_show):
+	def __init__(self, s_id, tv_show, cache=False):
 		'''Constructor method
 
 		Must receive a season id number and a tv_show from where this season belongs to
@@ -219,6 +189,7 @@ class Season():
 		self.torrent = None
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
+		self.cache=cache
 		self.update_info()
 
 	def to_string(self):
@@ -227,13 +198,10 @@ class Season():
 		for episode in self.episodes: return_string += "%s - %s\n" % (episode.episode_number, episode.name)
 		print return_string
 
-	def update_info(self, cache = CACHE):
-		'''Searches thetvdb.com and updates all episodes it contains
-
-		If cache is False, update from the database is forced
-		'''
+	def update_info(self):
+		'''Searches thetvdb.com and updates all episodes it contains '''
 		# update posters
-		database = Tvdb(cache = cache, banners = True)
+		database = Tvdb(cache = self.cache, banners = True)
 		try: posters = database[self.tv_show.real_name]['_banners']['season']
 		except KeyError: pass # no posters, so don't update them
 		else: # update posters
@@ -255,7 +223,7 @@ class Season():
 		episodes_list = database[self.tv_show.real_name][self.s_id].keys()
 		self.episodes = [] # reset cached values
 		for i in episodes_list: # generate the episodes list
-			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show)
+			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show, cache=self.cache)
 			self.episodes.append(new_episode)
 
 	def toogle_watched(self):
@@ -296,10 +264,9 @@ class Episode:
 	'''Class defining a Season Episode
 
 	Its self updatable with method update_info updating episode information
-	Update function generates cache on CACHE directory by default
 	'''
 
-	def __init__(self, e_id, s_id, tv_show):
+	def __init__(self, e_id, s_id, tv_show, cache=False):
 		'''Constructor method
 
 		Must receive an episode id number, a season id number and a tv_show from where this episode belongs to
@@ -320,6 +287,7 @@ class Episode:
 		self.torrent = None
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
+		self.cache=cache
 		self.update_info()
 
 	def to_string(self):
@@ -327,12 +295,9 @@ class Episode:
 		print "\t Episode info:\nName: %s\nSeason: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s" % (self.name, self.season, self.episode_number, self.director, self.writer, self.rating, self.image, self.airdate, self.imdb_id)
 		print "Description: %s" % self.description.encode('utf-8') # fix encoding
 
-	def update_info(self, cache = CACHE):
-		'''Searches thetvdb.com and updates all episodes it contains
-
-		If cache is False, update from the database is forced
-		'''
-		database = Tvdb(cache = cache)
+	def update_info(self):
+		'''Searches thetvdb.com and updates all episodes it contains '''
+		database = Tvdb(cache = self.cache)
 		self.name = database[self.tv_show.real_name][self.s_id][self.e_id]['episodename']
 		self.description = database[self.tv_show.real_name][self.s_id][self.e_id]['overview']
 		self.episode_number = database[self.tv_show.real_name][self.s_id][self.e_id]['episodenumber']
