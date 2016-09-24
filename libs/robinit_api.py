@@ -31,8 +31,6 @@ from os import mkdir, path
 import gatherer
 import cPickle
 
-USER_STATE_DIR = 'user/'
-
 class UserContent:
 	'''User TV Shows Content Class
 
@@ -40,7 +38,7 @@ class UserContent:
 	Contains list with following shows being Show instances
 	'''
 
-	def __init__(self, uname = '', empty = False):
+	def __init__(self, uname = '', empty = False, cache_dir='cache/', user_dir='user/'):
 		if not empty:
 			if uname != '': self.username = uname
 			else: raise ValueError("Username cannot be empty")
@@ -48,10 +46,11 @@ class UserContent:
 
 		self.tvdb_apikey = '' # TODO API KEY
 		self.shows = {} # following tv shows
-		self.episode_queue = []
+		self.user_dir = user_dir
+		self.cache_dir = cache_dir
 
-		if not self.load_state(USER_STATE_DIR):
-			if not path.exists(USER_STATE_DIR): mkdir(USER_STATE_DIR)
+		if not self.load_state(self.user_dir):
+			if not path.exists(self.user_dir): mkdir(self.user_dir)
 
 # ==========================================
 # 	          BASIC METHODS
@@ -68,26 +67,6 @@ class UserContent:
 		show_name = self.find_item(show, selection_handler)
 		if show_name: return self.shows[show_name]
 		return None
-
-	def enqueue(self, episode):
-		'''Add an episode or a list of episodes to the queue'''
-		if isinstance(episode, list): self.episode_queue.extend(episode)
-		else: self.episode_queue.append(episode)
-
-	def dequeue(self, i):
-		'''Remove element from the queue'''
-		del self.episode_queue[i]
-
-	def clear_queue(self):
-		'''Make queue empy'''
-		self.episode_queue = []
-
-	def stat_queue(self):
-		'''Return stats in the form of a dictionary where keys are show names and value the corresponding episode count'''
-		stats = {}
-		for item in self.episode_queue: # build status to present
-			stats[item.tv_show.name] = 1 if item.tv_show.name not in stats else stats[item.tv_show.name]+1
-		return stats
 
 # ==========================================
 # 	           MAIN METHODS
@@ -164,7 +143,7 @@ class UserContent:
 				self.shows[show].update_info() # update everything
 
 	def add_show(self, name = None, show = None, selection_handler = None) :
-		'''Add TV SHOW to the follwed tvshows dictionary
+		'''Add TV SHOW to the followed tvshows dictionary
 
 		Parameters:
 			name -- keyword used in search
@@ -174,14 +153,11 @@ class UserContent:
 					NOTE: This argument is mandatory! See top Documentation
 		Returns show name if was added sucessfully, false otherwise, None if canceled
 		'''
-		try:
-			new_show = tvshow.Show(name)
-			if new_show.search_results != []:
-				i = selection_handler(new_show.search_results)
-				if i == None: return None
-				new_show.build_with_result(i) # use choise to build content
-		except tvshow.UnknownTVShowException:
-			return None
+		new_show = tvshow.Show(name)
+		if new_show.search_results != []:
+			i = selection_handler(new_show.search_results)
+			if i == None: return None
+			new_show.build_with_result(i) # use choise to build content
 		self.shows.update({new_show.name:new_show})
 		return new_show.name
 
@@ -290,7 +266,7 @@ class UserContent:
 		for e in episode_list:
 			yield False, e, status
 			if not e.torrent or force:
-					search_term = '%s %s %s' % (e.tv_show.name, 'S%02d' % int(e.s_id) + 'E%02d' % int(e.e_id), "720p")
+					search_term = '%s %s %s' % (e.tv_show.name, 's%02d' % int(e.s_id) + 'e%02d' % int(e.e_id), "720p")
 					try:
 						results = gatherer.search(gatherer.KICKASS, search_term)
 						if selection_handler:
@@ -306,12 +282,4 @@ class UserContent:
 					except UtillibError:
 						status = False
 			yield True, e, status
-
-	def download_torrents(self, episode_queue):
-		'''Download torrents from the episode list'''
-		for state, torrent, flag in gatherer.download_torrents(map(lambda x: x.torrent, episode_queue)):
-			yield state, torrent, flag
-
-
-
 
