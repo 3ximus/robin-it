@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>show_window</class>
- <widget class="QMainWindow" name="show_window">
+ <class>show_banner_widget</class>
+ <widget class="QWidget" name="show_banner_widget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>943</width>
-    <height>740</height>
+    <width>770</width>
+    <height>179</height>
    </rect>
   </property>
   <property name="palette">
@@ -52,9 +52,9 @@
      <colorrole role="Dark">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>49</red>
-        <green>72</green>
-        <blue>67</blue>
+        <red>1</red>
+        <green>83</green>
+        <blue>49</blue>
        </color>
       </brush>
      </colorrole>
@@ -189,9 +189,9 @@
      <colorrole role="Dark">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>49</red>
-        <green>72</green>
-        <blue>67</blue>
+        <red>1</red>
+        <green>83</green>
+        <blue>49</blue>
        </color>
       </brush>
      </colorrole>
@@ -290,9 +290,9 @@
      <colorrole role="WindowText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>49</red>
-        <green>72</green>
-        <blue>67</blue>
+        <red>1</red>
+        <green>83</green>
+        <blue>49</blue>
        </color>
       </brush>
      </colorrole>
@@ -326,9 +326,9 @@
      <colorrole role="Dark">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>49</red>
-        <green>72</green>
-        <blue>67</blue>
+        <red>1</red>
+        <green>83</green>
+        <blue>49</blue>
        </color>
       </brush>
      </colorrole>
@@ -344,9 +344,9 @@
      <colorrole role="Text">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>49</red>
-        <green>72</green>
-        <blue>67</blue>
+        <red>1</red>
+        <green>83</green>
+        <blue>49</blue>
        </color>
       </brush>
      </colorrole>
@@ -362,9 +362,9 @@
      <colorrole role="ButtonText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>49</red>
-        <green>72</green>
-        <blue>67</blue>
+        <red>1</red>
+        <green>83</green>
+        <blue>49</blue>
        </color>
       </brush>
      </colorrole>
@@ -425,148 +425,88 @@
     </disabled>
    </palette>
   </property>
-  <property name="font">
-   <font>
-    <family>Hack</family>
-   </font>
-  </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.1</string>
+   <string>Form</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/resources/images/robinit.ico</normaloff>
-    <disabledoff>:/resources/images/robinit_desaturated.ico</disabledoff>
-    <disabledon>:/resources/images/robinit_desaturated.ico</disabledon>:/resources/images/robinit.ico</iconset>
-  </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="leftMargin">
-     <number>30</number>
-    </property>
-    <property name="rightMargin">
-     <number>30</number>
-    </property>
-    <item>
-     <widget class="QLabel" name="shows_label">
-      <property name="palette">
-       <palette>
-        <active>
-         <colorrole role="WindowText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-        </active>
-        <inactive>
-         <colorrole role="WindowText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-        </inactive>
-        <disabled>
-         <colorrole role="WindowText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>1</red>
-            <green>83</green>
-            <blue>49</blue>
-           </color>
-          </brush>
-         </colorrole>
-        </disabled>
-       </palette>
-      </property>
-      <property name="font">
-       <font>
-        <family>Roboto Mono Medium for Powerline</family>
-        <pointsize>48</pointsize>
-        <italic>false</italic>
-       </font>
-      </property>
-      <property name="text">
-       <string>&gt; show name</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2"/>
-    </item>
-    <item>
-     <widget class="QPushButton" name="back_button">
-      <property name="maximumSize">
-       <size>
-        <width>40</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="palette">
-       <palette>
-        <active>
-         <colorrole role="ButtonText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-        </active>
-        <inactive>
-         <colorrole role="ButtonText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </brush>
-         </colorrole>
-        </inactive>
-        <disabled>
-         <colorrole role="ButtonText">
-          <brush brushstyle="SolidPattern">
-           <color alpha="255">
-            <red>1</red>
-            <green>83</green>
-            <blue>49</blue>
-           </color>
-          </brush>
-         </colorrole>
-        </disabled>
-       </palette>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>14</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>&lt;&lt;</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="name_label">
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>1</red>
+           <green>83</green>
+           <blue>49</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto Mono for Powerline</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>&lt;name&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="banner">
+     <property name="font">
+      <font>
+       <family>Roboto Mono for Powerline</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>../../../../Downloads/121361-g41.jpg</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
