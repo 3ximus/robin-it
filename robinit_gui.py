@@ -17,6 +17,7 @@ from gui.login import Ui_loginwindow
 from gui.settings import Ui_settings_window
 from gui.show import Ui_show_window
 from libs.robinit_api import UserContent
+from libs.tvshow import search_for_show
 from functools import partial
 
 class ShowWindow(QMainWindow):
@@ -133,7 +134,9 @@ class ShowsMainWindow(QMainWindow):
 		self.ui.search_box.setFocus()
 
 		self.ui.search_box.returnPressed.connect(self.search)
+		self.ui.search_box_2.returnPressed.connect(self.search)
 		self.ui.search_button.clicked.connect(self.search)
+		self.ui.search_button_2.clicked.connect(self.search)
 
 		self.ui.back_button_0.clicked.connect(self.go_back)
 		self.ui.back_button_1.clicked.connect(partial(self.go_to, index=0))
@@ -145,16 +148,17 @@ class ShowsMainWindow(QMainWindow):
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
 		self.ui.search_box.textChanged.connect(self.update_search)
+		self.ui.search_box_2.textChanged.connect(self.update_search_2)
 
 	def search(self):
 		'''Searches for TV Show'''
-		self.user_state.add_show(name=self.ui.search_box.text(), selection_handler=self.display_results)
+		self.display_results(search_for_show(self.ui.search_box.text()))
 		self.ui.stackedWidget.setCurrentIndex(1)
+		self.ui.search_box_2.setFocus()
 
 	def display_results(self, results):
 		'''Displays TV show results on stack widget page 1'''
 		print results
-		return None
 
 	def go_back(self):
 		self.close()
@@ -163,14 +167,18 @@ class ShowsMainWindow(QMainWindow):
 
 	def go_to(self, index):
 		self.ui.stackedWidget.setCurrentIndex(index)
+		if index==0: self.ui.search_box.setFocus()
 
 	def update_filter(self):
 		'''Updates scroll box content according to content of filter_box'''
 		print self.ui.filter_box.text()
 
 	def update_search(self):
-		'''Display suggested shows according to typed content'''
-		pass
+		self.ui.search_box_2.setText(self.ui.search_box.text())
+# TODO ALSO REDISPLAY SEARCH RESULTS
+
+	def update_search_2(self):
+		self.ui.search_box.setText(self.ui.search_box_2.text())
 
 class LoginWindow(QMainWindow):
 	def __init__(self, main_window, config):
