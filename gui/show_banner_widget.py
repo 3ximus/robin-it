@@ -180,7 +180,7 @@ class Ui_show_banner_widget(object):
         font.setWeight(75)
         self.banner.setFont(font)
         self.banner.setText("")
-        self.banner.setPixmap(QtGui.QPixmap("../../../../Downloads/121361-g41.jpg"))
+        self.banner.setPixmap(QtGui.QPixmap(":/resources/images/121361-g41.jpg"))
         self.banner.setScaledContents(True)
         self.banner.setObjectName("banner")
         self.verticalLayout.addWidget(self.banner)
@@ -193,3 +193,4 @@ class Ui_show_banner_widget(object):
         show_banner_widget.setWindowTitle(_translate("show_banner_widget", "Form"))
         self.name_label.setText(_translate("show_banner_widget", "<name>"))
 
+import resources_rc

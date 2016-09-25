@@ -2,23 +2,48 @@
 
 '''
 Frontend Aplication GUI
-Latest Update - v1.0.1
+Latest Update - v0.0.1
 Created - 21.9.16
 Copyright (C) 2016 - eximus
 '''
 __version__ = '0.0.1'
 
-import sys
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
 from gui.mainwindow import Ui_mainwindow
 from gui.shows_mainwindow import Ui_shows_mainwindow
 from gui.login import Ui_loginwindow
 from gui.settings import Ui_settings_window
 from gui.show import Ui_show_window
+from gui.show_banner_widget import Ui_show_banner_widget
 from libs.robinit_api import UserContent
 from libs.tvshow import search_for_show
 from functools import partial
+from threading import Thread
+import Queue
+import sys
+
+# -----------------------------
+#       Thread Decorator
+# ----------------------------
+def threaded(function, daemon=False):
+	'''Decorator to make a function threaded
+
+		To acess wrapped funciton return value use .get()
+	'''
+	def wrapped_function(queue, *args, **kwargs):
+		return_val = function(*args, **kwargs)
+		queue.put(return_val)
+
+	def wrap(*args, **kwargs):
+		queue = Queue.Queue()
+
+		thread = Thread(target=wrapped_function, args=(queue,)+args , kwargs=kwargs)
+		thread.daemon=daemon
+		thread.start()
+		thread.result_queue=queue
+		return queue
+	return wrap
 
 class ShowWindow(QMainWindow):
 	def __init__(self, return_to):
@@ -122,7 +147,17 @@ class SettingsWindow(QMainWindow):
 		if 'default_user' in keys:
 			self.ui.defaultuser_box.setText(self.config['default_user'])
 
+class ShowBanner(QWidget):
+	def __init__(self):
+		super(ShowBanner, self).__init__()
+
+		self.ui = Ui_show_banner_widget()
+		self.ui.setupUi(self)
+
 class ShowsMainWindow(QMainWindow):
+
+	search_complete_signal = QtCore.pyqtSignal(object)
+
 	def __init__(self, return_to, user_state):
 		super(ShowsMainWindow, self).__init__()
 		self.return_to=return_to
@@ -137,6 +172,7 @@ class ShowsMainWindow(QMainWindow):
 		self.ui.search_box_2.returnPressed.connect(self.search)
 		self.ui.search_button.clicked.connect(self.search)
 		self.ui.search_button_2.clicked.connect(self.search)
+		self.search_complete_signal.connect(self.display_results)
 
 		self.ui.back_button_0.clicked.connect(self.go_back)
 		self.ui.back_button_1.clicked.connect(partial(self.go_to, index=0))
@@ -152,12 +188,27 @@ class ShowsMainWindow(QMainWindow):
 
 	def search(self):
 		'''Searches for TV Show'''
-		self.display_results(search_for_show(self.ui.search_box.text()))
+		self.ui.noresults_label.setParent(None)
+		self._search_thread(self.ui.search_box.text()) # both input boxes are synced
 		self.ui.stackedWidget.setCurrentIndex(1)
 		self.ui.search_box_2.setFocus()
 
+	@threaded
+	def _search_thread(self, text):
+		'''Wrapper for the search function to make it threaded'''
+		results = search_for_show(text)
+		self.search_complete_signal.emit(results)
+
 	def display_results(self, results):
 		'''Displays TV show results on stack widget page 1'''
+		for i in reversed(range(self.ui.results_layout.count())):
+			self.ui.results_layout.itemAt(i).widget().setParent(None)
+		#banner = ShowBanner()
+		#self.ui.results_layout.addWidget(banner)
+
+		if len(results) == 0:
+			self.ui.results_layout.addWidget(self.ui.noresults_label) # no results found
+
 		print results
 
 	def go_back(self):
