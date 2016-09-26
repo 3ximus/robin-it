@@ -2,11 +2,11 @@
 
 '''
 Frontend Aplication for console usage
-Latest Update - v1.0.1
+Latest Update - v0.1
 Created - 3.1.16
 Copyright (C) 2016 - eximus
 '''
-__version__ = '1.0.1'
+__version__ = '0.1'
 
 import os, sys
 from colorama import init
