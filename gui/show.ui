@@ -448,7 +448,7 @@
      <number>30</number>
     </property>
     <item>
-     <widget class="QLabel" name="shows_label">
+     <widget class="QLabel" name="showname_label">
       <property name="palette">
        <palette>
         <active>

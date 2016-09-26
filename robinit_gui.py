@@ -10,6 +10,7 @@ __version__ = '0.0.1'
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
+from PyQt5.QtGui import QPixmap
 from gui.mainwindow import Ui_mainwindow
 from gui.shows_mainwindow import Ui_shows_mainwindow
 from gui.login import Ui_loginwindow
@@ -21,6 +22,7 @@ from libs.tvshow import search_for_show
 from functools import partial
 from threading import Thread
 import Queue
+import urllib
 import sys
 
 # -----------------------------
@@ -46,13 +48,16 @@ def threaded(function, daemon=False):
 	return wrap
 
 class ShowWindow(QMainWindow):
-	def __init__(self, return_to):
+	def __init__(self, tvshow):
 		super(ShowWindow, self).__init__()
-		self.return_to=return_to
+		self.tvshow = tvshow
 
 		# set up UI from QtDesigner
 		self.ui = Ui_show_window()
 		self.ui.setupUi(self)
+
+		self.ui.showname_label.setText("> %s" % self.tvshow['seriesname']) # TODO Placeholder, this must take in to verify if we got a show class
+		self.ui.back_button.clicked.connect(self.close)
 
 class SettingsWindow(QMainWindow):
 	def __init__(self, main_window, config):
@@ -148,14 +153,48 @@ class SettingsWindow(QMainWindow):
 			self.ui.defaultuser_box.setText(self.config['default_user'])
 
 class ShowBanner(QWidget):
-	def __init__(self):
+	banner_loaded = QtCore.pyqtSignal(object)
+
+	def __init__(self, tvshow):
 		super(ShowBanner, self).__init__()
+		self.tvshow = tvshow
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
+		self.ui.name_label.setText('<%s>' % self.tvshow['seriesname'])
+
+		self.ui.view_button.clicked.connect(self.view_show)
+		self.ui.add_button.clicked.connect(self.add_show)
+
+		if 'banner' in self.tvshow.keys():
+			self.banner_loaded.connect(self.load_banner)
+			self.download_banner()
+		else:
+			self.banner_loaded.emit("") # FIXME not working
+
+	@threaded
+	def download_banner(self):
+		'''Thread to download banner, emits signal when complete'''
+		url = "http://thetvdb.com/banners/" + self.tvshow['banner'] # fix url
+		data = urllib.urlopen(url).read()
+		self.banner_loaded.emit(data)
+
+	def load_banner(self, data):
+		'''Loads the banner from downloaded data'''
+		if data == "":
+			return
+		banner = QPixmap()
+		banner.loadFromData(data)
+		self.ui.banner.setPixmap(banner)
+
+	def view_show(self):
+		self.show_window = ShowWindow(self.tvshow)
+		self.show_window.show()
+
+	def add_show(self):
+		pass
 
 class ShowsMainWindow(QMainWindow):
-
 	search_complete_signal = QtCore.pyqtSignal(object)
 
 	def __init__(self, return_to, user_state):
@@ -201,15 +240,18 @@ class ShowsMainWindow(QMainWindow):
 
 	def display_results(self, results):
 		'''Displays TV show results on stack widget page 1'''
-		for i in reversed(range(self.ui.results_layout.count())):
-			self.ui.results_layout.itemAt(i).widget().setParent(None)
-		#banner = ShowBanner()
-		#self.ui.results_layout.addWidget(banner)
+		def _add_to_layout(widget, *args):
+			self.ui.results_layout.addWidget(widget)
+			return
 
+		for i in reversed(range(self.ui.results_layout.count())): # clear previous results
+			self.ui.results_layout.itemAt(i).widget().setParent(None)
 		if len(results) == 0:
 			self.ui.results_layout.addWidget(self.ui.noresults_label) # no results found
-
-		print results
+		else:
+			for r in results: # display new results
+				banner = ShowBanner(r)
+				banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
 
 	def go_back(self):
 		self.close()

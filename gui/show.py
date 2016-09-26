@@ -162,7 +162,7 @@ class Ui_show_window(object):
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setContentsMargins(30, -1, 30, -1)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.shows_label = QtWidgets.QLabel(self.centralwidget)
+        self.showname_label = QtWidgets.QLabel(self.centralwidget)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -173,15 +173,15 @@ class Ui_show_window(object):
         brush = QtGui.QBrush(QtGui.QColor(1, 83, 49))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, brush)
-        self.shows_label.setPalette(palette)
+        self.showname_label.setPalette(palette)
         font = QtGui.QFont()
         font.setFamily("Roboto Mono Medium for Powerline")
         font.setPointSize(48)
         font.setItalic(False)
-        self.shows_label.setFont(font)
-        self.shows_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.shows_label.setObjectName("shows_label")
-        self.verticalLayout.addWidget(self.shows_label)
+        self.showname_label.setFont(font)
+        self.showname_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.showname_label.setObjectName("showname_label")
+        self.verticalLayout.addWidget(self.showname_label)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout.addLayout(self.verticalLayout_2)
@@ -216,7 +216,7 @@ class Ui_show_window(object):
     def retranslateUi(self, show_window):
         _translate = QtCore.QCoreApplication.translate
         show_window.setWindowTitle(_translate("show_window", "Robin_it_v0.1"))
-        self.shows_label.setText(_translate("show_window", "> show name"))
+        self.showname_label.setText(_translate("show_window", "> show name"))
         self.back_button.setText(_translate("show_window", "<<"))
 
 import resources_rc

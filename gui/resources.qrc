@@ -2,6 +2,6 @@
 	<qresource prefix="/resources">
 		<file>images/robinit.ico</file>
 		<file>images/robinit_desaturated.ico</file>
-		<file>images/121361-g41.jpg</file>
+		<file>images/noimageavailable.png</file>
 	</qresource>
 </RCC>
