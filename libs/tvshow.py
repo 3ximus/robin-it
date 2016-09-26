@@ -10,8 +10,7 @@ Copyright (C) 2015 - eximus
 '''
 
 from tvdb_api import Tvdb
-from tvdb_exceptions import tvdb_error
-from tvdb_exceptions import tvdb_shownotfound
+from tvdb_exceptions import tvdb_error, tvdb_shownotfound
 from torrent import Torrent
 import datetime
 import os
@@ -39,7 +38,7 @@ class Show:
 	This class is self updated, once the method update_info is called it updates itself
 	'''
 
-	def __init__(self, name, header_only = False, cache=False):
+	def __init__(self, name, header_only = False, cache=False, banners=False):
 		'''Class constructor
 
 		Name must be the only possibility otherwise an error will ocurr (use search_for_show method and
@@ -63,18 +62,21 @@ class Show:
 		self.actors = '' # actors list
 		self.poster = '' # tv show poster
 		self.banner = '' # banner
+		self.all_images = None # posters fanart banners
 		self.imdb_id = '' # imdb id
 		self.watched = False
 		self.torrent = None
 		self.cache=cache
 
-		if not os.path.exists(self.cache): os.mkdir(self.cache) # make directory if unexistent
+		if self.cache:
+			if not os.path.exists(self.cache):
+				os.mkdir(self.cache) # make directory if unexistent
 
 		self.name = name.split('(')[0]
 		self.real_name = name
-		self.update_info(header_only = header_only) # generate content
+		self.update_info(header_only=header_only, banners=banners) # generate content
 
-	def update_info(self, header_only = False, override_cache=False):
+	def update_info(self, header_only = False, override_cache=False, banners=False):
 		'''Searches thetvdb.com and generates class attributes
 
 		This method function is responsible for building the entire data structure of a TV Show
@@ -103,6 +105,7 @@ class Show:
 		self.actors = database[self.real_name]['actors']
 		self.poster = database[self.real_name]['poster']
 		self.banner = database[self.real_name]['banner']
+		if banners: self.all_images = database[self.real_name]['_banners']
 		imdb_id = database[self.real_name]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 

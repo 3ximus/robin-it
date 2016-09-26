@@ -10,7 +10,7 @@ __version__ = '0.2'
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QPalette, QBrush
 from gui.mainwindow import Ui_mainwindow
 from gui.shows_mainwindow import Ui_shows_mainwindow
 from gui.login import Ui_loginwindow
@@ -18,7 +18,7 @@ from gui.settings import Ui_settings_window
 from gui.show import Ui_show_window
 from gui.show_banner_widget import Ui_show_banner_widget
 from libs.robinit_api import UserContent
-from libs.tvshow import search_for_show
+from libs.tvshow import search_for_show, Show
 from functools import partial
 from threading import Thread
 import Queue
@@ -47,17 +47,47 @@ def threaded(function, daemon=False):
 		return queue
 	return wrap
 
+@threaded
+def download_image(signal, url):
+	'''Thread to download image, emits signal when complete'''
+	data = urllib.urlopen(url).read()
+	signal.emit(data)
+
 class ShowWindow(QMainWindow):
+	show_loaded = QtCore.pyqtSignal()
+	background_loaded = QtCore.pyqtSignal(object)
 	def __init__(self, tvshow):
 		super(ShowWindow, self).__init__()
-		self.tvshow = tvshow
 
 		# set up UI from QtDesigner
 		self.ui = Ui_show_window()
 		self.ui.setupUi(self)
 
-		self.ui.showname_label.setText("> %s" % self.tvshow['seriesname']) # TODO Placeholder, this must take in to verify if we got a show class
+		self.ui.showname_label.setText("> %s" % tvshow['seriesname'])
 		self.ui.back_button.clicked.connect(self.close)
+		self.show_loaded.connect(self.fill_info)
+		self.load_show(tvshow['seriesname'])
+
+	@threaded
+	def load_show(self, name):
+		self.tvshow = Show(name, header_only=True)
+		self.show_loaded.emit()
+		print "Show Loaded: %s\n" % name
+
+	def fill_info(self):
+		'''Fill in info after loaded'''
+		if self.tvshow.poster:
+			print self.tvshow.poster
+			self.background_loaded.connect(self.load_background)
+			download_image(self.background_loaded, self.tvshow.poster)
+			print "poster dowloaded"
+
+	def load_background(self, data):
+		palette = QPalette()
+		back = QPixmap()
+		back.loadFromData(data)
+		palette.setBrush(QPalette.Background, QBrush(back))
+		self.setPalette(palette)
 
 class SettingsWindow(QMainWindow):
 	def __init__(self, main_window, config):
@@ -168,16 +198,9 @@ class ShowBanner(QWidget):
 
 		if 'banner' in self.tvshow.keys():
 			self.banner_loaded.connect(self.load_banner)
-			self.download_banner()
+			download_image(self.banner_loaded, "http://thetvdb.com/banners/" + self.tvshow['banner'])
 		else:
 			self.banner_loaded.emit("") # FIXME not working
-
-	@threaded
-	def download_banner(self):
-		'''Thread to download banner, emits signal when complete'''
-		url = "http://thetvdb.com/banners/" + self.tvshow['banner'] # fix url
-		data = urllib.urlopen(url).read()
-		self.banner_loaded.emit(data)
 
 	def load_banner(self, data):
 		'''Loads the banner from downloaded data'''
