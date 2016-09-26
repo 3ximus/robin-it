@@ -1,7 +1,7 @@
 #Robin It#
 ================================
 
-*Version 1.0.1*
+*Version 0.1*
 
 Python web crawler that automaticly searches and gatheres torrents.
 Console Version.
@@ -22,7 +22,7 @@ After building the compiled executable should be in the build directory under `r
 
 ## Changelog
 
-**New in v1.0.1**
+**New in v0.1**
 
 - Windows color support
 - Fixed profile saving bug

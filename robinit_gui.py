@@ -2,11 +2,11 @@
 
 '''
 Frontend Aplication GUI
-Latest Update - v0.0.1
+Latest Update - v0.1
 Created - 21.9.16
 Copyright (C) 2016 - eximus
 '''
-__version__ = '0.0.1'
+__version__ = '0.1'
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
