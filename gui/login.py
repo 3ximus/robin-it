@@ -315,7 +315,7 @@ class Ui_loginwindow(object):
 
     def retranslateUi(self, loginwindow):
         _translate = QtCore.QCoreApplication.translate
-        loginwindow.setWindowTitle(_translate("loginwindow", "Robin_it_v0.1"))
+        loginwindow.setWindowTitle(_translate("loginwindow", "Robin_it_v0.2"))
         self.loaduser_label.setText(_translate("loginwindow", "> load user"))
         self.sign_label.setText(_translate("loginwindow", ">"))
         self.login_box.setPlaceholderText(_translate("loginwindow", "username"))

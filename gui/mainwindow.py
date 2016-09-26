@@ -154,7 +154,7 @@ class Ui_mainwindow(object):
         font.setFamily("Hack")
         font.setItalic(True)
         mainwindow.setFont(font)
-        mainwindow.setWindowTitle("Robin_it_v0.1")
+        mainwindow.setWindowTitle("Robin_it_v0.2")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit_desaturated.ico"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
