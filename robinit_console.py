@@ -15,20 +15,6 @@ from libs.robinit_api import UserContent
 
 init() # make ANSI escape sequences work on windows too
 
-USER_STATE_DIR = "user/"
-
-def first_use(user_name):
-	'''Setup user class in first use
-
-	Prompt user to add shows to follow
-	Class state is saved after everything is inserted
-	'''
-	print "\t\033[3;33mSetting things up for first use...\033[0m"
-	if not os.path.exists(USER_STATE_DIR): os.mkdir(USER_STATE_DIR)
-	new_user_state = UserContent(user_name)
-# Promp user to start adding tv shows
-	return user_interaction(new_user_state)
-
 def selection_handler(results):
 	print "Multiple Results found, select one: (Use 'q' to cancel)"
 	for i, string in enumerate(results):
@@ -209,21 +195,12 @@ def user_interaction(user_state):
 
 User_State = None # will hold the user state
 
-user_name = raw_input("Insert your username: ")
-if user_name == "": sys.exit("Invalid username. Exiting...")
-# handle data loading or new profile generation
-USER_STATE_FILE = "%srobinit_%s_%s%s" % (USER_STATE_DIR, __version__, user_name, '.pkl') # Only used to look for state file
+username = raw_input("Insert your username: ")
+if username == "": sys.exit("Invalid username. Exiting...")
 
-print USER_STATE_FILE
 
-if not os.path.exists(USER_STATE_FILE): # no previous save file?
-	print "No user files in %s. Generating new user \"%s\"" % (USER_STATE_DIR, user_name)
-	try: User_State = first_use(user_name) # make new one
-	except KeyboardInterrupt: sys.exit('\n\033[1;33mAborting...\033[0m')
 
-else: # exists then load the previous state
-	User_State = UserContent(user_name)
-	User_State.load_state(USER_STATE_DIR)
-	try: user_interaction(User_State)
-	except KeyboardInterrupt: sys.exit('\n\033[1;33mAborting...\033[0m')
+User_State = UserContent(username)
+try: user_interaction(User_State)
+except KeyboardInterrupt: sys.exit('\n\033[1;33mAborting...\033[0m')
 

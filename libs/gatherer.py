@@ -15,7 +15,7 @@ import utillib
 # Defines
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
 
-KICKASS = "http://kickass.unblocked.la/"
+KICKASS = "http://kickasstorrents.to/"
 TRUSTED_SOURCES = 'killers|rartv|immerse|publichd|rarbg|'
 TRUSTED_SOURCES += TRUSTED_SOURCES.upper()
 TRUSTED_FORMAT = 'web-dl|hdtv|eztv|ettv|'
@@ -48,6 +48,7 @@ def search(main_url, search_term, parser=parserlib.Torrent_BS4(), page = 1, orde
 		order_results -- order of results, values are : 'seeds' and 'age'
 	'''
 	url = utillib.build_search_url(main_url, search_term, page=page, order_results=order_results)
+	print url
 	try: html = utillib.get_page_html(url)
 	except utillib.UtillibError: raise # re-raise the exception
 	return parse_page_links(html, parser) # return list of Torrent instances

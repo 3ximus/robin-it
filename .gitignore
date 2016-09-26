@@ -8,3 +8,4 @@ build/*
 dist/*
 in.txt
 fix_version
+robinit.conf
