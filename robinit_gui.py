@@ -21,9 +21,14 @@ from libs.robinit_api import UserContent
 from libs.tvshow import search_for_show, Show
 from functools import partial
 from threading import Thread
+from cStringIO import StringIO
+from PIL import Image, ImageFilter
 import Queue
 import urllib
 import sys
+
+BLUR_RADIOUS = 10
+DARKNESS = 0.6
 
 # -----------------------------
 #       Thread Decorator
@@ -48,10 +53,23 @@ def threaded(function, daemon=False):
 	return wrap
 
 @threaded
-def download_image(signal, url):
+def download_image(signal, url, filters=False):
 	'''Thread to download image, emits signal when complete'''
 	data = urllib.urlopen(url).read()
+	if filters: data = apply_filters(data)
 	signal.emit(data)
+
+def apply_filters(data):
+	'''Function to apply filter to image'''
+	data = StringIO(data)
+	img = Image.open(data)
+	img = img.point(lambda x: x*DARKNESS) # darken
+	img = img.filter(ImageFilter.GaussianBlur(BLUR_RADIOUS)) # blur
+	tmp_data = StringIO()
+	img.save(tmp_data, format='PNG')
+	data = tmp_data.getvalue()
+	tmp_data.close()
+	return data
 
 class ShowWindow(QMainWindow):
 	show_loaded = QtCore.pyqtSignal()
@@ -68,6 +86,8 @@ class ShowWindow(QMainWindow):
 		self.show_loaded.connect(self.fill_info)
 		self.load_show(tvshow['seriesname'])
 
+		self.back = None
+
 	@threaded
 	def load_show(self, name):
 		'''Loads show from database'''
@@ -79,15 +99,24 @@ class ShowWindow(QMainWindow):
 		'''Fill in info after loaded, starting background download'''
 		if self.tvshow.poster:
 			self.background_loaded.connect(self.load_background)
-			download_image(self.background_loaded, self.tvshow.poster)
+			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 
 	def load_background(self, data):
 		'''Load window background from downloaded background image'''
 		palette = QPalette()
-		back = QPixmap()
-		back.loadFromData(data)
-		palette.setBrush(QPalette.Background, QBrush(back))
+		self.back = QPixmap()
+		self.back.loadFromData(data)
+		self.back_ratio = self.back.size().width()/float(self.back.size().height())
+		self.back=self.back.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
+		palette.setBrush(QPalette.Background, QBrush(self.back))
 		self.setPalette(palette)
+
+	def resizeEvent(self, event):
+		if self.back:
+			palette = QPalette()
+			self.back=self.back.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
+			palette.setBrush(QPalette.Background, QBrush(self.back))
+			self.setPalette(palette)
 
 class SettingsWindow(QMainWindow):
 	def __init__(self, main_window, config):
@@ -380,7 +409,6 @@ class MainWindow(QMainWindow):
 		self.ui.user_label.setText('<%s>' % self.user_state.username)
 
 	def closeEvent(self, event):
-		print "Closing Robin it"
 		self.deleteLater()
 
 def save_config_file(content):

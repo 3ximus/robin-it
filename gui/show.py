@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_show_window(object):
     def setupUi(self, show_window):
         show_window.setObjectName("show_window")
-        show_window.resize(1067, 705)
+        show_window.resize(1115, 924)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
