@@ -1482,13 +1482,13 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>150</width>
-             <height>35</height>
+             <width>902</width>
+             <height>477</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <layout class="QFormLayout" name="results_layout">
+             <layout class="QGridLayout" name="results_layout">
               <item row="0" column="0">
                <widget class="QLabel" name="noresults_label">
                 <property name="palette">
@@ -1852,8 +1852,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>30</height>
+             <width>16</width>
+             <height>16</height>
             </rect>
            </property>
           </widget>
@@ -2293,8 +2293,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>30</height>
+             <width>16</width>
+             <height>16</height>
             </rect>
            </property>
           </widget>

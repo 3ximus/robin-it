@@ -502,6 +502,16 @@
      </widget>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <layout class="QFormLayout" name="formLayout"/>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2"/>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QLabel" name="showname_label_2">
       <property name="palette">
        <palette>
@@ -556,9 +566,6 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2"/>
     </item>
     <item>
      <widget class="QPushButton" name="back_button">

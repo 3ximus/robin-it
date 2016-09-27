@@ -70,19 +70,19 @@ class ShowWindow(QMainWindow):
 
 	@threaded
 	def load_show(self, name):
+		'''Loads show from database'''
 		self.tvshow = Show(name, header_only=True)
 		self.show_loaded.emit()
 		print "Show Loaded: %s\n" % name
 
 	def fill_info(self):
-		'''Fill in info after loaded'''
+		'''Fill in info after loaded, starting background download'''
 		if self.tvshow.poster:
-			print self.tvshow.poster
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster)
-			print "poster dowloaded"
 
 	def load_background(self, data):
+		'''Load window background from downloaded background image'''
 		palette = QPalette()
 		back = QPixmap()
 		back.loadFromData(data)
@@ -198,13 +198,19 @@ class ShowBanner(QWidget):
 
 		if 'banner' in self.tvshow.keys():
 			self.banner_loaded.connect(self.load_banner)
-			download_image(self.banner_loaded, "http://thetvdb.com/banners/" + self.tvshow['banner'])
+			self.download_banner("http://thetvdb.com/banners/" + self.tvshow['banner'])
 		else:
 			self.banner_loaded.emit("") # FIXME not working
 
+	@threaded
+	def download_banner(self, url): #FIXME there was some problem when using the download_image function (something about this class not having a signal with the signature banner_loaded signal(PyQt_PyObject))
+		'''Thread to download banner, emits signal when complete'''
+		data = urllib.urlopen(url).read()
+		self.banner_loaded.emit(data)
+
 	def load_banner(self, data):
 		'''Loads the banner from downloaded data'''
-		if data == "":
+		if data == "": # FIXME ridiculous atempt to force display of "no image available"
 			return
 		banner = QPixmap()
 		banner.loadFromData(data)
@@ -372,6 +378,10 @@ class MainWindow(QMainWindow):
 		'''Sets user state to a given UserContent instance'''
 		self.user_state=user_state
 		self.ui.user_label.setText('<%s>' % self.user_state.username)
+
+	def closeEvent(self, event):
+		print "Closing Robin it"
+		self.deleteLater()
 
 def save_config_file(content):
 	if type(content) == dict:
