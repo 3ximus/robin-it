@@ -74,6 +74,7 @@ def apply_filters(data):
 class ShowWindow(QMainWindow):
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
+
 	def __init__(self, tvshow):
 		super(ShowWindow, self).__init__()
 
@@ -81,12 +82,11 @@ class ShowWindow(QMainWindow):
 		self.ui = Ui_show_window()
 		self.ui.setupUi(self)
 
+		self.background = None
 		self.ui.showname_label.setText("> %s" % tvshow['seriesname'])
 		self.ui.back_button.clicked.connect(self.close)
 		self.show_loaded.connect(self.fill_info)
 		self.load_show(tvshow['seriesname'])
-
-		self.back = None
 
 	@threaded
 	def load_show(self, name):
@@ -100,22 +100,27 @@ class ShowWindow(QMainWindow):
 		if self.tvshow.poster:
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
+		self.ui.genre_label.setText('> genre - %s' % self.tvshow.genre)
+		self.ui.network_label.setText('> network - %s' % self.tvshow.network)
+		self.ui.airday_label.setText('> air day - %s' % self.tvshow.air_dayofweek)
+		self.ui.status_label.setText('> status - %s' % self.tvshow.status)
+		self.ui.imdb_label.setText('> <a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
 
 	def load_background(self, data):
 		'''Load window background from downloaded background image'''
 		palette = QPalette()
-		self.back = QPixmap()
-		self.back.loadFromData(data)
-		self.back_ratio = self.back.size().width()/float(self.back.size().height())
-		self.back=self.back.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
-		palette.setBrush(QPalette.Background, QBrush(self.back))
+		self.background = QPixmap()
+		self.background.loadFromData(data)
+		self.back_ratio = self.background.size().width()/float(self.background.size().height())
+		self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
+		palette.setBrush(QPalette.Background, QBrush(self.background))
 		self.setPalette(palette)
 
 	def resizeEvent(self, event):
-		if self.back:
+		if self.background:
 			palette = QPalette()
-			self.back=self.back.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
-			palette.setBrush(QPalette.Background, QBrush(self.back))
+			self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
+			palette.setBrush(QPalette.Background, QBrush(self.background))
 			self.setPalette(palette)
 
 class SettingsWindow(QMainWindow):
