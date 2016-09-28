@@ -1,10 +1,9 @@
 #Robin It#
 ================================
 
-*Version 0.2*
+*Version 0.1*
 
-Python web crawler that automaticly searches and gatheres torrents.
-Console Version.
+Python GUI Application to search, track and download tvshows and movie torrents
 
 --------------------------------
 
@@ -13,6 +12,7 @@ Console Version.
 Before manually installing try one of the compiled builds on the branches "releases-<arch>", if that does not work follow this:
 
 The main dependencies are listed in the requirements.txt, and can be installed through `pip install -r requirements.txt`
+Python bindings for Qt5 can be found [here](https://pypi.python.org/pypi/PyQt5)
 
 then just run `python2 setup.py build`
 
@@ -22,23 +22,12 @@ After building the compiled executable should be in the build directory under `r
 
 ## Changelog
 
-**New in v0.2**
+**New in v0.1**
 
-- Windows color support
-- Fixed profile saving bug
-- Compatibility fix for windows
-
-**New in v1.0.0**
-
-*RobinIt Console*
-
-- Possible to build a persistent list of episodes
-- Use previously built list to download episodes torrents
-
-*TV Downloader script*
-
-- Searches for available tv shows torrents at given a show name, quality (optional), season and episodes (optional) (Only Working for Kickass Torrents)
+- TVShow search function
 
 --------------------------------
 
-##[Known Bugs](https://github.com/3ximus/robin-it-console/labels/bug)
+##Known Bugs
+
+See [here](https://github.com/3ximus/robin-it-console/labels/bug)
