@@ -490,10 +490,10 @@
        </property>
        <property name="font">
         <font>
-         <family>Roboto Mono for Powerline</family>
+         <family>Hack</family>
          <pointsize>14</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
+         <weight>50</weight>
+         <bold>false</bold>
         </font>
        </property>
        <property name="text">
@@ -551,6 +551,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Hack</family>
          <pointsize>14</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -608,6 +609,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Hack</family>
          <pointsize>14</pointsize>
          <weight>75</weight>
          <bold>true</bold>
@@ -617,6 +619,22 @@
         <string>+add</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

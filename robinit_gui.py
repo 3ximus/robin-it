@@ -10,7 +10,7 @@ __version__ = '0.2'
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
-from PyQt5.QtGui import QPixmap, QPalette, QBrush
+from PyQt5.QtGui import QPixmap, QPalette, QBrush, QColor
 from gui.mainwindow import Ui_mainwindow
 from gui.shows_mainwindow import Ui_shows_mainwindow
 from gui.login import Ui_loginwindow
@@ -19,6 +19,7 @@ from gui.show import Ui_show_window
 from gui.show_banner_widget import Ui_show_banner_widget
 from libs.robinit_api import UserContent
 from libs.tvshow import search_for_show, Show
+from libs.loading import progress_bar
 from functools import partial
 from threading import Thread
 from cStringIO import StringIO
@@ -30,7 +31,7 @@ import sys
 BLUR_RADIOUS = 10
 DARKNESS = 0.6
 
-# -----------------------------
+# ----------------------------
 #       Thread Decorator
 # ----------------------------
 def threaded(function, daemon=False):
@@ -52,6 +53,10 @@ def threaded(function, daemon=False):
 		return queue
 	return wrap
 
+# ----------------------------
+#          Function
+# ----------------------------
+
 @threaded
 def download_image(signal, url, filters=False):
 	'''Thread to download image, emits signal when complete'''
@@ -71,9 +76,36 @@ def apply_filters(data):
 	tmp_data.close()
 	return data
 
+def save_config_file(content):
+	if type(content) == dict:
+		fp = open('robinit.conf', 'w')
+		for key in content.keys():
+			fp.write("%s %s\n" % (key, content[key]))
+		fp.close()
+
+def load_config_file():
+	content = {}
+	try:
+		fp = open('robinit.conf', 'r')
+		for n, line in enumerate(fp):
+			if line[0] == '#': continue
+			line = [s.strip('\n') for s in line.split(' ')]
+			if len(line) != 2 or line[1] == "":
+				raise ValueError("\033[0;31mError in line %d : \" %s \" in robinit.conf\033[0m" % (n, ' '.join(line)))
+			key, value = line
+			content.update({key : value})
+		fp.close()
+	except IOError: pass
+	return content
+
+# ----------------------------
+#         GUI Classes
+# ----------------------------
+
 class ShowWindow(QMainWindow):
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
+	update_done = QtCore.pyqtSignal()
 
 	def __init__(self, tvshow):
 		super(ShowWindow, self).__init__()
@@ -85,7 +117,10 @@ class ShowWindow(QMainWindow):
 		self.background = None
 		self.ui.showname_label.setText("> %s" % tvshow['seriesname'])
 		self.ui.back_button.clicked.connect(self.close)
+		self.ui.refresh_button.clicked.connect(self.update_show)
+		self.ui.refresh_button_2.clicked.connect(self.update_show)
 		self.show_loaded.connect(self.fill_info)
+		self.update_done.connect(self.fill_updated_info)
 		self.load_show(tvshow['seriesname'])
 
 	@threaded
@@ -102,9 +137,11 @@ class ShowWindow(QMainWindow):
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 		self.ui.genre_label.setText('> genre - %s' % self.tvshow.genre)
 		self.ui.network_label.setText('> network - %s' % self.tvshow.network)
-		self.ui.airday_label.setText('> air day - %s' % self.tvshow.air_dayofweek)
+		self.ui.airday_label.setText('> air day - %s : %s' % (self.tvshow.air_dayofweek, self.tvshow.air_time))
+		self.ui.runtime_label.setText('> runtime - %s min' % self.tvshow.runtime)
 		self.ui.status_label.setText('> status - %s' % self.tvshow.status)
 		self.ui.imdb_label.setText('> <a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
+		self.ui.description_box.setText(self.tvshow.description)
 
 	def load_background(self, data):
 		'''Load window background from downloaded background image'''
@@ -117,11 +154,20 @@ class ShowWindow(QMainWindow):
 		self.setPalette(palette)
 
 	def resizeEvent(self, event):
+		'''Called when resize is made'''
 		if self.background:
 			palette = QPalette()
 			self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
 			palette.setBrush(QPalette.Background, QBrush(self.background))
 			self.setPalette(palette)
+
+	@threaded
+	def update_show(self, event):
+		self.tvshow.update_info(override_cache='cache/')
+		self.update_done.emit()
+
+	def fill_updated_info(self):
+		print self.tvshow.seasons
 
 class SettingsWindow(QMainWindow):
 	def __init__(self, main_window, config):
@@ -225,7 +271,7 @@ class ShowBanner(QWidget):
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
-		self.ui.name_label.setText('<%s>' % self.tvshow['seriesname'])
+		self.ui.name_label.setText('< %s >' % self.tvshow['seriesname'])
 
 		self.ui.view_button.clicked.connect(self.view_show)
 		self.ui.add_button.clicked.connect(self.add_show)
@@ -290,6 +336,8 @@ class ShowsMainWindow(QMainWindow):
 
 	def search(self):
 		'''Searches for TV Show'''
+		self.resultid=0
+		self.ui.statusbar.showMessage("Searching %s..." % self.ui.search_box.text())
 		self.ui.noresults_label.setParent(None)
 		self._search_thread(self.ui.search_box.text()) # both input boxes are synced
 		self.ui.stackedWidget.setCurrentIndex(1)
@@ -304,17 +352,25 @@ class ShowsMainWindow(QMainWindow):
 	def display_results(self, results):
 		'''Displays TV show results on stack widget page 1'''
 		def _add_to_layout(widget, *args):
+			'''Takes the widget to be added'''
 			self.ui.results_layout.addWidget(widget)
 			return
 
+		def _status_update(results):
+			self.resultid+=1
+			p = 100*self.resultid/len(results)
+			bar = progress_bar(p, show_percentage=True)
+			self.ui.statusbar.showMessage(bar)
+
 		for i in reversed(range(self.ui.results_layout.count())): # clear previous results
 			self.ui.results_layout.itemAt(i).widget().setParent(None)
-		if len(results) == 0:
-			self.ui.results_layout.addWidget(self.ui.noresults_label) # no results found
+		if len(results) == 0: # no results found
+			self.ui.results_layout.addWidget(self.ui.noresults_label)
 		else:
 			for r in results: # display new results
 				banner = ShowBanner(r)
 				banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
+				banner.banner_loaded.connect(partial(_status_update, results=results))
 
 	def go_back(self):
 		self.close()
@@ -415,28 +471,6 @@ class MainWindow(QMainWindow):
 
 	def closeEvent(self, event):
 		self.deleteLater()
-
-def save_config_file(content):
-	if type(content) == dict:
-		fp = open('robinit.conf', 'w')
-		for key in content.keys():
-			fp.write("%s %s\n" % (key, content[key]))
-		fp.close()
-
-def load_config_file():
-	content = {}
-	try:
-		fp = open('robinit.conf', 'r')
-		for n, line in enumerate(fp):
-			if line[0] == '#': continue
-			line = [s.strip('\n') for s in line.split(' ')]
-			if len(line) != 2 or line[1] == "":
-				raise ValueError("\033[0;31mError in line %d : \" %s \" in robinit.conf\033[0m" % (n, ' '.join(line)))
-			key, value = line
-			content.update({key : value})
-		fp.close()
-	except IOError: pass
-	return content
 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)

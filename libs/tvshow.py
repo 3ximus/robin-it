@@ -10,7 +10,7 @@ Copyright (C) 2015 - eximus
 '''
 
 from tvdb_api import Tvdb
-from tvdb_exceptions import tvdb_error, tvdb_shownotfound
+from tvdb_exceptions import tvdb_error, tvdb_shownotfound, tvdb_attributenotfound
 from torrent import Torrent
 import datetime
 import os
@@ -40,6 +40,11 @@ class Show:
 
 	def __init__(self, name, header_only = False, cache=False, banners=False):
 		'''Class constructor
+
+		Parameters:
+			header_only - does not retrive season and episodes info
+			cache - path to cache NOTE: if set, greatly increses performance
+			banners - retrieve season banners and posters
 
 		Name must be the only possibility otherwise an error will ocurr (use search_for_show method and
 			use 'seriesname' as the name to build this correctly)
@@ -79,10 +84,15 @@ class Show:
 	def update_info(self, header_only = False, override_cache=False, banners=False):
 		'''Searches thetvdb.com and generates class attributes
 
+		Parameters:
+			header_only - does not retrive season and episodes info
+			override_cache - path to new cache, ignoring class defined cache NOTE: if set, greatly increses performance
+			banners - retrieve season banners and posters
+
 		This method function is responsible for building the entire data structure of a TV Show
 		It is mandatory that self.real_name is set otherwise build will fail
 		'''
-		database = Tvdb(cache = (self.cache if not override_cache else False))
+		database = Tvdb(cache = (self.cache if not override_cache else override_cache), banners=banners)
 
 		if not header_only:
 			# updates seasons list
@@ -90,7 +100,8 @@ class Show:
 			if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
 			self.seasons = []
 			for i in seasons_list: # generates the seasons list
-				new_season = Season(s_id = i, tv_show = self, cache=override_cache)
+				new_season = Season(s_id = i, tv_show = self, cache=(self.cache if not override_cache else override_cache), banners=banners)
+				new_season.to_string() #XXX DEBUG
 				self.seasons.append(new_season)
 
 		# update TV Show info
@@ -179,9 +190,12 @@ class Season():
 	Its self updatable with method update_info, this updates every episode information
 	'''
 
-	def __init__(self, s_id, tv_show, cache=False):
+	def __init__(self, s_id, tv_show, cache=False, banners=False):
 		'''Constructor method
 
+		Parameters:
+			cache - path to new cache, ignoring class defined cache NOTE: if set, greatly increses performance
+			banners - retrieve season banners and posters
 		Must receive a season id number and a tv_show from where this season belongs to
 		'''
 		self.s_id = s_id # 1 based
@@ -193,7 +207,7 @@ class Season():
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.cache=cache
-		self.update_info()
+		self.update_info(cache=cache, banners=banners)
 
 	def to_string(self):
 		'''Print this class information'''
@@ -201,14 +215,19 @@ class Season():
 		for episode in self.episodes: return_string += "%s - %s\n" % (episode.episode_number, episode.name)
 		print return_string
 
-	def update_info(self):
-		'''Searches thetvdb.com and updates all episodes it contains '''
+	def update_info(self, cache=False, banners=False):
+		'''Searches thetvdb.com and updates all episodes it contains
+
+		Parameters:
+			cache - path to new cache, ignoring class defined cache NOTE: if set, greatly increses performance
+			banners - retrieve season banners and posters
+		'''
 		# update posters
-		database = Tvdb(cache = self.cache, banners = True)
+		database = Tvdb(cache = self.cache, banners = banners)
 		try: posters = database[self.tv_show.real_name]['_banners']['season']
-		except KeyError: pass # no posters, so don't update them
+		except tvdb_attributenotfound: pass # posters werent loaded so ignore them
 		else: # update posters
-			self.poster = [] # clear ceched value
+			self.poster = [] # clear cached value
 			if 'season' in posters: # check for existance
 				for entry in posters['season']:
 					misc = posters['season'][entry]
