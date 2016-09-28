@@ -119,8 +119,11 @@ class ShowWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.close)
 		self.ui.refresh_button.clicked.connect(self.update_show)
 		self.ui.refresh_button_2.clicked.connect(self.update_show)
+		self.ui.refresh_button.clicked.connect(self._update_status)
+		self.ui.refresh_button_2.clicked.connect(self._update_status)
 		self.show_loaded.connect(self.fill_info)
 		self.update_done.connect(self.fill_updated_info)
+		self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
 		self.load_show(tvshow['seriesname'])
 
 	@threaded
@@ -133,6 +136,7 @@ class ShowWindow(QMainWindow):
 	def fill_info(self):
 		'''Fill in info after loaded, starting background download'''
 		if self.tvshow.poster:
+			self.ui.statusbar.showMessage("Loading Background...")
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 		self.ui.genre_label.setText('> genre - %s' % self.tvshow.genre)
@@ -152,6 +156,7 @@ class ShowWindow(QMainWindow):
 		self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
 		palette.setBrush(QPalette.Background, QBrush(self.background))
 		self.setPalette(palette)
+		self.ui.statusbar.clearMessage()
 
 	def resizeEvent(self, event):
 		'''Called when resize is made'''
@@ -167,7 +172,11 @@ class ShowWindow(QMainWindow):
 		self.update_done.emit()
 
 	def fill_updated_info(self):
-		print self.tvshow.seasons
+		self.ui.statusbar.clearMessage()
+		print self.tvshow.seasons[0].poster
+
+	def _update_status(self, event):
+		self.ui.statusbar.showMessage("Loading info...")
 
 class SettingsWindow(QMainWindow):
 	def __init__(self, main_window, config):
@@ -361,6 +370,8 @@ class ShowsMainWindow(QMainWindow):
 			p = 100*self.resultid/len(results)
 			bar = progress_bar(p, show_percentage=True)
 			self.ui.statusbar.showMessage(bar)
+			if self.resultid == len(results): # clear status bar after completion
+				self.ui.statusbar.clearMessage()
 
 		for i in reversed(range(self.ui.results_layout.count())): # clear previous results
 			self.ui.results_layout.itemAt(i).widget().setParent(None)

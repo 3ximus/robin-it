@@ -100,8 +100,7 @@ class Show:
 			if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
 			self.seasons = []
 			for i in seasons_list: # generates the seasons list
-				new_season = Season(s_id = i, tv_show = self, cache=(self.cache if not override_cache else override_cache), banners=banners)
-				new_season.to_string() #XXX DEBUG
+				new_season = Season(s_id = i, tv_show = self, cache=(self.cache if not override_cache else override_cache))
 				self.seasons.append(new_season)
 
 		# update TV Show info
@@ -190,7 +189,7 @@ class Season():
 	Its self updatable with method update_info, this updates every episode information
 	'''
 
-	def __init__(self, s_id, tv_show, cache=False, banners=False):
+	def __init__(self, s_id, tv_show, cache=False, banners=True):
 		'''Constructor method
 
 		Parameters:
@@ -215,7 +214,7 @@ class Season():
 		for episode in self.episodes: return_string += "%s - %s\n" % (episode.episode_number, episode.name)
 		print return_string
 
-	def update_info(self, cache=False, banners=False):
+	def update_info(self, cache=False, banners=True):
 		'''Searches thetvdb.com and updates all episodes it contains
 
 		Parameters:
