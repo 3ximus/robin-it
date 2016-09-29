@@ -106,6 +106,7 @@ class ShowWindow(QMainWindow):
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
 	update_done = QtCore.pyqtSignal()
+	refresh_status = QtCore.pyqtSignal()
 
 	def __init__(self, tvshow):
 		super(ShowWindow, self).__init__()
@@ -116,13 +117,15 @@ class ShowWindow(QMainWindow):
 
 		self.background = None
 		self.ui.showname_label.setText("> %s" % tvshow['seriesname'])
+
 		self.ui.back_button.clicked.connect(self.close)
 		self.ui.refresh_button.clicked.connect(self.update_show)
 		self.ui.refresh_button_2.clicked.connect(self.update_show)
-		self.ui.refresh_button.clicked.connect(self._update_status)
-		self.ui.refresh_button_2.clicked.connect(self._update_status)
-		self.show_loaded.connect(self.fill_info)
-		self.update_done.connect(self.fill_updated_info)
+
+		self.show_loaded.connect(self.fill_info) # fills info on gui after the show info is retrieved
+		self.refresh_status.connect(self.update_status) # updates statusbar while updating show
+		self.update_done.connect(self.fill_expanded_content) # fills gui with info about seasons and episodes
+
 		self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
 		self.load_show(tvshow['seriesname'])
 
@@ -139,6 +142,7 @@ class ShowWindow(QMainWindow):
 			self.ui.statusbar.showMessage("Loading Background...")
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
+		self.ui.showname_label.setText("> %s" % self.tvshow.name)
 		self.ui.genre_label.setText('> genre - %s' % self.tvshow.genre)
 		self.ui.network_label.setText('> network - %s' % self.tvshow.network)
 		self.ui.airday_label.setText('> air day - %s : %s' % (self.tvshow.air_dayofweek, self.tvshow.air_time))
@@ -168,15 +172,17 @@ class ShowWindow(QMainWindow):
 
 	@threaded
 	def update_show(self, event):
+		self.refresh_status.emit()
 		self.tvshow.update_info(override_cache='cache/')
 		self.update_done.emit()
 
-	def fill_updated_info(self):
+	def fill_expanded_content(self):
+		'''Fills the GUI with info about the seasons and episodes'''
 		self.ui.statusbar.clearMessage()
 		print self.tvshow.seasons[0].poster
 
-	def _update_status(self, event):
-		self.ui.statusbar.showMessage("Loading info...")
+	def update_status(self):
+		self.ui.statusbar.showMessage("Loading info...") # initial message
 
 class SettingsWindow(QMainWindow):
 	def __init__(self, main_window, config):
@@ -346,7 +352,7 @@ class ShowsMainWindow(QMainWindow):
 	def search(self):
 		'''Searches for TV Show'''
 		self.resultid=0
-		self.ui.statusbar.showMessage("Searching %s..." % self.ui.search_box.text())
+		self.ui.statusbar.showMessage("Searching for %s..." % self.ui.search_box.text())
 		self.ui.noresults_label.setParent(None)
 		self._search_thread(self.ui.search_box.text()) # both input boxes are synced
 		self.ui.stackedWidget.setCurrentIndex(1)
