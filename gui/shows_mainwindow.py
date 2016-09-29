@@ -537,7 +537,6 @@ class Ui_shows_mainwindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName("scrollArea_2")
         self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 902, 477))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
@@ -869,7 +868,7 @@ class Ui_shows_mainwindow(object):
         shows_mainwindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(shows_mainwindow)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(shows_mainwindow)
 
     def retranslateUi(self, shows_mainwindow):

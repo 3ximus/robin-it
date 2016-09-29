@@ -958,7 +958,7 @@
              <x>0</x>
              <y>0</y>
              <width>543</width>
-             <height>198</height>
+             <height>176</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1170,6 +1170,12 @@
     </item>
     <item>
      <widget class="QScrollArea" name="scrollArea">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>271</height>
+       </size>
+      </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
@@ -1177,14 +1183,6 @@
        <bool>true</bool>
       </property>
       <widget class="QWidget" name="scrollAreaWidgetContents_2">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>1055</width>
-         <height>227</height>
-        </rect>
-       </property>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2"/>
@@ -1343,7 +1341,7 @@
          <x>0</x>
          <y>0</y>
          <width>1055</width>
-         <height>228</height>
+         <height>206</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_4">

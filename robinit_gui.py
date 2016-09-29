@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/python2
 
 '''
 Frontend Aplication GUI
@@ -17,6 +17,8 @@ from gui.login import Ui_loginwindow
 from gui.settings import Ui_settings_window
 from gui.show import Ui_show_window
 from gui.show_banner_widget import Ui_show_banner_widget
+from gui.season_banner_widget import Ui_season_banner_widget
+from gui.episode_banner_widget import Ui_episode_banner_widget
 from libs.robinit_api import UserContent
 from libs.tvshow import search_for_show, Show
 from libs.loading import progress_bar
@@ -102,6 +104,29 @@ def load_config_file():
 #         GUI Classes
 # ----------------------------
 
+class SeasonPoster(QWidget):
+	poster_loaded = QtCore.pyqtSignal(object)
+	def __init__(self, season):
+		super(SeasonPoster, self).__init__()
+		self.season = season
+
+		self.ui = Ui_season_banner_widget()
+		self.ui.setupUi(self)
+		self.poster_loaded.connect(self.load_poster)
+		if len(self.season.poster) > 0:
+			self.download_poster(self.season.poster[0])
+
+	@threaded
+	def download_poster(self, url):
+		data = urllib.urlopen(url).read()
+		self.poster_loaded.emit(data)
+
+	def load_poster(self, data):
+		'''Load poster from downloaded data'''
+		poster=QPixmap()
+		poster.loadFromData(data)
+		self.ui.poster.setPixmap(poster)
+
 class ShowWindow(QMainWindow):
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
@@ -134,7 +159,7 @@ class ShowWindow(QMainWindow):
 		'''Loads show from database'''
 		self.tvshow = Show(name, header_only=True)
 		self.show_loaded.emit()
-		print "Show Loaded: %s\n" % name
+		print "Show Loaded: %s" % name
 
 	def fill_info(self):
 		'''Fill in info after loaded, starting background download'''
@@ -179,10 +204,12 @@ class ShowWindow(QMainWindow):
 	def fill_expanded_content(self):
 		'''Fills the GUI with info about the seasons and episodes'''
 		self.ui.statusbar.clearMessage()
+		for s in self.tvshow.seasons:
+			self.ui.horizontalLayout_2.addWidget(SeasonPoster(s))	
 		print self.tvshow.seasons[0].poster
 
 	def update_status(self):
-		self.ui.statusbar.showMessage("Loading info...") # initial message
+    		self.ui.statusbar.showMessage("Loading info...") # initial message
 
 class SettingsWindow(QMainWindow):
 	def __init__(self, main_window, config):
@@ -277,6 +304,7 @@ class SettingsWindow(QMainWindow):
 		if 'default_user' in keys:
 			self.ui.defaultuser_box.setText(self.config['default_user'])
 
+
 class ShowBanner(QWidget):
 	banner_loaded = QtCore.pyqtSignal(object)
 
@@ -294,8 +322,6 @@ class ShowBanner(QWidget):
 		if 'banner' in self.tvshow.keys():
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner("http://thetvdb.com/banners/" + self.tvshow['banner'])
-		else:
-			self.banner_loaded.emit("") # FIXME not working
 
 	@threaded
 	def download_banner(self, url): #FIXME there was some problem when using the download_image function (something about this class not having a signal with the signature banner_loaded signal(PyQt_PyObject))
