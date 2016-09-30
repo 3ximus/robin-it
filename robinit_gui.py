@@ -104,10 +104,33 @@ def load_config_file():
 #         GUI Classes
 # ----------------------------
 
-class SeasonPoster(QWidget):
+class EpisodeWidget(QWidget):
+	image_loaded = QtCore.pyqtSignal(object)
+	def __init__(self, episode):
+		super(EpisodeWidget, self).__init__()
+		self.episode = episode
+
+		self.ui = Ui_episode_banner_widget()
+		self.ui.setupUi(self)
+
+		self.image_loaded.connect(self.load_image)
+		self.download_image(self.episode.image)
+		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
+
+	@threaded
+	def download_image(self, url):
+		data = urllib.urlopen(url).read()
+		self.image_loaded.emit(data)
+
+	def load_image(self, data):
+		image=QPixmap()
+		image.loadFromData(data)
+		self.ui.image.setPixmap(image)
+
+class SeasonWidget(QWidget):
 	poster_loaded = QtCore.pyqtSignal(object)
 	def __init__(self, season):
-		super(SeasonPoster, self).__init__()
+		super(SeasonWidget, self).__init__()
 		self.season = season
 
 		self.ui = Ui_season_banner_widget()
@@ -131,7 +154,7 @@ class SeasonPoster(QWidget):
 		self.ui.poster.setPixmap(poster)
 
 	def view_show(self):
-		pass 
+		pass
 
 	def mark_show(self):
 		pass
@@ -156,7 +179,7 @@ class ShowWindow(QMainWindow):
 
 		self.show_loaded.connect(self.fill_info) # fills info on gui after the show info is retrieved
 		self.refresh_status.connect(self.update_status) # updates statusbar while updating show
-		self.update_done.connect(self.fill_expanded_content) # fills gui with info about seasons and episodes
+		self.update_done.connect(self.fill_seasons) # fills gui with info about seasons and episodes
 
 		self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
 		self.load_show(tvshow['seriesname'])
@@ -175,7 +198,7 @@ class ShowWindow(QMainWindow):
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 		self.update_show() #update seasons and episodes
-		
+
 		self.ui.showname_label.setText("> %s" % self.tvshow.name)
 		self.ui.genre_label.setText('> genre - %s' % self.tvshow.genre)
 		self.ui.network_label.setText('> network - %s' % self.tvshow.network)
@@ -209,21 +232,30 @@ class ShowWindow(QMainWindow):
 		self.tvshow.update_info(override_cache='cache/')
 		self.update_done.emit()
 
-	def fill_expanded_content(self):
-		'''Fills the GUI with info about the seasons and episodes'''
+	def fill_seasons(self):
+		'''Fills the GUI with seasons widgets'''
 		self.ui.statusbar.clearMessage()
 		for s in self.tvshow.seasons:
-			self.ui.horizontalLayout_2.addWidget(SeasonPoster(s))	
+			season = SeasonWidget(s)
+			season.ui.view_button.clicked.connect(partial(self.fill_episodes, sid=(s.s_id-1)))
+			self.ui.seasons_layout.addWidget(season)
 		print self.tvshow.seasons[0].poster
 
+	def fill_episodes(self, sid):
+		'''Fills the GUI with episodes from selected season'''
+		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
+			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
+		for e in self.tvshow.seasons[sid].episodes:
+			self.ui.episodes_layout.addWidget(EpisodeWidget(e))
+    	
 	def update_status(self):
-    		self.ui.statusbar.showMessage("Loading info...") # initial message
+		self.ui.statusbar.showMessage("Loading info...") # initial message
 
-class ShowBanner(QWidget):
+class ShowWidget(QWidget):
 	banner_loaded = QtCore.pyqtSignal(object)
 
 	def __init__(self, tvshow):
-		super(ShowBanner, self).__init__()
+		super(ShowWidget, self).__init__()
 		self.tvshow = tvshow
 
 		self.ui = Ui_show_banner_widget()
@@ -325,7 +357,7 @@ class ShowsMainWindow(QMainWindow):
 			self.ui.results_layout.addWidget(self.ui.noresults_label)
 		else:
 			for r in results: # display new results
-				banner = ShowBanner(r)
+				banner = ShowWidget(r)
 				banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
 				banner.banner_loaded.connect(partial(_status_update, results=results))
 
@@ -381,8 +413,9 @@ class LoginWindow(QMainWindow):
 
 	def toogle_autologin(self):
 		self.autologin = not self.autologin
+
 class SettingsWindow(QMainWindow):
-    	def __init__(self, main_window, config):
+	def __init__(self, main_window, config):
 		super(SettingsWindow, self).__init__()
 		self.main_window=main_window
 		self.config=config

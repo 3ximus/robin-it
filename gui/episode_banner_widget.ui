@@ -6,9 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>191</width>
-    <height>272</height>
+    <width>320</width>
+    <height>180</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>320</width>
+    <height>180</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>320</width>
+    <height>180</height>
+   </size>
   </property>
   <property name="palette">
    <palette>
@@ -428,13 +446,13 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QLabel" name="banner">
+  <widget class="QLabel" name="image">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>189</width>
-     <height>271</height>
+     <width>320</width>
+     <height>180</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -461,10 +479,10 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="watched_button">
+  <widget class="QPushButton" name="mark_button">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>260</x>
      <y>0</y>
      <width>60</width>
      <height>20</height>
@@ -525,25 +543,19 @@
     <string>mark</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="view_button">
+  <widget class="QLabel" name="name_label">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>0</y>
-     <width>60</width>
-     <height>20</height>
+     <x>10</x>
+     <y>150</y>
+     <width>318</width>
+     <height>21</height>
     </rect>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>60</width>
-     <height>20</height>
-    </size>
    </property>
    <property name="palette">
     <palette>
      <active>
-      <colorrole role="ButtonText">
+      <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
          <red>255</red>
@@ -554,7 +566,7 @@
       </colorrole>
      </active>
      <inactive>
-      <colorrole role="ButtonText">
+      <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
          <red>255</red>
@@ -565,7 +577,7 @@
       </colorrole>
      </inactive>
      <disabled>
-      <colorrole role="ButtonText">
+      <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
          <red>1</red>
@@ -581,12 +593,15 @@
     <font>
      <family>Hack</family>
      <pointsize>14</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
+     <weight>50</weight>
+     <bold>false</bold>
     </font>
    </property>
    <property name="text">
-    <string>view</string>
+    <string>&lt;name&gt;</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
  </widget>

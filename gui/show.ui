@@ -1120,7 +1120,7 @@
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+         <layout class="QHBoxLayout" name="seasons_layout"/>
         </item>
        </layout>
       </widget>
@@ -1208,7 +1208,7 @@
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5"/>
+         <layout class="QHBoxLayout" name="episodes_layout"/>
         </item>
        </layout>
       </widget>
