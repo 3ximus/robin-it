@@ -78,6 +78,24 @@ def apply_filters(data):
 	tmp_data.close()
 	return data
 
+def clickable(widget):
+	'''Makes a widget clickable, returning the clicked event'''
+	class Filter(QtCore.QObject):
+		clicked = QtCore.pyqtSignal()
+
+		def eventFilter(self, obj, event):
+			if obj == widget:
+				if event.type() == QtCore.QEvent.MouseButtonRelease:
+					if obj.rect().contains(event.pos()):
+						self.clicked.emit()
+						# use .emit(obj) to get the object within the slot.
+						return True
+			return False
+	
+	filter = Filter(widget)
+	widget.installEventFilter(filter)
+	return filter.clicked
+
 def save_config_file(content):
 	if type(content) == dict:
 		fp = open('robinit.conf', 'w')
@@ -136,7 +154,6 @@ class SeasonWidget(QWidget):
 		self.ui = Ui_season_banner_widget()
 		self.ui.setupUi(self)
 
-		self.ui.view_button.clicked.connect(self.view_show)
 		self.ui.mark_button.clicked.connect(self.mark_show)
 		self.poster_loaded.connect(self.load_poster)
 		if len(self.season.poster) > 0:
@@ -152,9 +169,6 @@ class SeasonWidget(QWidget):
 		poster=QPixmap()
 		poster.loadFromData(data)
 		self.ui.poster.setPixmap(poster)
-
-	def view_show(self):
-		pass
 
 	def mark_show(self):
 		pass
@@ -237,7 +251,7 @@ class ShowWindow(QMainWindow):
 		self.ui.statusbar.clearMessage()
 		for s in self.tvshow.seasons:
 			season = SeasonWidget(s)
-			season.ui.view_button.clicked.connect(partial(self.fill_episodes, sid=(s.s_id-1)))
+			clickable(season).connect(partial(self.fill_episodes, sid=(s.s_id-1)))
 			self.ui.seasons_layout.addWidget(season)
 		print self.tvshow.seasons[0].poster
 
@@ -247,7 +261,7 @@ class ShowWindow(QMainWindow):
 			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
 		for e in self.tvshow.seasons[sid].episodes:
 			self.ui.episodes_layout.addWidget(EpisodeWidget(e))
-    	
+
 	def update_status(self):
 		self.ui.statusbar.showMessage("Loading info...") # initial message
 
@@ -262,7 +276,7 @@ class ShowWidget(QWidget):
 		self.ui.setupUi(self)
 		self.ui.name_label.setText('< %s >' % self.tvshow['seriesname'])
 
-		self.ui.view_button.clicked.connect(self.view_show)
+		clickable(self).connect(self.view_show)
 		self.ui.add_button.clicked.connect(self.add_show)
 
 		if 'banner' in self.tvshow.keys():

@@ -194,9 +194,9 @@ class Ui_season_banner_widget(object):
         font.setWeight(75)
         self.mark_button.setFont(font)
         self.mark_button.setObjectName("mark_button")
-        self.view_button = QtWidgets.QPushButton(season_banner_widget)
-        self.view_button.setGeometry(QtCore.QRect(130, 0, 60, 20))
-        self.view_button.setMaximumSize(QtCore.QSize(60, 20))
+        self.download_button = QtWidgets.QPushButton(season_banner_widget)
+        self.download_button.setGeometry(QtCore.QRect(160, 0, 25, 20))
+        self.download_button.setMaximumSize(QtCore.QSize(60, 20))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -207,14 +207,14 @@ class Ui_season_banner_widget(object):
         brush = QtGui.QBrush(QtGui.QColor(1, 83, 49))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, brush)
-        self.view_button.setPalette(palette)
+        self.download_button.setPalette(palette)
         font = QtGui.QFont()
         font.setFamily("Hack")
         font.setPointSize(14)
         font.setBold(True)
         font.setWeight(75)
-        self.view_button.setFont(font)
-        self.view_button.setObjectName("view_button")
+        self.download_button.setFont(font)
+        self.download_button.setObjectName("download_button")
 
         self.retranslateUi(season_banner_widget)
         QtCore.QMetaObject.connectSlotsByName(season_banner_widget)
@@ -223,6 +223,6 @@ class Ui_season_banner_widget(object):
         _translate = QtCore.QCoreApplication.translate
         season_banner_widget.setWindowTitle(_translate("season_banner_widget", "Form"))
         self.mark_button.setText(_translate("season_banner_widget", "mark"))
-        self.view_button.setText(_translate("season_banner_widget", "view"))
+        self.download_button.setText(_translate("season_banner_widget", "↓"))
 
 import resources_rc

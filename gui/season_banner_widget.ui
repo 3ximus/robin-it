@@ -543,12 +543,12 @@
     <string>mark</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="view_button">
+  <widget class="QPushButton" name="download_button">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>160</x>
      <y>0</y>
-     <width>60</width>
+     <width>25</width>
      <height>20</height>
     </rect>
    </property>
@@ -604,7 +604,7 @@
     </font>
    </property>
    <property name="text">
-    <string>view</string>
+    <string>↓</string>
    </property>
   </widget>
  </widget>
