@@ -112,6 +112,9 @@ class SeasonPoster(QWidget):
 
 		self.ui = Ui_season_banner_widget()
 		self.ui.setupUi(self)
+
+		self.ui.view_button.clicked.connect(self.view_show)
+		self.ui.mark_button.clicked.connect(self.mark_show)
 		self.poster_loaded.connect(self.load_poster)
 		if len(self.season.poster) > 0:
 			self.download_poster(self.season.poster[0])
@@ -126,6 +129,12 @@ class SeasonPoster(QWidget):
 		poster=QPixmap()
 		poster.loadFromData(data)
 		self.ui.poster.setPixmap(poster)
+
+	def view_show(self):
+		pass 
+
+	def mark_show(self):
+		pass
 
 class ShowWindow(QMainWindow):
 	show_loaded = QtCore.pyqtSignal()
@@ -144,8 +153,6 @@ class ShowWindow(QMainWindow):
 		self.ui.showname_label.setText("> %s" % tvshow['seriesname'])
 
 		self.ui.back_button.clicked.connect(self.close)
-		self.ui.refresh_button.clicked.connect(self.update_show)
-		self.ui.refresh_button_2.clicked.connect(self.update_show)
 
 		self.show_loaded.connect(self.fill_info) # fills info on gui after the show info is retrieved
 		self.refresh_status.connect(self.update_status) # updates statusbar while updating show
@@ -163,10 +170,12 @@ class ShowWindow(QMainWindow):
 
 	def fill_info(self):
 		'''Fill in info after loaded, starting background download'''
-		if self.tvshow.poster:
+		if self.tvshow.poster: # load background
 			self.ui.statusbar.showMessage("Loading Background...")
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
+		self.update_show() #update seasons and episodes
+		
 		self.ui.showname_label.setText("> %s" % self.tvshow.name)
 		self.ui.genre_label.setText('> genre - %s' % self.tvshow.genre)
 		self.ui.network_label.setText('> network - %s' % self.tvshow.network)
@@ -185,7 +194,6 @@ class ShowWindow(QMainWindow):
 		self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
 		palette.setBrush(QPalette.Background, QBrush(self.background))
 		self.setPalette(palette)
-		self.ui.statusbar.clearMessage()
 
 	def resizeEvent(self, event):
 		'''Called when resize is made'''
@@ -196,7 +204,7 @@ class ShowWindow(QMainWindow):
 			self.setPalette(palette)
 
 	@threaded
-	def update_show(self, event):
+	def update_show(self):
 		self.refresh_status.emit()
 		self.tvshow.update_info(override_cache='cache/')
 		self.update_done.emit()
@@ -210,100 +218,6 @@ class ShowWindow(QMainWindow):
 
 	def update_status(self):
     		self.ui.statusbar.showMessage("Loading info...") # initial message
-
-class SettingsWindow(QMainWindow):
-	def __init__(self, main_window, config):
-		super(SettingsWindow, self).__init__()
-		self.main_window=main_window
-		self.config=config
-
-		# set up UI from QtDesigner
-		self.ui = Ui_settings_window()
-		self.ui.setupUi(self)
-
-		self.ui.back_button.clicked.connect(self.go_back)
-		self.ui.save_button.clicked.connect(self.save)
-		self.configure()
-
-	def go_back(self):
-		self.main_window.show()
-		self.main_window.setEnabled(True)
-		self.close()
-
-	def save(self):
-		'''Saves configuration to a file, ignores if its set to default'''
-		keys = self.config.keys()
-		if not self.ui.kickass_checkbox.checkState(): self.config['kickass_allow'] = 'False' # default is True
-		elif 'kickass_allow' in keys: del(self.config['kickass_allow'])
-		if self.ui.rarbg_checkbox.checkState(): self.config['rarbg_allow'] = 'True' # default is False
-		elif 'rarbg_allow' in keys: del(self.config['rarbg_allow'])
-		if self.ui.piratebay_checkbox.checkState(): self.config['piratebay_allow'] = 'True' # default is False
-		elif 'piratebay_allow' in keys: del(self.config['piratebay_allow'])
-
-		if not self.ui.kickass_box.text() == "" : self.config['kickass'] = self.ui.kickass_box.text() # default is empty
-		elif 'kickass' in keys: del(self.config['kickass'])
-		if not self.ui.rarbg_box.text() == "" : self.config['rarbg'] = self.ui.rarbg_box.text() # default is empty
-		elif 'rarbg' in keys: del(self.config['rarbg'])
-		if not self.ui.piratebay_box.text() == "" : self.config['piratebay'] = self.ui.piratebay_box.text() # default is empty
-		elif 'piratebay' in keys: del(self.config['piratebay'])
-
-		if not self.ui.ensub_checkbox.checkState(): self.config['sub_en'] = 'False' # default is True
-		elif 'sub_en' in keys: del(self.config['sub_en'])
-		if not self.ui.ptsub_checkbox.checkState(): self.config['sub_pt'] = 'False' # default is True
-		elif 'sub_pt' in keys: del(self.config['sub_pt'])
-
-		if self.ui.sd_button.isChecked(): self.config['def'] = 'sd'
-		if self.ui.hd_button.isChecked(): self.config['def'] = 'hd'
-
-		if not self.ui.storage_box.text() == "": self.config['storage_dir'] = self.ui.storage_box.text() # default is empty
-		elif 'storage_dir' in keys: del(self.config['storage_dir'])
-		if not self.ui.user_box.text() == "": self.config['user_dir'] = self.ui.user_box.text() # default is empty
-		elif 'user_dir' in keys: del(self.config['user_dir'])
-		if not self.ui.cache_box.text() == "": self.config['cache_dir'] = self.ui.cache_box.text() # default is empty
-		elif 'cache_dir' in keys: del(self.config['cache_dir'])
-
-		if not self.ui.defaultuser_box.text() == "": self.config['default_user'] = self.ui.defaultuser_box.text()
-		elif 'default_user' in keys: del(self.config['default_user'])
-
-		save_config_file(self.config)
-		self.go_back()
-
-	def configure(self):
-		keys = self.config.keys()
-		if 'kickass_allow' in keys:
-			self.ui.kickass_checkbox.setCheckState(True if self.config['kickass_allow'] == 'True' else False)
-		if 'rarbg_allow' in keys:
-			self.ui.rarbg_checkbox.setCheckState(True if self.config['rarbg_allow'] == 'True' else False)
-		if 'piratebay_allow' in keys:
-			self.ui.piratebay_checkbox.setCheckState(True if self.config['piratebay_allow'] == 'True' else False)
-
-		if 'kickass' in keys:
-			self.ui.kickass_box.setText(self.config['kickass'])
-		if 'rarbg' in keys:
-			self.ui.rarbg_box.setText(self.config['rarbg'])
-		if 'piratebay' in keys:
-			self.ui.piratebay_box.setText(self.config['piratebay'])
-
-		if 'sub_en' in keys:
-			self.ui.ensub_checkbox.setCheckState(True if self.config['sub_en'] == 'True' else False)
-		if 'sub_pt' in keys:
-			self.ui.ptsub_checkbox.setCheckState(True if self.config['sub_pt'] == 'True' else False)
-
-		if 'def' in keys:
-			if self.config['def'] == 'sd':
-				self.ui.sd_button.setChecked(True)
-			elif self.config['def'] == 'hd':
-				self.ui.hd_button.setChecked(True)
-
-		if 'storage_dir' in keys:
-			self.ui.storage_box.setText(self.config['storage_dir'])
-		if 'user_dir' in keys:
-			self.ui.user_box.setText(self.config['user_dir'])
-		if 'cache_dir' in keys:
-			self.ui.cache_box.setText(self.config['cache_dir'])
-		if 'default_user' in keys:
-			self.ui.defaultuser_box.setText(self.config['default_user'])
-
 
 class ShowBanner(QWidget):
 	banner_loaded = QtCore.pyqtSignal(object)
@@ -324,7 +238,7 @@ class ShowBanner(QWidget):
 			self.download_banner("http://thetvdb.com/banners/" + self.tvshow['banner'])
 
 	@threaded
-	def download_banner(self, url): #FIXME there was some problem when using the download_image function (something about this class not having a signal with the signature banner_loaded signal(PyQt_PyObject))
+	def download_banner(self, url):
 		'''Thread to download banner, emits signal when complete'''
 		data = urllib.urlopen(url).read()
 		self.banner_loaded.emit(data)
@@ -430,7 +344,7 @@ class ShowsMainWindow(QMainWindow):
 
 	def update_search(self):
 		self.ui.search_box_2.setText(self.ui.search_box.text())
-# TODO ALSO REDISPLAY SEARCH RESULTS
+		# TODO ALSO REDISPLAY SEARCH RESULTS
 
 	def update_search_2(self):
 		self.ui.search_box.setText(self.ui.search_box_2.text())
@@ -467,6 +381,98 @@ class LoginWindow(QMainWindow):
 
 	def toogle_autologin(self):
 		self.autologin = not self.autologin
+class SettingsWindow(QMainWindow):
+    	def __init__(self, main_window, config):
+		super(SettingsWindow, self).__init__()
+		self.main_window=main_window
+		self.config=config
+
+		# set up UI from QtDesigner
+		self.ui = Ui_settings_window()
+		self.ui.setupUi(self)
+
+		self.ui.back_button.clicked.connect(self.go_back)
+		self.ui.save_button.clicked.connect(self.save)
+		self.configure()
+
+	def go_back(self):
+		self.main_window.show()
+		self.main_window.setEnabled(True)
+		self.close()
+
+	def save(self):
+		'''Saves configuration to a file, ignores if its set to default'''
+		keys = self.config.keys()
+		if not self.ui.kickass_checkbox.checkState(): self.config['kickass_allow'] = 'False' # default is True
+		elif 'kickass_allow' in keys: del(self.config['kickass_allow'])
+		if self.ui.rarbg_checkbox.checkState(): self.config['rarbg_allow'] = 'True' # default is False
+		elif 'rarbg_allow' in keys: del(self.config['rarbg_allow'])
+		if self.ui.piratebay_checkbox.checkState(): self.config['piratebay_allow'] = 'True' # default is False
+		elif 'piratebay_allow' in keys: del(self.config['piratebay_allow'])
+
+		if not self.ui.kickass_box.text() == "" : self.config['kickass'] = self.ui.kickass_box.text() # default is empty
+		elif 'kickass' in keys: del(self.config['kickass'])
+		if not self.ui.rarbg_box.text() == "" : self.config['rarbg'] = self.ui.rarbg_box.text() # default is empty
+		elif 'rarbg' in keys: del(self.config['rarbg'])
+		if not self.ui.piratebay_box.text() == "" : self.config['piratebay'] = self.ui.piratebay_box.text() # default is empty
+		elif 'piratebay' in keys: del(self.config['piratebay'])
+
+		if not self.ui.ensub_checkbox.checkState(): self.config['sub_en'] = 'False' # default is True
+		elif 'sub_en' in keys: del(self.config['sub_en'])
+		if not self.ui.ptsub_checkbox.checkState(): self.config['sub_pt'] = 'False' # default is True
+		elif 'sub_pt' in keys: del(self.config['sub_pt'])
+
+		if self.ui.sd_button.isChecked(): self.config['def'] = 'sd'
+		if self.ui.hd_button.isChecked(): self.config['def'] = 'hd'
+
+		if not self.ui.storage_box.text() == "": self.config['storage_dir'] = self.ui.storage_box.text() # default is empty
+		elif 'storage_dir' in keys: del(self.config['storage_dir'])
+		if not self.ui.user_box.text() == "": self.config['user_dir'] = self.ui.user_box.text() # default is empty
+		elif 'user_dir' in keys: del(self.config['user_dir'])
+		if not self.ui.cache_box.text() == "": self.config['cache_dir'] = self.ui.cache_box.text() # default is empty
+		elif 'cache_dir' in keys: del(self.config['cache_dir'])
+
+		if not self.ui.defaultuser_box.text() == "": self.config['default_user'] = self.ui.defaultuser_box.text()
+		elif 'default_user' in keys: del(self.config['default_user'])
+
+		save_config_file(self.config)
+		self.go_back()
+
+	def configure(self):
+		keys = self.config.keys()
+		if 'kickass_allow' in keys:
+			self.ui.kickass_checkbox.setCheckState(True if self.config['kickass_allow'] == 'True' else False)
+		if 'rarbg_allow' in keys:
+			self.ui.rarbg_checkbox.setCheckState(True if self.config['rarbg_allow'] == 'True' else False)
+		if 'piratebay_allow' in keys:
+			self.ui.piratebay_checkbox.setCheckState(True if self.config['piratebay_allow'] == 'True' else False)
+
+		if 'kickass' in keys:
+			self.ui.kickass_box.setText(self.config['kickass'])
+		if 'rarbg' in keys:
+			self.ui.rarbg_box.setText(self.config['rarbg'])
+		if 'piratebay' in keys:
+			self.ui.piratebay_box.setText(self.config['piratebay'])
+
+		if 'sub_en' in keys:
+			self.ui.ensub_checkbox.setCheckState(True if self.config['sub_en'] == 'True' else False)
+		if 'sub_pt' in keys:
+			self.ui.ptsub_checkbox.setCheckState(True if self.config['sub_pt'] == 'True' else False)
+
+		if 'def' in keys:
+			if self.config['def'] == 'sd':
+				self.ui.sd_button.setChecked(True)
+			elif self.config['def'] == 'hd':
+				self.ui.hd_button.setChecked(True)
+
+		if 'storage_dir' in keys:
+			self.ui.storage_box.setText(self.config['storage_dir'])
+		if 'user_dir' in keys:
+			self.ui.user_box.setText(self.config['user_dir'])
+		if 'cache_dir' in keys:
+			self.ui.cache_box.setText(self.config['cache_dir'])
+		if 'default_user' in keys:
+			self.ui.defaultuser_box.setText(self.config['default_user'])
 
 class MainWindow(QMainWindow):
 	def __init__(self):

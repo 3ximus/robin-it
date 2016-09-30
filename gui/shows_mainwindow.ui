@@ -484,7 +484,7 @@
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page0">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -1515,6 +1515,14 @@
            <bool>true</bool>
           </property>
           <widget class="QWidget" name="scrollAreaWidgetContents_2">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>902</width>
+             <height>477</height>
+            </rect>
+           </property>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <layout class="QGridLayout" name="results_layout">
@@ -1881,8 +1889,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>16</width>
-             <height>16</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
           </widget>
@@ -2322,8 +2330,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>16</width>
-             <height>16</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
           </widget>
