@@ -2,9 +2,10 @@
 *.pyc
 *.vim
 .vscode
-cache/*
-storage/*
-user/*
-build/*
-dist/*
+cache
+storage
+user
+build
+dist
 robinit.conf
+robinit_env
