@@ -874,7 +874,7 @@ class Ui_shows_mainwindow(object):
 
     def retranslateUi(self, shows_mainwindow):
         _translate = QtCore.QCoreApplication.translate
-        shows_mainwindow.setWindowTitle(_translate("shows_mainwindow", "Robin_it_v0.2"))
+        shows_mainwindow.setWindowTitle(_translate("shows_mainwindow", "Robin_it_v0.3"))
         self.myshows_button.setText(_translate("shows_mainwindow", "> load my_shows"))
         self.towatch_button.setText(_translate("shows_mainwindow", "> set to_watch"))
         self.back_button_0.setText(_translate("shows_mainwindow", "<<"))

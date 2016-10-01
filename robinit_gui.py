@@ -1,14 +1,14 @@
-#! /usr/bin/python2
+#! /usr/bin/python2.7
 
 '''
 Frontend Aplication GUI
-Latest Update - v0.2
+Latest Update - v0.3
 Created - 21.9.16
 Copyright (C) 2016 - eximus
 '''
-__version__ = '0.2'
+__version__ = '0.3'
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt5.QtGui import QPixmap, QPalette, QBrush, QColor
 from gui.mainwindow import Ui_mainwindow
