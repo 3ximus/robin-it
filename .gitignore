@@ -1,11 +1,10 @@
 *.swp
 *.pyc
 *.vim
+.vscode
 cache/*
 storage/*
 user/*
 build/*
 dist/*
-in.txt
-fix_version
 robinit.conf

@@ -253,8 +253,8 @@ class Ui_loginwindow(object):
         self.login_box.setPalette(palette)
         font = QtGui.QFont()
         font.setPointSize(14)
-        font.setBold(True)
-        font.setWeight(75)
+        font.setBold(False)
+        font.setWeight(50)
         self.login_box.setFont(font)
         self.login_box.setText("")
         self.login_box.setFrame(False)
@@ -297,8 +297,8 @@ class Ui_loginwindow(object):
         self.autologin_checkbox.setPalette(palette)
         font = QtGui.QFont()
         font.setPointSize(14)
-        font.setBold(True)
-        font.setWeight(75)
+        font.setBold(False)
+        font.setWeight(50)
         self.autologin_checkbox.setFont(font)
         self.autologin_checkbox.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.autologin_checkbox.setChecked(False)
@@ -315,7 +315,7 @@ class Ui_loginwindow(object):
 
     def retranslateUi(self, loginwindow):
         _translate = QtCore.QCoreApplication.translate
-        loginwindow.setWindowTitle(_translate("loginwindow", "Robin_it_v0.1"))
+        loginwindow.setWindowTitle(_translate("loginwindow", "Robin_it_v0.2"))
         self.loaduser_label.setText(_translate("loginwindow", "> load user"))
         self.sign_label.setText(_translate("loginwindow", ">"))
         self.login_box.setPlaceholderText(_translate("loginwindow", "username"))

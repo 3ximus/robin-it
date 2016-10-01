@@ -437,7 +437,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.1</string>
+   <string>Robin_it_v0.2</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
@@ -688,8 +688,8 @@
           <property name="font">
            <font>
             <pointsize>14</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
+            <weight>50</weight>
+            <bold>false</bold>
            </font>
           </property>
           <property name="text">
@@ -810,8 +810,8 @@
         <property name="font">
          <font>
           <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
+          <weight>50</weight>
+          <bold>false</bold>
          </font>
         </property>
         <property name="layoutDirection">
