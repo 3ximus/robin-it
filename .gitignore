@@ -8,4 +8,4 @@ user
 build
 dist
 robinit.conf
-robinit_env
+venv

@@ -25,11 +25,14 @@ Copyright (C) 2015 - eximus
 '''
 __version__ = '0.3'
 
-from utillib import UtillibError
+
 import tvshow
 from os import mkdir, path
-import gatherer
 import cPickle
+
+# Torrent libs
+#from utillib import UtillibError
+#import gatherer
 
 class UserContent:
 	'''User TV Shows Content Class
