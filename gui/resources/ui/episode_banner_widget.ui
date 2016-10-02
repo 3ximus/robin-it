@@ -547,7 +547,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>150</y>
+     <y>158</y>
      <width>318</width>
      <height>21</height>
     </rect>
@@ -668,6 +668,91 @@
     <string>↓</string>
    </property>
   </widget>
+  <widget class="QLabel" name="name_back">
+   <property name="geometry">
+    <rect>
+     <x>-10</x>
+     <y>158</y>
+     <width>331</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="Base">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Window">
+       <brush brushstyle="SolidPattern">
+        <color alpha="155">
+         <red>50</red>
+         <green>56</green>
+         <blue>65</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="Base">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Window">
+       <brush brushstyle="SolidPattern">
+        <color alpha="155">
+         <red>50</red>
+         <green>56</green>
+         <blue>65</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="Base">
+       <brush brushstyle="SolidPattern">
+        <color alpha="155">
+         <red>50</red>
+         <green>56</green>
+         <blue>65</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Window">
+       <brush brushstyle="SolidPattern">
+        <color alpha="155">
+         <red>50</red>
+         <green>56</green>
+         <blue>65</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+  </widget>
+  <zorder>image</zorder>
+  <zorder>mark_button</zorder>
+  <zorder>download_button</zorder>
+  <zorder>name_back</zorder>
+  <zorder>name_label</zorder>
  </widget>
  <resources>
   <include location="../resources.qrc"/>

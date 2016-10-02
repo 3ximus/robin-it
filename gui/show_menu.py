@@ -25,58 +25,9 @@ from libs.thread_decorator import threaded
 from libs.loading import progress_bar
 
 # TOOLS
+from time import sleep
 from functools import partial
 import urllib
-
-class ShowWidget(QWidget):
-	'''Small banner to identify a show
-
-	Parameters:
-		tvshow - search result to load the banner from
-
-		The whole widget is clickable displaying a Show Window with the tvshow info
-		Has an add button to add the show to the followed shows
-		Emits banner_loaded signal when the banner image is loaded
-		
-		Used in search results
-	'''
-	banner_loaded = QtCore.pyqtSignal(object)
-
-	def __init__(self, tvshow):
-		super(ShowWidget, self).__init__()
-		self.tvshow = tvshow
-
-		self.ui = Ui_show_banner_widget()
-		self.ui.setupUi(self)
-		self.ui.name_label.setText('< %s >' % self.tvshow['seriesname'])
-
-		clickable(self).connect(self.view_show)
-		self.ui.add_button.clicked.connect(self.add_show)
-
-		if 'banner' in self.tvshow.keys():
-			self.banner_loaded.connect(self.load_banner)
-			self.download_banner("http://thetvdb.com/banners/" + self.tvshow['banner']) #FIXME harcoding is bad for your health
-
-	@threaded
-	def download_banner(self, url):
-		'''Thread to download banner, emits self.banner_loaded signal when complete'''
-		data = urllib.urlopen(url).read()
-		self.banner_loaded.emit(data)
-
-	def load_banner(self, data):
-		'''Triggered by self.banner_loaded signal. Loads the banner from downloaded data'''
-		banner = QPixmap()
-		banner.loadFromData(data)
-		self.ui.banner.setPixmap(banner)
-
-	def view_show(self):
-		'''Triggered clicking on the widget. Displays Show Window'''
-		self.show_window = ShowWindow(self.tvshow)
-		self.show_window.show()
-
-	def add_show(self):
-		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
-		pass
 
 class ShowsMenu(QMainWindow):
 	'''Works with stacked pages
@@ -166,7 +117,6 @@ class ShowsMenu(QMainWindow):
 			'''This thread will simply wait until all shows with banners are loaded
 				Emits self.all_banners_loaded when finished
 			'''
-			from time import sleep
 			while True:
 				if self.loaded_results == len(results)-len(pending_add):
 					self.all_banners_loaded.emit()
@@ -220,3 +170,54 @@ class ShowsMenu(QMainWindow):
 	def update_search_2(self):
 		'''Maintains search boxes from both stack pages in sync'''
 		self.ui.search_box.setText(self.ui.search_box_2.text())
+
+
+class ShowWidget(QWidget):
+	'''Small banner to identify a show
+
+	Parameters:
+		tvshow - search result to load the banner from
+
+		The whole widget is clickable displaying a Show Window with the tvshow info
+		Has an add button to add the show to the followed shows
+		Emits banner_loaded signal when the banner image is loaded
+		
+		Used in search results
+	'''
+	banner_loaded = QtCore.pyqtSignal(object)
+
+	def __init__(self, tvshow):
+		super(ShowWidget, self).__init__()
+		self.tvshow = tvshow
+
+		self.ui = Ui_show_banner_widget()
+		self.ui.setupUi(self)
+		self.ui.name_label.setText('< %s >' % self.tvshow['seriesname'])
+
+		clickable(self).connect(self.view_show)
+		self.ui.add_button.clicked.connect(self.add_show)
+
+		if 'banner' in self.tvshow.keys():
+			self.banner_loaded.connect(self.load_banner)
+			self.download_banner("http://thetvdb.com/banners/" + self.tvshow['banner']) #FIXME harcoding is bad for your health
+
+	@threaded
+	def download_banner(self, url):
+		'''Thread to download banner, emits self.banner_loaded signal when complete'''
+		data = urllib.urlopen(url).read()
+		self.banner_loaded.emit(data)
+
+	def load_banner(self, data):
+		'''Triggered by self.banner_loaded signal. Loads the banner from downloaded data'''
+		banner = QPixmap()
+		banner.loadFromData(data)
+		self.ui.banner.setPixmap(banner)
+
+	def view_show(self):
+		'''Triggered clicking on the widget. Displays Show Window'''
+		self.show_window = ShowWindow(self.tvshow)
+		self.show_window.show()
+
+	def add_show(self):
+		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
+		pass
