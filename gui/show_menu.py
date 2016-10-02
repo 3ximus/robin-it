@@ -31,6 +31,10 @@ import urllib
 
 class ShowsMenu(QMainWindow):
 	'''Works with stacked pages
+
+	Parameters:
+		return_to -- window to show when the back_button is pressed
+		user_state -- UserContent class instance containing user info
 	
 	Index:
 		0 - Main Page contains search box and updates
@@ -176,7 +180,7 @@ class ShowWidget(QWidget):
 	'''Small banner to identify a show
 
 	Parameters:
-		tvshow - search result to load the banner from
+		tvshow -- search result to load the banner from
 
 		The whole widget is clickable displaying a Show Window with the tvshow info
 		Has an add button to add the show to the followed shows

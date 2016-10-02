@@ -74,7 +74,7 @@ class ShowWindow(QMainWindow):
 		self.ui.setupUi(self)
 
 		self.background = None
-		self.ui.showname_label.setText("> %s" % tvshow['seriesname'])
+		self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
 
 		self.ui.back_button.clicked.connect(self.close)
 
@@ -100,13 +100,13 @@ class ShowWindow(QMainWindow):
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 		self.update_show() #update seasons and episodes
 
-		self.ui.showname_label.setText("> %s" % self.tvshow.name)
-		self.ui.genre_label.setText('> genre - %s' % self.tvshow.genre)
-		self.ui.network_label.setText('> network - %s' % self.tvshow.network)
-		self.ui.airday_label.setText('> air day - %s : %s' % (self.tvshow.air_dayofweek, self.tvshow.air_time))
-		self.ui.runtime_label.setText('> runtime - %s min' % self.tvshow.runtime)
-		self.ui.status_label.setText('> status - %s' % self.tvshow.status)
-		self.ui.imdb_label.setText('> <a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
+		self.ui.showname_label.setText("// %s" % self.tvshow.name)
+		self.ui.genre_label.setText('genre - %s' % self.tvshow.genre)
+		self.ui.network_label.setText('network - %s' % self.tvshow.network)
+		self.ui.airday_label.setText('air day - %s : %s' % (self.tvshow.air_dayofweek, self.tvshow.air_time))
+		self.ui.runtime_label.setText('runtime - %s min' % self.tvshow.runtime)
+		self.ui.status_label.setText('status - %s' % self.tvshow.status)
+		self.ui.imdb_label.setText('<a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
 		self.ui.description_box.setText(self.tvshow.description)
 
 	def load_background(self, data):

@@ -28,20 +28,28 @@ from functools import partial
 import sys
 
 # ----------------------------
+#         Globals 
+# ----------------------------
+
+CONFIG_FILE = 'robinit.conf'
+
+# ----------------------------
 #          Function
 # ----------------------------
 
 def save_config_file(content):
+	'''Save given content to the CONFIG_FILE'''
 	if type(content) == dict:
-		fp = open('robinit.conf', 'w')
+		fp = open(CONFIG_FILE, 'w')
 		for key in content.keys():
 			fp.write("%s %s\n" % (key, content[key]))
 		fp.close()
 
 def load_config_file():
+	'''Load CONFIG_FILE to a dictionary, returning it'''
 	content = {}
 	try:
-		fp = open('robinit.conf', 'r')
+		fp = open(CONFIG_FILE, 'r')
 		for n, line in enumerate(fp):
 			if line[0] == '#': continue
 			line = [s.strip('\n') for s in line.split(' ')]
@@ -57,7 +65,81 @@ def load_config_file():
 #         GUI Classes
 # ----------------------------
 
+class MainWindow(QMainWindow):
+	'''Main window class containing the main menu
+	
+	This class launches other parts of the program like the Shows and Movies, through its menu
+	This class when created lods the CONFIG_FILE if available, if the default user is set its saved profile is loaded
+		otherwise a LoginWindow is presented so the user can select a profile or create a new one
+	'''
+	def __init__(self):
+		super(MainWindow, self).__init__()
+
+		# set up UI from QtDesigner
+		self.ui = Ui_mainwindow()
+		self.ui.setupUi(self)
+
+		# init window at center
+		self.move(QApplication.desktop().screen().rect().center()-self.rect().center())
+		self.show()
+
+		# User
+		self.user_state = None
+
+		self.config = load_config_file() # get configs
+		if 'default_user' in self.config.keys():
+			self.set_user_state(UserContent(self.config['default_user']))
+		else: # create login window
+			self.setEnabled(False)
+			self.loginwindow = LoginWindow(main_window=self, config=self.config)
+			self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
+			self.loginwindow.show()
+
+		self.shows_window = ShowsMenu(return_to=self, user_state=self.user_state)
+		self.settings = SettingsWindow(main_window=self, config=self.config)
+		self.ui.shows_button.clicked.connect(partial(self.display_window, window=self.shows_window))
+		self.ui.config_button.clicked.connect(self.display_settings)
+
+	def display_window(self, window):
+		'''Displays given window'''
+		window.move(self.pos()+self.rect().center()-window.rect().center()) # position new window at the center position
+		window.show()
+		self.close()
+
+	def display_settings(self):
+		'''Separate function to display shows window due to it disabling the main menu while open'''
+		self.settings.move(self.pos()+self.rect().center()-self.settings.rect().center()) # position new window at the center position
+		self.settings.show()
+		self.setEnabled(False)
+
+	def set_user_state(self, user_state):
+		'''Sets user state to a given UserContent instance
+			This is called either at construction time if a default user is set in the CONFIG_FILE or
+				by the login window when selecting a profile
+		'''
+		self.user_state=user_state
+		self.ui.user_label.setText('<%s>' % self.user_state.username)
+
+	def closeEvent(self, event):
+		'''Good because it stops segmentation fault when exiting, but impedes the
+			possibily of returning to the main menu after other menus are loaded
+
+			NOTE: something here needs tweaking to prevent fatal crash
+			when other menus try to return to this window
+		'''
+		self.deleteLater()
+
+
 class LoginWindow(QMainWindow):
+	'''Class for logging in the user
+	
+	Parameters:
+		main_window -- window to return after login (usually the main menu window)
+		config -- config dictionary loaded from CONFIG_FILE usually
+
+		Expect user to input username, if not given it creates a new one 
+		Autologin checkbox saves the user to the config dictionary given avoiding this window when app launched
+	'''
 	def __init__(self, main_window, config):
 		super(LoginWindow, self).__init__()
 		self.main_window=main_window
@@ -77,7 +159,11 @@ class LoginWindow(QMainWindow):
 		self.autologin = False
 
 	def login(self):
-		'''If a username is given it loads the user profile or creates a new one'''
+		'''Triggered by a returnPressed on login_box or clicked on login_button signals
+
+			Logs the user in, effectivly loading its profile if available, otherwise it creates a new one
+			If the autologin checkbox is checked it will save this user to the config file
+		'''
 		if self.ui.login_box.text() != "":
 			if self.autologin:
 				self.config.update({'default_user' : self.ui.login_box.text()})
@@ -88,9 +174,20 @@ class LoginWindow(QMainWindow):
 			self.destroy()
 
 	def toogle_autologin(self):
+		'''Triggered by self.ui.autologin_checkbox.stateChanged signal.
+			Toogles autologin variable when self.ui.autologin_checkbox state is changed
+		'''
 		self.autologin = not self.autologin
 
 class SettingsWindow(QMainWindow):
+	'''Settings window class
+
+	Parameters:
+		main_window -- window to return after login (usually the main menu window)
+		config -- config dictionary loaded from CONFIG_FILE usually
+
+		This class contains multiple settings that are save on the CONFIG_FILE when the save_button is pressed
+	'''
 	def __init__(self, main_window, config):
 		super(SettingsWindow, self).__init__()
 		self.main_window=main_window
@@ -105,12 +202,13 @@ class SettingsWindow(QMainWindow):
 		self.configure()
 
 	def go_back(self):
+		'''Closes window and reenables to main_menu'''
 		self.main_window.show()
 		self.main_window.setEnabled(True)
 		self.close()
 
 	def save(self):
-		'''Saves configuration to a file, ignores if its set to default'''
+		'''Saves configuration to a file, ignores a setting if its set to default'''
 		keys = self.config.keys()
 		if not self.ui.kickass_checkbox.checkState(): self.config['kickass_allow'] = 'False' # default is True
 		elif 'kickass_allow' in keys: del(self.config['kickass_allow'])
@@ -148,6 +246,7 @@ class SettingsWindow(QMainWindow):
 		self.go_back()
 
 	def configure(self):
+		'''Sets the settings displayed according to given config dictionary'''
 		keys = self.config.keys()
 		if 'kickass_allow' in keys:
 			self.ui.kickass_checkbox.setCheckState(True if self.config['kickass_allow'] == 'True' else False)
@@ -183,52 +282,10 @@ class SettingsWindow(QMainWindow):
 		if 'default_user' in keys:
 			self.ui.defaultuser_box.setText(self.config['default_user'])
 
-class MainWindow(QMainWindow):
-	def __init__(self):
-		super(MainWindow, self).__init__()
 
-		# set up UI from QtDesigner
-		self.ui = Ui_mainwindow()
-		self.ui.setupUi(self)
-
-		# init window at center
-		self.move(QApplication.desktop().screen().rect().center()-self.rect().center())
-		self.show()
-
-		# User
-		self.user_state = None
-
-		self.config = load_config_file() # get configs
-		if 'default_user' in self.config.keys():
-			self.set_user_state(UserContent(self.config['default_user']))
-		else: # create login window
-			self.setEnabled(False)
-			self.loginwindow = LoginWindow(main_window=self, config=self.config)
-			self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
-			self.loginwindow.show()
-
-		self.shows_window = ShowsMenu(return_to=self, user_state=self.user_state)
-		self.settings = SettingsWindow(main_window=self, config=self.config)
-		self.ui.shows_button.clicked.connect(partial(self.display_window, window=self.shows_window))
-		self.ui.config_button.clicked.connect(self.display_settings)
-
-	def display_window(self, window):
-		window.move(self.pos()+self.rect().center()-window.rect().center()) # position new window at the center position
-		window.show()
-		self.close()
-
-	def display_settings(self):
-		self.settings.move(self.pos()+self.rect().center()-self.settings.rect().center()) # position new window at the center position
-		self.settings.show()
-		self.setEnabled(False)
-
-	def set_user_state(self, user_state):
-		'''Sets user state to a given UserContent instance'''
-		self.user_state=user_state
-		self.ui.user_label.setText('<%s>' % self.user_state.username)
-
-	def closeEvent(self, event):
-		self.deleteLater()
+# ----------------
+#		MAIN
+# ----------------
 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
