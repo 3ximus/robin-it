@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>shows_mainwindow</class>
- <widget class="QMainWindow" name="shows_mainwindow">
+ <class>shows_menu</class>
+ <widget class="QMainWindow" name="shows_menu">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -434,7 +434,7 @@
    <string>Robin_it_v0.3</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset resource="../resources.qrc">
     <normaloff>:/resources/images/robinit.ico</normaloff>
     <disabledoff>:/resources/images/robinit_desaturated.ico</disabledoff>
     <disabledon>:/resources/images/robinit_desaturated.ico</disabledon>:/resources/images/robinit.ico</iconset>
@@ -1519,8 +1519,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>477</height>
+             <width>144</width>
+             <height>35</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout">
@@ -1889,8 +1889,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>490</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
           </widget>
@@ -2330,8 +2330,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>522</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
           </widget>
@@ -2441,7 +2441,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

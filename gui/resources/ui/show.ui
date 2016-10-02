@@ -434,7 +434,7 @@
    <string>Robin_it_v0.3</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset>
     <normaloff>:/resources/images/robinit.ico</normaloff>
     <disabledoff>:/resources/images/robinit_desaturated.ico</disabledoff>
     <disabledon>:/resources/images/robinit_desaturated.ico</disabledon>:/resources/images/robinit.ico</iconset>
@@ -1468,7 +1468,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>
