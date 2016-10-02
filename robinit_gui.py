@@ -121,8 +121,9 @@ class MainWindow(QMainWindow):
 		self.ui.user_label.setText('<%s>' % self.user_state.username)
 
 	def closeEvent(self, event):
-		'''Good because it stops segmentation fault when exiting, but impedes the
-			possibily of returning to the main menu after other menus are loaded
+		'''This is here because it stops segmentation fault when exiting, but stops the
+			possibily of returning to the main menu after other menus are loaded and 
+			this one is closed
 
 			NOTE: something here needs tweaking to prevent fatal crash
 			when other menus try to return to this window

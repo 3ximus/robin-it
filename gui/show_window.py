@@ -45,7 +45,7 @@ def download_image(signal, url, filters=False):
 	signal.emit(data)
 
 def apply_filters(data):
-	'''Function to apply filter to image'''
+	'''Function to apply filter to an image'''
 	data = StringIO(data)
 	img = Image.open(data)
 	img = img.point(lambda x: x*DARKNESS) # darken
@@ -61,10 +61,23 @@ def apply_filters(data):
 # --------------------
 
 class ShowWindow(QMainWindow):
+	'''Main window of a TV Show
+	
+	Parameters:
+		tvshow -- result from a tvshow search
+		
+		Displays most of the show info
+		Show info and season/episode data are loaded separatly in 2 fases
+
+		Emits multiple signals:
+			show_loaded -- after main info of the tvshow is gathered
+			background_loaded  -- main tvshow poster to use as background is loaded
+			update_done  -- all show info was gathered, including seasons and episodes info
+	'''
+
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
 	update_done = QtCore.pyqtSignal()
-	refresh_status = QtCore.pyqtSignal()
 
 	def __init__(self, tvshow):
 		super(ShowWindow, self).__init__()
@@ -79,7 +92,6 @@ class ShowWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.close)
 
 		self.show_loaded.connect(self.fill_info) # fills info on gui after the show info is retrieved
-		self.refresh_status.connect(self.update_status) # updates statusbar while updating show
 		self.update_done.connect(self.fill_seasons) # fills gui with info about seasons and episodes
 
 		self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
@@ -87,18 +99,23 @@ class ShowWindow(QMainWindow):
 
 	@threaded
 	def load_show(self, name):
-		'''Loads show from database'''
+		'''Loads the show main info from the database'''
 		self.tvshow = Show(name, header_only=True)
 		self.show_loaded.emit()
 		print "Show Loaded: %s" % name
 
 	def fill_info(self):
-		'''Fill in info after loaded, starting background download'''
+		'''Triggered by the show_loaded signal
+
+			Fills in the info loaded
+			Starts background image download
+		'''
 		if self.tvshow.poster: # load background
 			self.ui.statusbar.showMessage("Loading Background...")
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 		self.update_show() #update seasons and episodes
+		self.ui.statusbar.showMessage("Loading info...") # initial message
 
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
 		self.ui.genre_label.setText('genre - %s' % self.tvshow.genre)
@@ -110,7 +127,9 @@ class ShowWindow(QMainWindow):
 		self.ui.description_box.setText(self.tvshow.description)
 
 	def load_background(self, data):
-		'''Load window background from downloaded background image'''
+		'''Triggered by background_loaded signal.
+			Loads window background from downloaded background image
+		'''
 		palette = QPalette()
 		self.background = QPixmap()
 		self.background.loadFromData(data)
@@ -129,12 +148,12 @@ class ShowWindow(QMainWindow):
 
 	@threaded
 	def update_show(self):
-		self.refresh_status.emit()
+		'''Called after info has been gathered. Loads season and episode info'''
 		self.tvshow.update_info(override_cache='cache/')
 		self.update_done.emit()
 
 	def fill_seasons(self):
-		'''Fills the GUI with seasons widgets'''
+		'''Triggered by update_done signal. Fills the GUI with seasons widgets'''
 		self.ui.statusbar.clearMessage()
 		for s in self.tvshow.seasons:
 			season = SeasonWidget(s)
@@ -148,10 +167,14 @@ class ShowWindow(QMainWindow):
 		for e in self.tvshow.seasons[sid].episodes:
 			self.ui.episodes_layout.addWidget(EpisodeWidget(e))
 
-	def update_status(self):
-		self.ui.statusbar.showMessage("Loading info...") # initial message
-
 class EpisodeWidget(QWidget):
+	'''Episode Widget class
+	
+	Parameters:
+		episode -- Episode class instance
+
+		Emits image_loaded signal when the episode image is loaded
+	'''
 	image_loaded = QtCore.pyqtSignal(object)
 	def __init__(self, episode):
 		super(EpisodeWidget, self).__init__()
@@ -166,15 +189,24 @@ class EpisodeWidget(QWidget):
 
 	@threaded
 	def download_image(self, url):
+		'''Thread to downlaod episode image'''
 		data = urllib.urlopen(url).read()
 		self.image_loaded.emit(data)
 
 	def load_image(self, data):
+		'''Triggered by image_loaded signal. Loads image to the widget'''
 		image=QPixmap()
 		image.loadFromData(data)
 		self.ui.image.setPixmap(image)
 
 class SeasonWidget(QWidget):
+	'''Season Widget class
+
+	Parameters:
+		season -- Season class instance
+
+		Emits poster_loaded signal when season poster is loaded
+	'''
 	poster_loaded = QtCore.pyqtSignal(object)
 	def __init__(self, season):
 		super(SeasonWidget, self).__init__()
@@ -183,21 +215,23 @@ class SeasonWidget(QWidget):
 		self.ui = Ui_season_banner_widget()
 		self.ui.setupUi(self)
 
-		self.ui.mark_button.clicked.connect(self.mark_show)
+		self.ui.mark_button.clicked.connect(self.mark_season)
 		self.poster_loaded.connect(self.load_poster)
 		if len(self.season.poster) > 0:
 			self.download_poster(self.season.poster[0])
 
 	@threaded
 	def download_poster(self, url):
+    	'''Thread to download season poster'''
 		data = urllib.urlopen(url).read()
 		self.poster_loaded.emit(data)
 
 	def load_poster(self, data):
-		'''Load poster from downloaded data'''
+		'''Load poster from downloaded data to the widget'''
 		poster=QPixmap()
 		poster.loadFromData(data)
 		self.ui.poster.setPixmap(poster)
 
-	def mark_show(self):
+	def mark_season(self):
+		'''Mark this season as watched'''
 		pass
