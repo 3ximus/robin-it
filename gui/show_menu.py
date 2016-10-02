@@ -35,7 +35,7 @@ class ShowsMenu(QMainWindow):
 	Parameters:
 		return_to -- window to show when the back_button is pressed
 		user_state -- UserContent class instance containing user info
-	
+
 	Index:
 		0 - Main Page contains search box and updates
 		1 - Results from search box
@@ -96,7 +96,7 @@ class ShowsMenu(QMainWindow):
 
 	def display_results(self, results):
 		'''Triggered by the self.search_complete signal. Displays TV show results on stack widget page 1
-		
+
 			Cleans the layout and adds show widgets when they finish loading the respective banners.
 			Shows without banners are left pending until self.all_banners_loaded signal
 			is triggered, displaying the remaining results.
@@ -130,9 +130,9 @@ class ShowsMenu(QMainWindow):
 		def _display_pending(pending):
 			'''Triggered by self.all_banners_loaded signal. Display shows without banner'''
 			for p in pending: # add the shows without banner at the end
-				self.ui.results_layout.addWidget(ShowWidget(p))
+				self.ui.results_layout.addWidget(ShowWidget(self, p))
 				_status_update(results=results)
-			
+
 		for i in reversed(range(self.ui.results_layout.count())): # clear previous results
 			self.ui.results_layout.itemAt(i).widget().setParent(None)
 		if len(results) == 0: # no results found
@@ -143,11 +143,11 @@ class ShowsMenu(QMainWindow):
 			except TypeError: pass
 			self.all_banners_loaded.connect(partial(_display_pending, pending=pending_add))
 			for r in results: # display new results
-				banner = ShowWidget(r)
+				banner = ShowWidget(self, r)
 				if 'banner' not in r: # shows without banners added to pending add
 					pending_add.append(r)
 				else:
-    					banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
+					banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
 					banner.banner_loaded.connect(partial(_status_update, results=results))
 
 			_wait_for_loading(results, pending_add) # add bannerless when all other shows are loaded
@@ -185,21 +185,26 @@ class ShowWidget(QWidget):
 		The whole widget is clickable displaying a Show Window with the tvshow info
 		Has an add button to add the show to the followed shows
 		Emits banner_loaded signal when the banner image is loaded
-		
+
 		Used in search results
 	'''
 	banner_loaded = QtCore.pyqtSignal(object)
 
-	def __init__(self, tvshow):
+	def __init__(self, mainwindow, tvshow):
 		super(ShowWidget, self).__init__()
 		self.tvshow = tvshow
+		self.main_window = mainwindow
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
 		self.ui.name_label.setText('< %s >' % self.tvshow['seriesname'])
 
 		clickable(self).connect(self.view_show)
+		
 		self.ui.add_button.clicked.connect(self.add_show)
+		if self.main_window.user_state.is_tracked(self.tvshow['seriesname']):
+			self.ui.add_button.setText('added')
+			self.ui.add_button.setEnabled(False)
 
 		if 'banner' in self.tvshow.keys():
 			self.banner_loaded.connect(self.load_banner)
@@ -219,9 +224,12 @@ class ShowWidget(QWidget):
 
 	def view_show(self):
 		'''Triggered clicking on the widget. Displays Show Window'''
-		self.show_window = ShowWindow(self.tvshow)
+		self.show_window = ShowWindow(self.main_window, self.tvshow)
 		self.show_window.show()
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
-		pass
+		self.main_window.user_state.add_show(self.tvshow['seriesname'])
+		self.main_window.user_state.save_state()
+		self.ui.add_button.setText('added')
+		self.ui.add_button.setEnabled(False)

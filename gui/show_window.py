@@ -57,15 +57,15 @@ def apply_filters(data):
 	return data
 
 # --------------------
-#      Classes 
+#      Classes
 # --------------------
 
 class ShowWindow(QMainWindow):
 	'''Main window of a TV Show
-	
+
 	Parameters:
 		tvshow -- result from a tvshow search
-		
+
 		Displays most of the show info
 		Show info and season/episode data are loaded separatly in 2 fases
 
@@ -79,8 +79,9 @@ class ShowWindow(QMainWindow):
 	background_loaded = QtCore.pyqtSignal(object)
 	update_done = QtCore.pyqtSignal()
 
-	def __init__(self, tvshow):
+	def __init__(self, mainwindow, tvshow):
 		super(ShowWindow, self).__init__()
+		self.main_window = mainwindow
 
 		# set up UI from QtDesigner
 		self.ui = Ui_show_window()
@@ -93,6 +94,9 @@ class ShowWindow(QMainWindow):
 
 		self.show_loaded.connect(self.fill_info) # fills info on gui after the show info is retrieved
 		self.update_done.connect(self.fill_seasons) # fills gui with info about seasons and episodes
+
+		self.ui.add_button.setEnabled(False) # disable until show is loaded
+		self.ui.add_button.clicked.connect(self.add_show)
 
 		self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
 		self.load_show(tvshow['seriesname'])
@@ -116,6 +120,11 @@ class ShowWindow(QMainWindow):
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 		self.update_show() #update seasons and episodes
 		self.ui.statusbar.showMessage("Loading info...") # initial message
+
+		if self.main_window.user_state.is_tracked(self.tvshow.name):
+			self.ui.add_button.setText('added')
+		else:
+			self.ui.add_button.setEnabled(True)
 
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
 		self.ui.genre_label.setText('genre - %s' % self.tvshow.genre)
@@ -167,9 +176,16 @@ class ShowWindow(QMainWindow):
 		for e in self.tvshow.seasons[sid].episodes:
 			self.ui.episodes_layout.addWidget(EpisodeWidget(e))
 
+	def add_show(self):
+		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
+		self.main_window.user_state.add_show(self.tvshow.name)
+		self.main_window.user_state.save_state()
+		self.ui.add_button.setText('added')
+		self.ui.add_button.setEnabled(False)
+
 class EpisodeWidget(QWidget):
 	'''Episode Widget class
-	
+
 	Parameters:
 		episode -- Episode class instance
 
@@ -222,7 +238,7 @@ class SeasonWidget(QWidget):
 
 	@threaded
 	def download_poster(self, url):
-    	'''Thread to download season poster'''
+		'''Thread to download season poster'''
 		data = urllib.urlopen(url).read()
 		self.poster_loaded.emit(data)
 

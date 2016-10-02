@@ -24,7 +24,7 @@ def clickable(widget):
 						# use .emit(obj) to get the object within the slot.
 						return True
 			return False
-	
+
 	filter = Filter(widget)
 	widget.installEventFilter(filter)
 	return filter.clicked
