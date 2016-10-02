@@ -60,57 +60,6 @@ def apply_filters(data):
 #      Classes 
 # --------------------
 
-class EpisodeWidget(QWidget):
-	image_loaded = QtCore.pyqtSignal(object)
-	def __init__(self, episode):
-		super(EpisodeWidget, self).__init__()
-		self.episode = episode
-
-		self.ui = Ui_episode_banner_widget()
-		self.ui.setupUi(self)
-
-		self.image_loaded.connect(self.load_image)
-		self.download_image(self.episode.image)
-		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
-
-	@threaded
-	def download_image(self, url):
-		data = urllib.urlopen(url).read()
-		self.image_loaded.emit(data)
-
-	def load_image(self, data):
-		image=QPixmap()
-		image.loadFromData(data)
-		self.ui.image.setPixmap(image)
-
-class SeasonWidget(QWidget):
-	poster_loaded = QtCore.pyqtSignal(object)
-	def __init__(self, season):
-		super(SeasonWidget, self).__init__()
-		self.season = season
-
-		self.ui = Ui_season_banner_widget()
-		self.ui.setupUi(self)
-
-		self.ui.mark_button.clicked.connect(self.mark_show)
-		self.poster_loaded.connect(self.load_poster)
-		if len(self.season.poster) > 0:
-			self.download_poster(self.season.poster[0])
-
-	@threaded
-	def download_poster(self, url):
-		data = urllib.urlopen(url).read()
-		self.poster_loaded.emit(data)
-
-	def load_poster(self, data):
-		'''Load poster from downloaded data'''
-		poster=QPixmap()
-		poster.loadFromData(data)
-		self.ui.poster.setPixmap(poster)
-
-	def mark_show(self):
-		pass
-
 class ShowWindow(QMainWindow):
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
@@ -165,7 +114,6 @@ class ShowWindow(QMainWindow):
 		palette = QPalette()
 		self.background = QPixmap()
 		self.background.loadFromData(data)
-		print self.background.size().width(), self.background.size().height()
 		self.back_ratio = self.background.size().width()/float(self.background.size().height())
 		self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
 		palette.setBrush(QPalette.Background, QBrush(self.background))
@@ -203,3 +151,53 @@ class ShowWindow(QMainWindow):
 	def update_status(self):
 		self.ui.statusbar.showMessage("Loading info...") # initial message
 
+class EpisodeWidget(QWidget):
+	image_loaded = QtCore.pyqtSignal(object)
+	def __init__(self, episode):
+		super(EpisodeWidget, self).__init__()
+		self.episode = episode
+
+		self.ui = Ui_episode_banner_widget()
+		self.ui.setupUi(self)
+
+		self.image_loaded.connect(self.load_image)
+		self.download_image(self.episode.image)
+		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
+
+	@threaded
+	def download_image(self, url):
+		data = urllib.urlopen(url).read()
+		self.image_loaded.emit(data)
+
+	def load_image(self, data):
+		image=QPixmap()
+		image.loadFromData(data)
+		self.ui.image.setPixmap(image)
+
+class SeasonWidget(QWidget):
+	poster_loaded = QtCore.pyqtSignal(object)
+	def __init__(self, season):
+		super(SeasonWidget, self).__init__()
+		self.season = season
+
+		self.ui = Ui_season_banner_widget()
+		self.ui.setupUi(self)
+
+		self.ui.mark_button.clicked.connect(self.mark_show)
+		self.poster_loaded.connect(self.load_poster)
+		if len(self.season.poster) > 0:
+			self.download_poster(self.season.poster[0])
+
+	@threaded
+	def download_poster(self, url):
+		data = urllib.urlopen(url).read()
+		self.poster_loaded.emit(data)
+
+	def load_poster(self, data):
+		'''Load poster from downloaded data'''
+		poster=QPixmap()
+		poster.loadFromData(data)
+		self.ui.poster.setPixmap(poster)
+
+	def mark_show(self):
+		pass

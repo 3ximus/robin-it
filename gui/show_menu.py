@@ -29,6 +29,17 @@ from functools import partial
 import urllib
 
 class ShowWidget(QWidget):
+	'''Small banner to identify a show
+
+	Parameters:
+		tvshow - search result to load the banner from
+
+		The whole widget is clickable displaying a Show Window with the tvshow info
+		Has an add button to add the show to the followed shows
+		Emits banner_loaded signal when the banner image is loaded
+		
+		Used in search results
+	'''
 	banner_loaded = QtCore.pyqtSignal(object)
 
 	def __init__(self, tvshow):
@@ -48,27 +59,40 @@ class ShowWidget(QWidget):
 
 	@threaded
 	def download_banner(self, url):
-		'''Thread to download banner, emits signal when complete'''
+		'''Thread to download banner, emits self.banner_loaded signal when complete'''
 		data = urllib.urlopen(url).read()
 		self.banner_loaded.emit(data)
 
 	def load_banner(self, data):
-		'''Loads the banner from downloaded data'''
-		if data == "": # FIXME ridiculous atempt to force display of "no image available"
-			return
+		'''Triggered by self.banner_loaded signal. Loads the banner from downloaded data'''
 		banner = QPixmap()
 		banner.loadFromData(data)
 		self.ui.banner.setPixmap(banner)
 
 	def view_show(self):
+		'''Triggered clicking on the widget. Displays Show Window'''
 		self.show_window = ShowWindow(self.tvshow)
 		self.show_window.show()
 
 	def add_show(self):
+		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
 		pass
 
 class ShowsMenu(QMainWindow):
-	search_complete_signal = QtCore.pyqtSignal(object)
+	'''Works with stacked pages
+	
+	Index:
+		0 - Main Page contains search box and updates
+		1 - Results from search box
+		2 - List of followed shows
+		3 - List of shows to watch
+
+		Emits the search_complete signal when it gathers the search results for given keywords
+		Emits all_banners_loaded as an internal signal for loading the remaining bannerless
+			results (do not use outside this class)
+	'''
+	search_complete = QtCore.pyqtSignal(object)
+	all_banners_loaded = QtCore.pyqtSignal()
 
 	def __init__(self, return_to, user_state):
 		super(ShowsMenu, self).__init__()
@@ -84,7 +108,7 @@ class ShowsMenu(QMainWindow):
 		self.ui.search_box_2.returnPressed.connect(self.search)
 		self.ui.search_button.clicked.connect(self.search)
 		self.ui.search_button_2.clicked.connect(self.search)
-		self.search_complete_signal.connect(self.display_results)
+		self.search_complete.connect(self.display_results)
 
 		self.ui.back_button_0.clicked.connect(self.go_back)
 		self.ui.back_button_1.clicked.connect(partial(self.go_to, index=0))
@@ -99,8 +123,8 @@ class ShowsMenu(QMainWindow):
 		self.ui.search_box_2.textChanged.connect(self.update_search_2)
 
 	def search(self):
-		'''Searches for TV Show'''
-		self.resultid=0
+		'''Searches for TV Show by a given keyword in the search box'''
+		self.loaded_results=0
 		self.ui.statusbar.showMessage("Searching for %s..." % self.ui.search_box.text())
 		self.ui.noresults_label.setParent(None)
 		self._search_thread(self.ui.search_box.text()) # both input boxes are synced
@@ -109,51 +133,90 @@ class ShowsMenu(QMainWindow):
 
 	@threaded
 	def _search_thread(self, text):
-		'''Wrapper for the search function to make it threaded'''
+		'''Searches for TV shows by given keywords
+			Emits self.search_complete when finished
+		'''
 		results = search_for_show(text)
-		self.search_complete_signal.emit(results)
+		self.search_complete.emit(results)
 
 	def display_results(self, results):
-		'''Displays TV show results on stack widget page 1'''
+		'''Triggered by the self.search_complete signal. Displays TV show results on stack widget page 1
+		
+			Cleans the layout and adds show widgets when they finish loading the respective banners.
+			Shows without banners are left pending until self.all_banners_loaded signal
+			is triggered, displaying the remaining results.
+			This is done in order to only display bannerless shows at the end
+		'''
 		def _add_to_layout(widget, *args):
 			'''Takes the widget to be added'''
 			self.ui.results_layout.addWidget(widget)
 			return
 
 		def _status_update(results):
-			self.resultid+=1
-			p = 100*self.resultid/len(results)
+			'''Updates Status bar loading message with progress_bar'''
+			self.loaded_results+=1
+			p = 100*self.loaded_results/len(results)
 			bar = progress_bar(p, show_percentage=True)
 			self.ui.statusbar.showMessage(bar)
-			if self.resultid == len(results): # clear status bar after completion
+			if self.loaded_results == len(results): # clear status bar after completion
 				self.ui.statusbar.clearMessage()
 
+		@threaded
+		def _wait_for_loading(results, pending_add):
+			'''This thread will simply wait until all shows with banners are loaded
+				Emits self.all_banners_loaded when finished
+			'''
+			from time import sleep
+			while True:
+				if self.loaded_results == len(results)-len(pending_add):
+					self.all_banners_loaded.emit()
+					return
+				sleep(1)
+
+		def _display_pending(pending):
+			'''Triggered by self.all_banners_loaded signal. Display shows without banner'''
+			for p in pending: # add the shows without banner at the end
+				self.ui.results_layout.addWidget(ShowWidget(p))
+				_status_update(results=results)
+			
 		for i in reversed(range(self.ui.results_layout.count())): # clear previous results
 			self.ui.results_layout.itemAt(i).widget().setParent(None)
 		if len(results) == 0: # no results found
 			self.ui.results_layout.addWidget(self.ui.noresults_label)
 		else:
+			pending_add = []
+			try: self.all_banners_loaded.disconnect() # disconnect signals in order to not connect duplicates
+			except TypeError: pass
+			self.all_banners_loaded.connect(partial(_display_pending, pending=pending_add))
 			for r in results: # display new results
 				banner = ShowWidget(r)
-				banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
-				banner.banner_loaded.connect(partial(_status_update, results=results))
+				if 'banner' not in r: # shows without banners added to pending add
+					pending_add.append(r)
+				else:
+    					banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
+					banner.banner_loaded.connect(partial(_status_update, results=results))
+
+			_wait_for_loading(results, pending_add) # add bannerless when all other shows are loaded
 
 	def go_back(self):
+		'''Closes this window and opens the Main Menu'''
 		self.close()
 		self.return_to.move(self.x(),self.y())
 		self.return_to.show()
 
 	def go_to(self, index):
+		'''Got to one of the stacked pages given by index'''
 		self.ui.stackedWidget.setCurrentIndex(index)
 		if index==0: self.ui.search_box.setFocus()
 
 	def update_filter(self):
-		'''Updates scroll box content according to content of filter_box'''
+		'''Updates the news updates content according to content of filter_box'''
 		print self.ui.filter_box.text()
 
 	def update_search(self):
+		'''Maintains search boxes from both stack pages in sync'''
 		self.ui.search_box_2.setText(self.ui.search_box.text())
-		# TODO ALSO REDISPLAY SEARCH RESULTS
 
 	def update_search_2(self):
+		'''Maintains search boxes from both stack pages in sync'''
 		self.ui.search_box.setText(self.ui.search_box_2.text())
