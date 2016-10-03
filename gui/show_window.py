@@ -67,7 +67,6 @@ class ShowWindow(QMainWindow):
 		tvshow -- result from a tvshow search
 
 		Displays most of the show info
-		Show info and season/episode data are loaded separatly in 2 fases
 
 		Emits multiple signals:
 			show_loaded -- after main info of the tvshow is gathered
@@ -77,7 +76,6 @@ class ShowWindow(QMainWindow):
 
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
-	update_done = QtCore.pyqtSignal()
 
 	def __init__(self, mainwindow, tvshow):
 		super(ShowWindow, self).__init__()
@@ -93,7 +91,6 @@ class ShowWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.close)
 
 		self.show_loaded.connect(self.fill_info) # fills info on gui after the show info is retrieved
-		self.update_done.connect(self.fill_seasons) # fills gui with info about seasons and episodes
 
 		self.ui.add_button.setEnabled(False) # disable until show is loaded
 		self.ui.add_button.clicked.connect(self.add_show)
@@ -103,8 +100,8 @@ class ShowWindow(QMainWindow):
 
 	@threaded
 	def load_show(self, name):
-		'''Loads the show main info from the database'''
-		self.tvshow = Show(name, header_only=True)
+		'''Loads the show info from the database'''
+		self.tvshow = Show(name, cache=self.main_window.user_state.cache_dir)
 		self.show_loaded.emit()
 		print "Show Loaded: %s" % name
 
@@ -114,17 +111,22 @@ class ShowWindow(QMainWindow):
 			Fills in the info loaded
 			Starts background image download
 		'''
-		if self.tvshow.poster: # load background
-			self.ui.statusbar.showMessage("Loading Background...")
-			self.background_loaded.connect(self.load_background)
-			download_image(self.background_loaded, self.tvshow.poster, filters=True)
-		self.update_show() #update seasons and episodes
 		self.ui.statusbar.showMessage("Loading info...") # initial message
 
+		if self.tvshow.poster: # load background
+			self.background_loaded.connect(self.load_background)
+			download_image(self.background_loaded, self.tvshow.poster, filters=True)
+			
 		if self.main_window.user_state.is_tracked(self.tvshow.name):
 			self.ui.add_button.setText('added')
 		else:
 			self.ui.add_button.setEnabled(True)
+
+		# fill seasons
+		for s in self.tvshow.seasons:
+			season = SeasonWidget(s)
+			clickable(season).connect(partial(self.fill_episodes, sid=(s.s_id-1)))
+			self.ui.seasons_layout.addWidget(season)
 
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
 		self.ui.genre_label.setText('genre - %s' % self.tvshow.genre)
@@ -146,6 +148,7 @@ class ShowWindow(QMainWindow):
 		self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
 		palette.setBrush(QPalette.Background, QBrush(self.background))
 		self.setPalette(palette)
+		self.ui.statusbar.clearMessage()
 
 	def resizeEvent(self, event):
 		'''Called when resize is made'''
@@ -154,20 +157,6 @@ class ShowWindow(QMainWindow):
 			self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
 			palette.setBrush(QPalette.Background, QBrush(self.background))
 			self.setPalette(palette)
-
-	@threaded
-	def update_show(self):
-		'''Called after info has been gathered. Loads season and episode info'''
-		self.tvshow.update_info(override_cache='cache/')
-		self.update_done.emit()
-
-	def fill_seasons(self):
-		'''Triggered by update_done signal. Fills the GUI with seasons widgets'''
-		self.ui.statusbar.clearMessage()
-		for s in self.tvshow.seasons:
-			season = SeasonWidget(s)
-			clickable(season).connect(partial(self.fill_episodes, sid=(s.s_id-1)))
-			self.ui.seasons_layout.addWidget(season)
 
 	def fill_episodes(self, sid):
 		'''Fills the GUI with episodes from selected season'''
