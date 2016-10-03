@@ -169,7 +169,7 @@ class UserContent:
 			return None
 
 
-	def remove_show(self, name, selection_handler = None):
+	def remove_show(self, name):
 		'''Remove show by name
 
 			Returns show name if was deleted sucessfully, None if show name is invalid or multiple exist

@@ -11,14 +11,14 @@ __version__ = '0.3'
 # PYQT5 IMPORTS
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QMainWindow, QWidget
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QPalette, QBrush, QColor
 
 # IMPORT FORMS
 from gui.resources.shows_menu import Ui_shows_menu
 from gui.resources.show_banner_widget import Ui_show_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable
+from gui_func import clickable, begin_hover, end_hover 
 from show_window import ShowWindow
 from libs.tvshow import search_for_show
 from libs.thread_decorator import threaded
@@ -29,6 +29,10 @@ from time import sleep
 from functools import partial
 import urllib
 
+# FIXED VALUES
+
+MAIN_COLOR =  "#03a662"
+RED_COLOR =  "#bf273d"
 TVDB_BANNER_PREFIX = "http://thetvdb.com/banners/"
 
 class ShowsMenu(QMainWindow):
@@ -174,7 +178,8 @@ class ShowsMenu(QMainWindow):
 		for i in reversed(range(self.ui.myshows_layout.count())): # clear previous results
 			self.ui.myshows_layout.itemAt(i).widget().setParent(None)
 		for show in self.user_state.shows.values():
-			self.ui.myshows_layout.addWidget(ShowWidget(self, show))
+			self.ui.myshows_layout.addWidget( # give a remove function so he can later remove itself
+				ShowWidget(self, show, remove_function = self.ui.myshows_layout.removeWidget))
 
 	def update_filter(self):
 		'''Updates the news updates content according to content of filter_box'''
@@ -203,31 +208,33 @@ class ShowWidget(QWidget):
 	'''
 	banner_loaded = QtCore.pyqtSignal(object)
 
-	def __init__(self, mainwindow, tvshow):
+	def __init__(self, mainwindow, tvshow, remove_function = None):
 		super(ShowWidget, self).__init__()
 		self.tvshow = tvshow
 		self.main_window = mainwindow
+		self.remove_function = remove_function
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
 		
 		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
-
 		self.ui.name_label.setText('< %s >' % name)
-			
-			#TODO did this work??
-
 		clickable(self).connect(self.view_show)
 		
+		self.addbtn_begin_hover = begin_hover(self.ui.add_button) # save begin hover signal
+		self.addbtn_end_hover = end_hover(self.ui.add_button) # save end hover signal
+
 		self.ui.add_button.clicked.connect(self.add_show)
 		if self.main_window.user_state.is_tracked(name):
 			self.ui.add_button.setText('added')
 			self.ui.add_button.setEnabled(False)
+			self.addbtn_begin_hover.connect(self.activate_del_button)
+			self.addbtn_end_hover.connect(self.deactivate_del_button)
 
 		if type(self.tvshow) == dict:
 			if 'banner' in self.tvshow.keys():
 				self.banner_loaded.connect(self.load_banner)
-				self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])   #FIXME harcoding is bad for your health
+				self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])
 		else:
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)
@@ -255,3 +262,52 @@ class ShowWidget(QWidget):
 		self.main_window.user_state.save_state()
 		self.ui.add_button.setText('added')
 		self.ui.add_button.setEnabled(False)
+		self.addbtn_begin_hover.connect(self.activate_del_button)
+		self.addbtn_end_hover.connect(self.deactivate_del_button)
+		print "Added: " + self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
+
+	def activate_del_button(self):
+		'''Triggered when mouse hovers the add button
+
+			Makes add button look like a delete button, this trigger is only activated when
+			show is already being tracked
+		'''
+		self.ui.add_button.clicked.disconnect()
+		self.ui.add_button.setText("- del")
+		self.ui.add_button.setEnabled(True)
+		self.ui.add_button.setStyleSheet("background-color: " + RED_COLOR)
+		self.ui.add_button.clicked.connect(self.delete_show)
+
+	def deactivate_del_button(self):
+		'''Triggered when mouse stops hovering the add button
+		
+			Returns add button to its normal state
+		'''
+		self.ui.add_button.setText('added')
+		self.ui.add_button.setEnabled(False)
+		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
+
+	def delete_show(self):
+		'''Triggered by clicking on the add button when this show is added
+		
+			Stops show from being followed, deleting it from the self.main_window.user_state.shows
+		'''
+		self.ui.add_button.clicked.disconnect()
+		self.addbtn_end_hover.disconnect()
+		self.addbtn_begin_hover.disconnect()
+		self.ui.add_button.setText("+ add")
+		self.ui.add_button.setEnabled(True)
+		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
+
+		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
+		name = self.main_window.user_state.remove_show(name) # dont remove assignment (it returns none in case of failure to remove)
+		self.main_window.user_state.save_state()
+		print "Removed: " + name
+
+		if self.remove_function: # since this will be in a layout a remove function can be given to remove it aferwards
+			self.remove_function(self.objectName)
+		else:
+			self.ui.add_button.clicked.connect(self.add_show)
+
+			
+

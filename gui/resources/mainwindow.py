@@ -188,7 +188,7 @@ class Ui_mainwindow(object):
         self.gridLayout_2.addWidget(self.robin_label, 1, 0, 1, 1)
         self.user_label = QtWidgets.QLabel(self.centralwidget)
         self.user_label.setEnabled(True)
-        self.user_label.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.user_label.setMaximumSize(QtCore.QSize(16777215, 40))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(104, 104, 104))
         brush.setStyle(QtCore.Qt.SolidPattern)

@@ -28,3 +28,33 @@ def clickable(widget):
 	filter = Filter(widget)
 	widget.installEventFilter(filter)
 	return filter.clicked
+
+def begin_hover(widget):
+	'''Makes a widget emit a signal when mouse enters its bounds'''
+	class Filter(QtCore.QObject):
+		begin_hover = QtCore.pyqtSignal()
+
+		def eventFilter(self, obj, event):
+			if obj == widget:
+				if event.type() == QtCore.QEvent.HoverEnter:
+					self.begin_hover.emit()
+					return True
+			return False
+	filter = Filter(widget)
+	widget.installEventFilter(filter)
+	return filter.begin_hover
+
+def end_hover(widget):
+	'''Makes a widget emit a signal when mouse leaves its bounds'''
+	class Filter(QtCore.QObject):
+		end_hover = QtCore.pyqtSignal()
+
+		def eventFilter(self, obj, event):
+			if obj == widget:
+				if event.type() == QtCore.QEvent.HoverLeave:
+					self.end_hover.emit()
+					return True
+			return False
+	filter = Filter(widget)
+	widget.installEventFilter(filter)
+	return filter.end_hover

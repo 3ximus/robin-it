@@ -556,7 +556,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-82</y>
+         <y>0</y>
          <width>497</width>
          <height>700</height>
         </rect>
@@ -1688,6 +1688,9 @@
                  </colorrole>
                 </disabled>
                </palette>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::RightToLeft</enum>
               </property>
               <property name="text">
                <string>hi&amp;gh_definition</string>
