@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'gui/shows_mainwindow.ui'
+# Form implementation generated from reading ui file 'gui/resources/ui/shows_menu.ui'
 #
 # Created by: PyQt5 UI code generator 5.7
 #
@@ -8,10 +8,10 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_shows_mainwindow(object):
-    def setupUi(self, shows_mainwindow):
-        shows_mainwindow.setObjectName("shows_mainwindow")
-        shows_mainwindow.resize(994, 700)
+class Ui_shows_menu(object):
+    def setupUi(self, shows_menu):
+        shows_menu.setObjectName("shows_menu")
+        shows_menu.resize(994, 700)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -148,16 +148,16 @@ class Ui_shows_mainwindow(object):
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
-        shows_mainwindow.setPalette(palette)
+        shows_menu.setPalette(palette)
         font = QtGui.QFont()
         font.setFamily("Hack")
-        shows_mainwindow.setFont(font)
+        shows_menu.setFont(font)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit_desaturated.ico"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit_desaturated.ico"), QtGui.QIcon.Disabled, QtGui.QIcon.On)
-        shows_mainwindow.setWindowIcon(icon)
-        self.centralwidget = QtWidgets.QWidget(shows_mainwindow)
+        shows_menu.setWindowIcon(icon)
+        self.centralwidget = QtWidgets.QWidget(shows_menu)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -675,6 +675,12 @@ class Ui_shows_mainwindow(object):
         self.scrollAreaWidgetContents_3 = QtWidgets.QWidget()
         self.scrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 902, 490))
         self.scrollAreaWidgetContents_3.setObjectName("scrollAreaWidgetContents_3")
+        self.gridLayout_7 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_3)
+        self.gridLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_7.setObjectName("gridLayout_7")
+        self.myshows_layout = QtWidgets.QGridLayout()
+        self.myshows_layout.setObjectName("myshows_layout")
+        self.gridLayout_7.addLayout(self.myshows_layout, 0, 0, 1, 1)
         self.scrollArea_3.setWidget(self.scrollAreaWidgetContents_3)
         self.gridLayout_4.addWidget(self.scrollArea_3, 2, 0, 1, 1)
         self.myshows_label = QtWidgets.QLabel(self.page2)
@@ -852,8 +858,8 @@ class Ui_shows_mainwindow(object):
         self.gridLayout.addWidget(self.back_button_3, 2, 0, 1, 1)
         self.stackedWidget.addWidget(self.page3)
         self.horizontalLayout.addWidget(self.stackedWidget)
-        shows_mainwindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(shows_mainwindow)
+        shows_menu.setCentralWidget(self.centralwidget)
+        self.statusbar = QtWidgets.QStatusBar(shows_menu)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(98, 98, 98))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -866,35 +872,35 @@ class Ui_shows_mainwindow(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, brush)
         self.statusbar.setPalette(palette)
         self.statusbar.setObjectName("statusbar")
-        shows_mainwindow.setStatusBar(self.statusbar)
+        shows_menu.setStatusBar(self.statusbar)
 
-        self.retranslateUi(shows_mainwindow)
+        self.retranslateUi(shows_menu)
         self.stackedWidget.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(shows_mainwindow)
+        QtCore.QMetaObject.connectSlotsByName(shows_menu)
 
-    def retranslateUi(self, shows_mainwindow):
+    def retranslateUi(self, shows_menu):
         _translate = QtCore.QCoreApplication.translate
-        shows_mainwindow.setWindowTitle(_translate("shows_mainwindow", "Robin_it_v0.2"))
-        self.myshows_button.setText(_translate("shows_mainwindow", "> load my_shows"))
-        self.towatch_button.setText(_translate("shows_mainwindow", "> set to_watch"))
-        self.back_button_0.setText(_translate("shows_mainwindow", "<<"))
-        self.shows_label.setText(_translate("shows_mainwindow", "> search tv_shows"))
-        self.sign_label_2.setText(_translate("shows_mainwindow", ">"))
-        self.filter_box.setPlaceholderText(_translate("shows_mainwindow", "updates_filter"))
-        self.sign_label.setText(_translate("shows_mainwindow", ">"))
-        self.search_box.setPlaceholderText(_translate("shows_mainwindow", "show name"))
-        self.search_button.setText(_translate("shows_mainwindow", ">>"))
-        self.results_label.setText(_translate("shows_mainwindow", "> display results"))
-        self.back_button_1.setText(_translate("shows_mainwindow", "<<"))
-        self.noresults_label.setText(_translate("shows_mainwindow", "<no results>"))
-        self.sign_label_4.setText(_translate("shows_mainwindow", ">"))
-        self.search_box_2.setPlaceholderText(_translate("shows_mainwindow", "show name"))
-        self.search_button_2.setText(_translate("shows_mainwindow", ">>"))
-        self.myshows_label.setText(_translate("shows_mainwindow", "> display my_shows"))
-        self.back_button_2.setText(_translate("shows_mainwindow", "<<"))
-        self.sign_label_3.setText(_translate("shows_mainwindow", ">"))
-        self.showfilter_box.setPlaceholderText(_translate("shows_mainwindow", "filter_shows"))
-        self.myshows_label_2.setText(_translate("shows_mainwindow", "> set to_watch"))
-        self.back_button_3.setText(_translate("shows_mainwindow", "<<"))
+        shows_menu.setWindowTitle(_translate("shows_menu", "Robin_it_v0.3"))
+        self.myshows_button.setText(_translate("shows_menu", "> load my_shows"))
+        self.towatch_button.setText(_translate("shows_menu", "> set to_watch"))
+        self.back_button_0.setText(_translate("shows_menu", "<<"))
+        self.shows_label.setText(_translate("shows_menu", "> search tv_shows"))
+        self.sign_label_2.setText(_translate("shows_menu", ">"))
+        self.filter_box.setPlaceholderText(_translate("shows_menu", "updates_filter"))
+        self.sign_label.setText(_translate("shows_menu", ">"))
+        self.search_box.setPlaceholderText(_translate("shows_menu", "show name"))
+        self.search_button.setText(_translate("shows_menu", ">>"))
+        self.results_label.setText(_translate("shows_menu", "> display results"))
+        self.back_button_1.setText(_translate("shows_menu", "<<"))
+        self.noresults_label.setText(_translate("shows_menu", "<no results>"))
+        self.sign_label_4.setText(_translate("shows_menu", ">"))
+        self.search_box_2.setPlaceholderText(_translate("shows_menu", "show name"))
+        self.search_button_2.setText(_translate("shows_menu", ">>"))
+        self.myshows_label.setText(_translate("shows_menu", "> display my_shows"))
+        self.back_button_2.setText(_translate("shows_menu", "<<"))
+        self.sign_label_3.setText(_translate("shows_menu", ">"))
+        self.showfilter_box.setPlaceholderText(_translate("shows_menu", "filter_shows"))
+        self.myshows_label_2.setText(_translate("shows_menu", "> set to_watch"))
+        self.back_button_3.setText(_translate("shows_menu", "<<"))
 
 import resources_rc

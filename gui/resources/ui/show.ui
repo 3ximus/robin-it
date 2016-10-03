@@ -431,10 +431,10 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.2</string>
+   <string>Robin_it_v0.3</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
+   <iconset resource="../resources.qrc">
     <normaloff>:/resources/images/robinit.ico</normaloff>
     <disabledoff>:/resources/images/robinit_desaturated.ico</disabledoff>
     <disabledon>:/resources/images/robinit_desaturated.ico</disabledon>:/resources/images/robinit.ico</iconset>
@@ -494,7 +494,7 @@
        </font>
       </property>
       <property name="text">
-       <string>&gt; show name</string>
+       <string>// show name</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -576,7 +576,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; genre</string>
+           <string>genre</string>
           </property>
          </widget>
         </item>
@@ -635,7 +635,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; network</string>
+           <string>network</string>
           </property>
          </widget>
         </item>
@@ -694,7 +694,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; air day</string>
+           <string>air day</string>
           </property>
          </widget>
         </item>
@@ -753,7 +753,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; runtime</string>
+           <string>runtime</string>
           </property>
           <property name="openExternalLinks">
            <bool>true</bool>
@@ -815,7 +815,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; status</string>
+           <string>status</string>
           </property>
          </widget>
         </item>
@@ -874,7 +874,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; imdb</string>
+           <string>imdb</string>
           </property>
           <property name="openExternalLinks">
            <bool>true</bool>
@@ -940,7 +940,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; description</string>
+           <string>description</string>
           </property>
          </widget>
         </item>
@@ -1468,7 +1468,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

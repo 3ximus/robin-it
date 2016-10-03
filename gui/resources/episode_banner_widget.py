@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'gui/episode_banner_widget.ui'
+# Form implementation generated from reading ui file 'gui/resources/ui/episode_banner_widget.ui'
 #
 # Created by: PyQt5 UI code generator 5.7
 #
@@ -195,7 +195,7 @@ class Ui_episode_banner_widget(object):
         self.mark_button.setFont(font)
         self.mark_button.setObjectName("mark_button")
         self.name_label = QtWidgets.QLabel(episode_banner_widget)
-        self.name_label.setGeometry(QtCore.QRect(10, 150, 318, 21))
+        self.name_label.setGeometry(QtCore.QRect(10, 158, 318, 21))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -236,6 +236,36 @@ class Ui_episode_banner_widget(object):
         font.setWeight(75)
         self.download_button.setFont(font)
         self.download_button.setObjectName("download_button")
+        self.name_back = QtWidgets.QLabel(episode_banner_widget)
+        self.name_back.setGeometry(QtCore.QRect(-10, 158, 331, 31))
+        palette = QtGui.QPalette()
+        brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Base, brush)
+        brush = QtGui.QBrush(QtGui.QColor(50, 56, 65, 155))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Window, brush)
+        brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Base, brush)
+        brush = QtGui.QBrush(QtGui.QColor(50, 56, 65, 155))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Window, brush)
+        brush = QtGui.QBrush(QtGui.QColor(50, 56, 65, 155))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Base, brush)
+        brush = QtGui.QBrush(QtGui.QColor(50, 56, 65, 155))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Window, brush)
+        self.name_back.setPalette(palette)
+        self.name_back.setAutoFillBackground(True)
+        self.name_back.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.name_back.setObjectName("name_back")
+        self.image.raise_()
+        self.mark_button.raise_()
+        self.download_button.raise_()
+        self.name_back.raise_()
+        self.name_label.raise_()
 
         self.retranslateUi(episode_banner_widget)
         QtCore.QMetaObject.connectSlotsByName(episode_banner_widget)

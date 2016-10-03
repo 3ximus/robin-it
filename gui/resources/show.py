@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'gui/show.ui'
+# Form implementation generated from reading ui file 'gui/resources/ui/show.ui'
 #
 # Created by: PyQt5 UI code generator 5.7
 #
@@ -557,15 +557,15 @@ class Ui_show_window(object):
 
     def retranslateUi(self, show_window):
         _translate = QtCore.QCoreApplication.translate
-        show_window.setWindowTitle(_translate("show_window", "Robin_it_v0.2"))
-        self.showname_label.setText(_translate("show_window", "> show name"))
-        self.genre_label.setText(_translate("show_window", "> genre"))
-        self.network_label.setText(_translate("show_window", "> network"))
-        self.airday_label.setText(_translate("show_window", "> air day"))
-        self.runtime_label.setText(_translate("show_window", "> runtime"))
-        self.status_label.setText(_translate("show_window", "> status"))
-        self.imdb_label.setText(_translate("show_window", "> imdb"))
-        self.description_label.setText(_translate("show_window", "> description"))
+        show_window.setWindowTitle(_translate("show_window", "Robin_it_v0.3"))
+        self.showname_label.setText(_translate("show_window", "// show name"))
+        self.genre_label.setText(_translate("show_window", "genre"))
+        self.network_label.setText(_translate("show_window", "network"))
+        self.airday_label.setText(_translate("show_window", "air day"))
+        self.runtime_label.setText(_translate("show_window", "runtime"))
+        self.status_label.setText(_translate("show_window", "status"))
+        self.imdb_label.setText(_translate("show_window", "imdb"))
+        self.description_label.setText(_translate("show_window", "description"))
         self.seasons_label.setText(_translate("show_window", "< seasons >"))
         self.episodes_label.setText(_translate("show_window", "< episodes >"))
         self.back_button.setText(_translate("show_window", "<<"))
