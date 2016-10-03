@@ -92,20 +92,16 @@ class ShowWindow(QMainWindow):
 		self.background = None
 
 		if type(tvshow) == dict:
-    			self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
+			self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
 			self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
-
-			self.ui.add_button.setEnabled(False) # disable until show is loaded
-
 			self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
-			self.get_show(tvshow['seriesname'])
+			self.get_show_data(tvshow['seriesname'])
 		else:
 			self.tvshow = tvshow
-			self.ui.add_button.setEnabled(False) # disable until show is loaded
 			self.load_show()
 
 	@threaded
-	def get_show(self, name):
+	def get_show_data(self, name):
 		'''Loads the show info from the database'''
 		self.tvshow = Show(name, cache=self.main_window.user_state.cache_dir)
 		self.show_loaded.emit()
@@ -123,15 +119,8 @@ class ShowWindow(QMainWindow):
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 			
-		self.addbtn_begin_hover = begin_hover(self.ui.add_button) # save begin hover signal
-		self.addbtn_end_hover = end_hover(self.ui.add_button) # save end hover signal
-		
 		if self.main_window.user_state.is_tracked(self.tvshow.name):
-			self.ui.add_button.setText('added')
-			self.addbtn_begin_hover.connect(self.activate_del_button)
-			self.addbtn_end_hover.connect(self.deactivate_del_button)
-		else:
-    			self.ui.add_button.setEnabled(True)
+    			self.make_del_button()
 
 		# fill seasons
 		for s in self.tvshow.seasons:
@@ -180,32 +169,15 @@ class ShowWindow(QMainWindow):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
 		self.main_window.user_state.add_show(self.tvshow.name)
 		self.main_window.user_state.save_state()
-		self.ui.add_button.setText('added')
-		self.ui.add_button.setEnabled(False)
-		self.addbtn_begin_hover.connect(self.activate_del_button)
-		self.addbtn_end_hover.connect(self.deactivate_del_button)
 		print "Added: " + self.tvshow.name
+		self.make_del_button()
 
-	def activate_del_button(self):
-		'''Triggered when mouse hovers the add button
-
-			Makes add button look like a delete button, this trigger is only activated when
-			show is already being tracked
-		'''
+	def make_del_button(self):
+		'''Transforms the add button into a delete button'''
 		self.ui.add_button.clicked.disconnect()
-		self.ui.add_button.setText("- del")
-		self.ui.add_button.setEnabled(True)
+		self.ui.add_button.setText("-del")
 		self.ui.add_button.setStyleSheet("background-color: " + RED_COLOR)
 		self.ui.add_button.clicked.connect(self.delete_show)
-
-	def deactivate_del_button(self):
-		'''Triggered when mouse stops hovering the add button
-		
-			Returns add button to its normal state
-		'''
-		self.ui.add_button.setText('added')
-		self.ui.add_button.setEnabled(False)
-		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
 
 	def delete_show(self):
 		'''Triggered by clicking on the add button when this show is added
@@ -213,15 +185,12 @@ class ShowWindow(QMainWindow):
 			Stops show from being followed, deleting it from the self.main_window.user_state.shows
 		'''
 		self.ui.add_button.clicked.disconnect()
-		self.addbtn_end_hover.disconnect()
-		self.addbtn_begin_hover.disconnect()
 		self.ui.add_button.setText("+ add")
-		self.ui.add_button.setEnabled(True)
 		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
 
 		name = self.main_window.user_state.remove_show(self.tvshow.real_name) # dont remove assignment (it returns none in case of failure to remove)
 		self.main_window.user_state.save_state()
-		print "Removed: " + name
+		print ("Removed: " + name) if name else "Already removed"
 
 		self.ui.add_button.clicked.connect(self.add_show)
 
