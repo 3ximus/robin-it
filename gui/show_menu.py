@@ -224,9 +224,10 @@ class ShowWidget(QWidget):
 			self.ui.add_button.setText('added')
 			self.ui.add_button.setEnabled(False)
 
-		if type(self.tvshow) == dict and 'banner' in self.tvshow.keys():
-			self.banner_loaded.connect(self.load_banner)
-			self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])   #FIXME harcoding is bad for your health
+		if type(self.tvshow) == dict:
+			if 'banner' in self.tvshow.keys():
+				self.banner_loaded.connect(self.load_banner)
+				self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])   #FIXME harcoding is bad for your health
 		else:
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)

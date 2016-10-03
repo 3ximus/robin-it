@@ -443,6 +443,12 @@
     </disabled>
    </palette>
   </property>
+  <property name="font">
+   <font>
+    <family>Hack</family>
+    <pointsize>11</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -487,14 +493,6 @@
           </colorrole>
          </disabled>
         </palette>
-       </property>
-       <property name="font">
-        <font>
-         <family>Hack</family>
-         <pointsize>14</pointsize>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
        </property>
        <property name="text">
         <string>&lt;name&gt;</string>
@@ -549,14 +547,6 @@
          </disabled>
         </palette>
        </property>
-       <property name="font">
-        <font>
-         <family>Hack</family>
-         <pointsize>14</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
        <property name="text">
         <string>+add</string>
        </property>
@@ -599,14 +589,6 @@
        <width>450</width>
        <height>80</height>
       </size>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto Mono for Powerline</family>
-       <pointsize>14</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
      </property>
      <property name="text">
       <string/>

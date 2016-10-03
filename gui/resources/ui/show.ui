@@ -428,6 +428,7 @@
   <property name="font">
    <font>
     <family>Hack</family>
+    <pointsize>11</pointsize>
    </font>
   </property>
   <property name="windowTitle">
@@ -566,15 +567,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string>genre</string>
           </property>
@@ -624,15 +616,6 @@
              </colorrole>
             </disabled>
            </palette>
-          </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
           </property>
           <property name="text">
            <string>network</string>
@@ -684,15 +667,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string>air day</string>
           </property>
@@ -742,15 +716,6 @@
              </colorrole>
             </disabled>
            </palette>
-          </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
           </property>
           <property name="text">
            <string>runtime</string>
@@ -805,15 +770,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string>status</string>
           </property>
@@ -863,15 +819,6 @@
              </colorrole>
             </disabled>
            </palette>
-          </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
           </property>
           <property name="text">
            <string>imdb</string>
@@ -930,15 +877,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string>description</string>
           </property>
@@ -958,7 +896,7 @@
              <x>0</x>
              <y>0</y>
              <width>543</width>
-             <height>170</height>
+             <height>182</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1006,15 +944,6 @@
                  </colorrole>
                 </disabled>
                </palette>
-              </property>
-              <property name="font">
-               <font>
-                <family>Hack</family>
-                <pointsize>11</pointsize>
-                <weight>50</weight>
-                <italic>false</italic>
-                <bold>false</bold>
-               </font>
               </property>
               <property name="text">
                <string/>
@@ -1075,15 +1004,6 @@
            </colorrole>
           </disabled>
          </palette>
-        </property>
-        <property name="font">
-         <font>
-          <family>Hack</family>
-          <pointsize>14</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-         </font>
         </property>
         <property name="text">
          <string>&lt; seasons &gt;</string>
@@ -1207,15 +1127,6 @@
           </disabled>
          </palette>
         </property>
-        <property name="font">
-         <font>
-          <family>Hack</family>
-          <pointsize>14</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-         </font>
-        </property>
         <property name="text">
          <string>&lt; episodes &gt;</string>
         </property>
@@ -1277,7 +1188,7 @@
          <x>0</x>
          <y>0</y>
          <width>1055</width>
-         <height>199</height>
+         <height>209</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -1298,7 +1209,7 @@
         <property name="maximumSize">
          <size>
           <width>40</width>
-          <height>16777215</height>
+          <height>25</height>
          </size>
         </property>
         <property name="palette">
@@ -1337,13 +1248,6 @@
            </colorrole>
           </disabled>
          </palette>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
         </property>
         <property name="text">
          <string>&lt;&lt;</string>
@@ -1370,8 +1274,8 @@
        <widget class="QPushButton" name="add_button">
         <property name="maximumSize">
          <size>
-          <width>55</width>
-          <height>16777215</height>
+          <width>60</width>
+          <height>25</height>
          </size>
         </property>
         <property name="palette">
@@ -1410,13 +1314,6 @@
            </colorrole>
           </disabled>
          </palette>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
         </property>
         <property name="text">
          <string>+add</string>
