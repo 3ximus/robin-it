@@ -69,9 +69,8 @@ class ShowWindow(QMainWindow):
 		Displays most of the show info
 
 		Emits multiple signals:
-			show_loaded -- after main info of the tvshow is gathered
+			show_loaded -- after show info is loaded
 			background_loaded  -- main tvshow poster to use as background is loaded
-			update_done  -- all show info was gathered, including seasons and episodes info
 	'''
 
 	show_loaded = QtCore.pyqtSignal()
@@ -85,27 +84,32 @@ class ShowWindow(QMainWindow):
 		self.ui = Ui_show_window()
 		self.ui.setupUi(self)
 
-		self.background = None
-		self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
-
 		self.ui.back_button.clicked.connect(self.close)
+		
+		self.background = None
 
-		self.show_loaded.connect(self.fill_info) # fills info on gui after the show info is retrieved
+		if type(tvshow) == dict:
+			self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
+			self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
 
-		self.ui.add_button.setEnabled(False) # disable until show is loaded
-		self.ui.add_button.clicked.connect(self.add_show)
+			self.ui.add_button.setEnabled(False) # disable until show is loaded
+			self.ui.add_button.clicked.connect(self.add_show)
 
-		self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
-		self.load_show(tvshow['seriesname'])
+			self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
+			self.get_show(tvshow['seriesname'])
+		else:
+			self.tvshow = tvshow
+			self.ui.add_button.setEnabled(False) # disable until show is loaded
+			self.load_show()
 
 	@threaded
-	def load_show(self, name):
+	def get_show(self, name):
 		'''Loads the show info from the database'''
 		self.tvshow = Show(name, cache=self.main_window.user_state.cache_dir)
 		self.show_loaded.emit()
 		print "Show Loaded: %s" % name
 
-	def fill_info(self):
+	def load_show(self):
 		'''Triggered by the show_loaded signal
 
 			Fills in the info loaded
@@ -125,7 +129,7 @@ class ShowWindow(QMainWindow):
 		# fill seasons
 		for s in self.tvshow.seasons:
 			season = SeasonWidget(s)
-			clickable(season).connect(partial(self.fill_episodes, sid=(s.s_id-1)))
+			clickable(season).connect(partial(self.load_episodes, sid=(s.s_id-1)))
 			self.ui.seasons_layout.addWidget(season)
 
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
@@ -158,7 +162,7 @@ class ShowWindow(QMainWindow):
 			palette.setBrush(QPalette.Background, QBrush(self.background))
 			self.setPalette(palette)
 
-	def fill_episodes(self, sid):
+	def load_episodes(self, sid):
 		'''Fills the GUI with episodes from selected season'''
 		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
 			self.ui.episodes_layout.itemAt(i).widget().setParent(None)

@@ -29,6 +29,8 @@ from time import sleep
 from functools import partial
 import urllib
 
+TVDB_BANNER_PREFIX = "http://thetvdb.com/banners/"
+
 class ShowsMenu(QMainWindow):
 	'''Works with stacked pages
 
@@ -70,7 +72,7 @@ class ShowsMenu(QMainWindow):
 		self.ui.back_button_2.clicked.connect(partial(self.go_to, index=0))
 		self.ui.back_button_3.clicked.connect(partial(self.go_to, index=0))
 
-		self.ui.myshows_button.clicked.connect(partial(self.go_to, index=2))
+		self.ui.myshows_button.clicked.connect(self.load_my_shows)
 		self.ui.towatch_button.clicked.connect(partial(self.go_to, index=3))
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
@@ -78,7 +80,9 @@ class ShowsMenu(QMainWindow):
 		self.ui.search_box_2.textChanged.connect(self.update_search_2)
 
 	def search(self):
-		'''Searches for TV Show by a given keyword in the search box'''
+		'''Searches for TV Show by a given keyword in the search box
+			Displays results on page 1
+		'''
 		self.loaded_results=0
 		self.ui.statusbar.showMessage("Searching for %s..." % self.ui.search_box.text())
 		self.ui.noresults_label.setParent(None)
@@ -163,6 +167,15 @@ class ShowsMenu(QMainWindow):
 		self.ui.stackedWidget.setCurrentIndex(index)
 		if index==0: self.ui.search_box.setFocus()
 
+	def load_my_shows(self):
+		'''Load shows and got to page 2'''
+		self.ui.stackedWidget.setCurrentIndex(2)
+		self.ui.showfilter_box.setFocus()
+		for i in reversed(range(self.ui.myshows_layout.count())): # clear previous results
+			self.ui.myshows_layout.itemAt(i).widget().setParent(None)
+		for show in self.user_state.shows.values():
+			self.ui.myshows_layout.addWidget(ShowWidget(self, show))
+
 	def update_filter(self):
 		'''Updates the news updates content according to content of filter_box'''
 		print self.ui.filter_box.text()
@@ -180,7 +193,7 @@ class ShowWidget(QWidget):
 	'''Small banner to identify a show
 
 	Parameters:
-		tvshow -- search result to load the banner from
+		tvshow -- search result to load the banner from or a Show instance
 
 		The whole widget is clickable displaying a Show Window with the tvshow info
 		Has an add button to add the show to the followed shows
@@ -197,18 +210,26 @@ class ShowWidget(QWidget):
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
-		self.ui.name_label.setText('< %s >' % self.tvshow['seriesname'])
+		
+		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
+
+		self.ui.name_label.setText('< %s >' % name)
+			
+			#TODO did this work??
 
 		clickable(self).connect(self.view_show)
 		
 		self.ui.add_button.clicked.connect(self.add_show)
-		if self.main_window.user_state.is_tracked(self.tvshow['seriesname']):
+		if self.main_window.user_state.is_tracked(name):
 			self.ui.add_button.setText('added')
 			self.ui.add_button.setEnabled(False)
 
-		if 'banner' in self.tvshow.keys():
+		if type(self.tvshow) == dict and 'banner' in self.tvshow.keys():
 			self.banner_loaded.connect(self.load_banner)
-			self.download_banner("http://thetvdb.com/banners/" + self.tvshow['banner']) #FIXME harcoding is bad for your health
+			self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])   #FIXME harcoding is bad for your health
+		else:
+			self.banner_loaded.connect(self.load_banner)
+			self.download_banner(self.tvshow.banner)
 
 	@threaded
 	def download_banner(self, url):

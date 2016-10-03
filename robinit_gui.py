@@ -68,9 +68,9 @@ def load_config_file():
 class MainWindow(QMainWindow):
 	'''Main window class containing the main menu
 	
-	This class launches other parts of the program like the Shows and Movies, through its menu
-	This class when created lods the CONFIG_FILE if available, if the default user is set its saved profile is loaded
-		otherwise a LoginWindow is presented so the user can select a profile or create a new one
+		This class launches other parts of the program like the Shows and Movies, through its menu
+		This class when created lods the CONFIG_FILE if available, if the default user is set its saved profile is loaded
+			otherwise a LoginWindow is presented so the user can select a profile or create a new one
 	'''
 	def __init__(self):
 		super(MainWindow, self).__init__()

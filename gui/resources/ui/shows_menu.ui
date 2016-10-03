@@ -1893,6 +1893,11 @@
              <height>490</height>
             </rect>
            </property>
+           <layout class="QGridLayout" name="gridLayout_7">
+            <item row="0" column="0">
+             <layout class="QGridLayout" name="myshows_layout"/>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
