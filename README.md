@@ -1,7 +1,7 @@
 #Robin It#
 ================================
 
-*Version 0.1*
+*Version 0.4*
 
 Python GUI Application to search, track and download tvshows and movie torrents
 
@@ -20,11 +20,11 @@ Python bindings for Qt5 can be installed through:
 ubuntu: 	`apt-get install python-qt5`
 arch: 		`pacman -S python2-pyqt5`
 
-then just run `python robinit_gui.py`
+Run `python robinit_gui.py`
 
 ## Usage
 
-After building the compiled executable should be in the build directory under `robinit_console_vx.x.x`
+Run `python robinit_gui.py`
 
 ## Changelog
 

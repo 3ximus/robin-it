@@ -138,9 +138,9 @@ class ShowsMenu(QMainWindow):
 		def _display_pending(pending):
 			'''Triggered by self.all_banners_loaded signal. Display shows without banner'''
 			for p in pending: # add the shows without banner at the end
-				self.ui.results_layout.addWidget(ShowWidget(self, p))
+				self.ui.results_layout.addWidget(ShowWidget(p, self.user_state))
 				_status_update(results=results)
-
+				
 		for i in reversed(range(self.ui.results_layout.count())): # clear previous results
 			self.ui.results_layout.itemAt(i).widget().setParent(None)
 		if len(results) == 0: # no results found
@@ -151,7 +151,7 @@ class ShowsMenu(QMainWindow):
 			except TypeError: pass
 			self.all_banners_loaded.connect(partial(_display_pending, pending=pending_add))
 			for r in results: # display new results
-				banner = ShowWidget(self, r)
+				banner = ShowWidget(r, self.user_state)
 				if 'banner' not in r: # shows without banners added to pending add
 					pending_add.append(r)
 				else:
@@ -178,7 +178,7 @@ class ShowsMenu(QMainWindow):
 		for i in reversed(range(self.ui.myshows_layout.count())): # clear previous results
 			self.ui.myshows_layout.itemAt(i).widget().setParent(None)
 		for show in self.user_state.shows.values():
-			self.ui.myshows_layout.addWidget(ShowWidget(self, show))
+			self.ui.myshows_layout.addWidget(ShowWidget(show, self.user_state))
 
 	def update_filter(self):
 		'''Updates the news updates content according to content of filter_box'''
@@ -206,11 +206,12 @@ class ShowWidget(QWidget):
 		Used in search results
 	'''
 	banner_loaded = QtCore.pyqtSignal(object)
+	unloadable_banner = QtCore.pyqtSignal()
 
-	def __init__(self, mainwindow, tvshow):
+	def __init__(self, tvshow, user_state):
 		super(ShowWidget, self).__init__()
 		self.tvshow = tvshow
-		self.main_window = mainwindow
+		self.user_state = user_state
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
@@ -220,7 +221,7 @@ class ShowWidget(QWidget):
 		clickable(self).connect(self.view_show)
 
 		self.ui.add_button.clicked.connect(self.add_show)
-		if self.main_window.user_state.is_tracked(name):
+		if self.user_state.is_tracked(name):
 			self.make_del_button()
 
 		if type(self.tvshow) == dict:
@@ -234,24 +235,28 @@ class ShowWidget(QWidget):
 	@threaded
 	def download_banner(self, url):
 		'''Thread to download banner, emits self.banner_loaded signal when complete'''
-		data = urllib.urlopen(url).read()
+		if not url: return
+		data = None
+		try: data = urllib.urlopen(url).read()
+		except IOError: print "Name or Service unknown %s" % url
 		self.banner_loaded.emit(data)
 
 	def load_banner(self, data):
 		'''Triggered by self.banner_loaded signal. Loads the banner from downloaded data'''
+		if not data: return # when banner was not loaded or url couldnt be reached
 		banner = QPixmap()
 		banner.loadFromData(data)
 		self.ui.banner.setPixmap(banner)
 
 	def view_show(self):
 		'''Triggered clicking on the widget. Displays Show Window'''
-		self.show_window = ShowWindow(self.main_window, self.tvshow)
+		self.show_window = ShowWindow(self.tvshow, self.user_state)
 		self.show_window.show()
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
-		self.main_window.user_state.add_show(self.tvshow['seriesname'])
-		self.main_window.user_state.save_state()
+		self.user_state.add_show(self.tvshow['seriesname'])
+		self.user_state.save_state()
 		print "Added: " + self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
 		self.make_del_button()
 
@@ -265,15 +270,15 @@ class ShowWidget(QWidget):
 	def delete_show(self):
 		'''Triggered by clicking on the add button when this show is added
 		
-			Stops show from being followed, deleting it from the self.main_window.user_state.shows
+			Stops show from being followed, deleting it from the self.user_state.shows
 		'''
 		self.ui.add_button.clicked.disconnect()
 		self.ui.add_button.setText("+ add")
 		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
 
 		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
-		name = self.main_window.user_state.remove_show(name) # dont remove assignment (it returns none in case of failure to remove)
-		self.main_window.user_state.save_state()
+		name = self.user_state.remove_show(name) # dont remove assignment (it returns none in case of failure to remove)
+		self.user_state.save_state()
 		print ("Removed: " + name) if name else "Already removed"
 
 		self.ui.add_button.clicked.connect(self.add_show)

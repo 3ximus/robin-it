@@ -47,7 +47,7 @@ def download_image(signal, url, filters=False):
 	signal.emit(data)
 
 def apply_filters(data):
-	'''Function to apply filter to an image'''
+	'''Function to apply filter to an image in the form of binary data'''
 	data = StringIO(data)
 	img = Image.open(data)
 	img = img.point(lambda x: x*DARKNESS) # darken
@@ -66,7 +66,8 @@ class ShowWindow(QMainWindow):
 	'''Main window of a TV Show
 
 	Parameters:
-		tvshow -- result from a tvshow search
+		user_state -- instance of UserContent
+		tvshow -- result from a tvshow search or Show class
 
 		Displays most of the show info
 
@@ -79,9 +80,9 @@ class ShowWindow(QMainWindow):
 	background_loaded = QtCore.pyqtSignal(object)
 	update_shout = QtCore.pyqtSignal()
 
-	def __init__(self, mainwindow, tvshow):
+	def __init__(self, tvshow, user_state):
 		super(ShowWindow, self).__init__()
-		self.main_window = mainwindow
+		self.user_state = user_state
 
 		# set up UI from QtDesigner
 		self.ui = Ui_show_window()
@@ -96,16 +97,28 @@ class ShowWindow(QMainWindow):
 		self.background = None
 
 		if type(tvshow) == dict:
-			self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
-			self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
-			self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
-			self.get_show_data(tvshow['seriesname'])
+			if not self.user_state.is_tracked(tvshow['seriesname']):
+				# show is not tracked and is search result
+				self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
+				self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
+				self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
+				self.get_show_data(tvshow['seriesname'])
+				return # everyithing done in this case / prevente rest of the code execution
+			else:
+    			# show is tracked but search result, get the followed show instance instead
+				self.tvshow = self.user_state.shows[tvshow['seriesname']]
 		else:
+    		# show is tracked -- all is good!
 			self.tvshow = tvshow
-			self.load_show()
+		# this in both cases where it is tracked
+		self.update_me()
+		self.load_show()
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
+		if not self.user_state.is_tracked(self.tvshow.real_name):
+			self.add_show()
+		self.user_state.save_state()
 		if self.tvshow.watched:
 			self.ui.mark_button.setText("umark")
 			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
@@ -116,7 +129,7 @@ class ShowWindow(QMainWindow):
 	@threaded
 	def get_show_data(self, name):
 		'''Loads the show info from the database'''
-		self.tvshow = Show(name, cache=self.main_window.user_state.cache_dir)
+		self.tvshow = Show(name, cache=self.user_state.cache_dir)
 		self.show_loaded.emit()
 		print "Show Loaded: %s" % name
 
@@ -132,7 +145,7 @@ class ShowWindow(QMainWindow):
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 			
-		if self.main_window.user_state.is_tracked(self.tvshow.name):
+		if self.user_state.is_tracked(self.tvshow.name):
     			self.make_del_button()
 
 		# fill seasons
@@ -180,8 +193,8 @@ class ShowWindow(QMainWindow):
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
-		self.main_window.user_state.add_show(self.tvshow.name)
-		self.main_window.user_state.save_state()
+		self.user_state.add_show(self.tvshow.name)
+		self.user_state.save_state()
 		print "Added: " + self.tvshow.name
 		self.make_del_button()
 
@@ -195,14 +208,14 @@ class ShowWindow(QMainWindow):
 	def delete_show(self):
 		'''Triggered by clicking on the add button when this show is added
 		
-			Stops show from being followed, deleting it from the self.main_window.user_state.shows
+			Stops show from being followed, deleting it from the self.user_state.shows
 		'''
 		self.ui.add_button.clicked.disconnect()
 		self.ui.add_button.setText("+ add")
 		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
 
-		name = self.main_window.user_state.remove_show(self.tvshow.real_name) # dont remove assignment (it returns none in case of failure to remove)
-		self.main_window.user_state.save_state()
+		name = self.user_state.remove_show(self.tvshow.real_name) # dont remove assignment (it returns none in case of failure to remove)
+		self.user_state.save_state()
 		print ("Removed: " + name) if name else "Already removed"
 
 		self.ui.add_button.clicked.connect(self.add_show)
@@ -248,6 +261,7 @@ class SeasonWidget(QWidget):
 	@threaded
 	def download_poster(self, url):
 		'''Thread to download season poster'''
+		if not url: return
 		data = urllib.urlopen(url).read()
 		self.poster_loaded.emit(data)
 
@@ -284,6 +298,7 @@ class EpisodeWidget(QWidget):
 		self.window.update_shout.connect(self.update_me)
 		self.image_loaded.connect(self.load_image)
 		self.download_image(self.episode.image)
+		
 		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
 
 	def update_me(self):
@@ -298,6 +313,7 @@ class EpisodeWidget(QWidget):
 	@threaded
 	def download_image(self, url):
 		'''Thread to downlaod episode image'''
+		if not url: return
 		data = urllib.urlopen(url).read()
 		self.image_loaded.emit(data)
 
