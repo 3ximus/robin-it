@@ -103,26 +103,29 @@ class MainWindow(QMainWindow):
 
 		self.config = load_config_file() # get configs
 		if 'default_user' in self.config.keys():
-			self.set_user_state(UserContent(self.config['default_user']))
-		else: # create login window
+			self.set_user_state(UserContent(self.config['default_user'],
+					user_dir=self.config['user_dir'] if 'user_dir' in self.config.keys() else None,
+					cache_dir=self.config['cache_dir'] if 'cache_dir' in self.config.keys() else None,
+					storage_dir=self.config['storage_dir'] if 'storage_dir' in self.config.keys() else None))
+		else: # create login window, this will use the function self.set_user_state to set the user_state
 			self.setEnabled(False)
 			self.loginwindow = LoginWindow(main_window=self, config=self.config)
 			self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
 			self.loginwindow.show()
 
-		self.shows_window = ShowsMenu(return_to=self, user_state=self.user_state)
-		self.settings = SettingsWindow(main_window=self, config=self.config)
-		self.ui.shows_button.clicked.connect(partial(self.display_window, window=self.shows_window))
+		self.ui.shows_button.clicked.connect(self.display_shows)
 		self.ui.config_button.clicked.connect(self.display_settings)
 
-	def display_window(self, window):
-		'''Displays given window'''
-		window.move(self.pos()+self.rect().center()-window.rect().center()) # position new window at the center position
-		window.show()
+	def display_shows(self):
+		'''Displays Shows Menu'''
+		self.shows_window = ShowsMenu(return_to=self, user_state=self.user_state)
+		self.shows_window.move(self.pos()+self.rect().center()-window.rect().center()) # position new window at the center position
+		self.shows_window.show()
 		self.close()
 
 	def display_settings(self):
-		'''Separate function to display shows window due to it disabling the main menu while open'''
+		'''Display Settings Menu'''
+		self.settings = SettingsWindow(main_window=self, config=self.config)
 		self.settings.move(self.pos()+self.rect().center()-self.settings.rect().center()) # position new window at the center position
 		self.settings.show()
 		self.setEnabled(False)
@@ -184,7 +187,11 @@ class LoginWindow(QMainWindow):
 			if self.autologin:
 				self.config.update({'default_user' : self.ui.login_box.text().replace(' ', '_')})
 				save_config_file(self.config)
-			self.main_window.set_user_state(UserContent(self.ui.login_box.text().replace(' ', '_')))
+			self.main_window.set_user_state(
+				UserContent(self.ui.login_box.text().replace(' ', '_'),
+						user_dir=self.config['user_dir'] if 'user_dir' in self.config.keys() else None,
+						cache_dir=self.config['cache_dir'] if 'cache_dir' in self.config.keys() else None,
+						storage_dir=self.config['storage_dir'] if 'storage_dir' in self.config.keys() else None))
 			self.main_window.setEnabled(True)
 			self.close()
 			self.destroy()

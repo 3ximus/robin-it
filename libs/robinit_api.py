@@ -21,21 +21,25 @@ import cPickle
 
 class UserContent:
 	'''User TV Shows Content Class
+	
+	Parameters:
+		uname -- username
+		cache_dir -- directory used to cache database querie results
+		user_dir -- directory used to save the user profile (used to load profile on constructor)
 
 	This class contains all user content
 	Contains list with following shows being Show instances
 	'''
 
-	def __init__(self, uname = '', empty = False, cache_dir='cache/', user_dir='user/'):
-		if not empty:
-			if uname != '': self.username = uname
-			else: raise ValueError("Username cannot be empty")
-		else: self.username = ''
+	def __init__(self, uname = '', cache_dir='cache/', user_dir='user/', storage_dir='storage/'):
+		if uname != '': self.username = uname
+		else: raise ValueError("Username cannot be empty")
 
 		self.tvdb_apikey = '' # TODO API KEY
 		self.shows = {} # following tv shows
-		self.user_dir = user_dir
-		self.cache_dir = cache_dir
+		self.user_dir = user_dir if user_dir else 'user/' # force defaults if None
+		self.cache_dir = cache_dir if cache_dir else 'cache/' # force defaults if None
+		self.storage_dir = storage_dir if storage_dir else 'cache/' # force defaults if None
 
 		if not self.load_state(self.user_dir):
 			if not path.exists(self.user_dir): mkdir(self.user_dir)
