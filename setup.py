@@ -15,7 +15,7 @@ if _platform =="linux" or _platform == "linux2":
 	]
 
 	setup(name='robinit',
-	      version = '0.3',
+	      version = '0.4',
 	      description = 'TV Show Tracker and downloader -- console version',
 	      options = dict(build_exe = buildOptions),
 	      executables = executables)

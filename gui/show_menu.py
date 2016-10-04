@@ -1,12 +1,12 @@
 
 '''
 GUI for the TV Shows main menu
-Latest Update - v0.3
+Latest Update - v0.4
 Created - 30.1.16
 Copyright (C) 2016 - eximus
 '''
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 # PYQT5 IMPORTS
 from PyQt5 import QtCore

@@ -2,11 +2,11 @@
 
 '''
 Frontend Aplication GUI
-Latest Update - v0.3
+Latest Update - v0.4
 Created - 21.9.16
 Copyright (C) 2016 - eximus
 '''
-__version__ = '0.3'
+__version__ = '0.4'
 
 # PYQT5 IMPORTS
 from PyQt5.QtWidgets import QApplication, QMainWindow
