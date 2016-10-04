@@ -1,12 +1,12 @@
 
 '''
 GUI for a TV Show window
-Latest Update - v0.4
+Latest Update - v0.5
 Created - 30.1.16
 Copyright (C) 2016 - eximus
 '''
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 # PYQT5 IMPORTS
 from PyQt5 import QtCore

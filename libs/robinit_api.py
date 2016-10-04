@@ -19,11 +19,11 @@ def selection_handler(results):
 		except ValueError: print "Please Insert Valid Input"
 	return choice
 
-Latest Update - v0.4
+Latest Update - v0.5
 Created - 29.12.15
 Copyright (C) 2015 - eximus
 '''
-__version__ = '0.4'
+__version__ = '0.5'
 
 
 import tvshow
