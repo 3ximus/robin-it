@@ -97,16 +97,27 @@ class ShowWindow(QMainWindow):
 		self.background = None
 
 		if type(tvshow) == dict:
-			self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
-			self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
-			self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
-			self.get_show_data(tvshow['seriesname'])
+			if not self.user_state.is_tracked(tvshow['seriesname']):
+				# show is not tracked and is search result
+				self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
+				self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
+				self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
+				self.get_show_data(tvshow['seriesname'])
+				return # everyithing done in this case / prevente rest of the code execution
+			else:
+    			# show is tracked but search result, get the followed show instance instead
+				self.tvshow = self.user_state.shows[tvshow['seriesname']]
 		else:
+    		# show is tracked -- all is good!
 			self.tvshow = tvshow
-			self.load_show()
+		# this in both cases where it is tracked
+		self.update_me()
+		self.load_show()
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
+		if not self.user_state.is_tracked(self.tvshow.real_name):
+			self.add_show()
 		self.user_state.save_state()
 		if self.tvshow.watched:
 			self.ui.mark_button.setText("umark")
@@ -250,6 +261,7 @@ class SeasonWidget(QWidget):
 	@threaded
 	def download_poster(self, url):
 		'''Thread to download season poster'''
+		if not url: return
 		data = urllib.urlopen(url).read()
 		self.poster_loaded.emit(data)
 
@@ -301,6 +313,7 @@ class EpisodeWidget(QWidget):
 	@threaded
 	def download_image(self, url):
 		'''Thread to downlaod episode image'''
+		if not url: return
 		data = urllib.urlopen(url).read()
 		self.image_loaded.emit(data)
 

@@ -206,6 +206,7 @@ class ShowWidget(QWidget):
 		Used in search results
 	'''
 	banner_loaded = QtCore.pyqtSignal(object)
+	unloadable_banner = QtCore.pyqtSignal()
 
 	def __init__(self, tvshow, user_state):
 		super(ShowWidget, self).__init__()
@@ -234,11 +235,15 @@ class ShowWidget(QWidget):
 	@threaded
 	def download_banner(self, url):
 		'''Thread to download banner, emits self.banner_loaded signal when complete'''
-		data = urllib.urlopen(url).read()
+		if not url: return
+		data = None
+		try: data = urllib.urlopen(url).read()
+		except IOError: print "Name or Service unknown %s" % url
 		self.banner_loaded.emit(data)
 
 	def load_banner(self, data):
 		'''Triggered by self.banner_loaded signal. Loads the banner from downloaded data'''
+		if not data: return # when banner was not loaded or url couldnt be reached
 		banner = QPixmap()
 		banner.loadFromData(data)
 		self.ui.banner.setPixmap(banner)

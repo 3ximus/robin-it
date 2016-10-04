@@ -63,6 +63,7 @@ class UserContent:
 	def is_tracked(self, name):
 		'''Returns True if show is being tracked, else otherwise'''
 		if self.find_item(name): return True
+		# TODO change to name in self.shows.keys() ???
 		return False
 
 # ==========================================
