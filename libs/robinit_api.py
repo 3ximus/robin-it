@@ -4,11 +4,11 @@
 Api for traking TVShows and Movies
 User state is persistent across runs and saved in ./user/ directory
 
-Latest Update - v0.5
+Latest Update - v0.6
 Created - 29.12.15
 Copyright (C) 2016 - eximus
 '''
-__version__ = '0.5'
+__version__ = '0.6'
 
 
 import tvshow

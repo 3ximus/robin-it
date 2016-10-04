@@ -432,7 +432,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.5</string>
+   <string>Robin_it_v0.6</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
