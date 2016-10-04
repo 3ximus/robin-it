@@ -1,12 +1,27 @@
 #! /usr/bin/python2.7
+#Robin It - Track tvshows and download its torrents
+#Copyright (C) 2016  Fabio Almeida
+#
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or
+#(at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 Frontend Aplication GUI
-Latest Update - v0.4
+Latest Update - v0.5
 Created - 21.9.16
 Copyright (C) 2016 - eximus
 '''
-__version__ = '0.4'
+__version__ = '0.5'
 
 # PYQT5 IMPORTS
 from PyQt5.QtWidgets import QApplication, QMainWindow

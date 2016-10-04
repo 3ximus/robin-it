@@ -1,29 +1,14 @@
+
+
 '''
 Api for traking TVShows and Movies
 User state is persistent across runs and saved in ./user/ directory
 
-NOTE: For many functions a selection_handler is needed, in that
-	case here is an example of one:
-
-def selection_handler(results):
-	print "Multiple Results found, select one: (Use 'q' to cancel)"
-	for i, name in enumerate(results):
-		print "%i. %s" % (i, name)
-	while(1):
-		try:
-			choice = raw_input("Selection: ")
-			if choice == 'q': return None
-			choice = int(choice)
-			if choice < 0 or choice >= len(results): raise ValueError()
-			else: break
-		except ValueError: print "Please Insert Valid Input"
-	return choice
-
-Latest Update - v0.4
+Latest Update - v0.5
 Created - 29.12.15
-Copyright (C) 2015 - eximus
+Copyright (C) 2016 - eximus
 '''
-__version__ = '0.4'
+__version__ = '0.5'
 
 
 import tvshow
