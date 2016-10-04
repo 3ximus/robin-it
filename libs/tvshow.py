@@ -140,7 +140,7 @@ class Show:
 		self.torrent=torrent
 
 	def get_status(self):
-		'''Returns the status this show has, in repect to the user'''
+		'''Returns the status this show has, in respect to the user'''
 		if self.watched:
 			if self.status == 'Ended':
 				return "completed"
@@ -336,7 +336,7 @@ class Episode:
 		self.set_watched(not self.watched)
 		self.update_watched() # after setting the value call update_watched to propagate change
 
-	def set_watched(self):
+	def set_watched(self, value):
 		''' Set the watched state '''
 		self.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
@@ -348,7 +348,7 @@ class Episode:
 	def update_watched(self):
 		''' Update watched state according to its content'''
 		# call update on the belonging season
-		self.tv_show.seasons[s_id].update_watched()
+		self.tv_show.seasons[self.s_id-1].update_watched()
 
 	def already_aired(self):
 		if self.airdate == None: return False

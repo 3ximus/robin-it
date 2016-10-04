@@ -77,6 +77,7 @@ class ShowWindow(QMainWindow):
 
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
+	update_shout = QtCore.pyqtSignal()
 
 	def __init__(self, mainwindow, tvshow):
 		super(ShowWindow, self).__init__()
@@ -86,8 +87,11 @@ class ShowWindow(QMainWindow):
 		self.ui = Ui_show_window()
 		self.ui.setupUi(self)
 
+		self.update_shout.connect(self.update_me)
+
 		self.ui.back_button.clicked.connect(self.close)
 		self.ui.add_button.clicked.connect(self.add_show)
+		self.ui.mark_button.clicked.connect(self.toogle_watched)
 		
 		self.background = None
 
@@ -99,6 +103,15 @@ class ShowWindow(QMainWindow):
 		else:
 			self.tvshow = tvshow
 			self.load_show()
+
+	def update_me(self):
+		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
+		if self.tvshow.watched:
+			self.ui.mark_button.setText("umark")
+			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+		else:
+			self.ui.mark_button.setText("mark")
+			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
 
 	@threaded
 	def get_show_data(self, name):
@@ -124,7 +137,7 @@ class ShowWindow(QMainWindow):
 
 		# fill seasons
 		for s in self.tvshow.seasons:
-			season = SeasonWidget(s)
+			season = SeasonWidget(s, self)
 			clickable(season).connect(partial(self.load_episodes, sid=(s.s_id-1)))
 			self.ui.seasons_layout.addWidget(season)
 
@@ -163,7 +176,7 @@ class ShowWindow(QMainWindow):
 		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
 			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
 		for e in self.tvshow.seasons[sid].episodes:
-			self.ui.episodes_layout.addWidget(EpisodeWidget(e))
+			self.ui.episodes_layout.addWidget(EpisodeWidget(e, self))
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
@@ -194,37 +207,10 @@ class ShowWindow(QMainWindow):
 
 		self.ui.add_button.clicked.connect(self.add_show)
 
-class EpisodeWidget(QWidget):
-	'''Episode Widget class
-
-	Parameters:
-		episode -- Episode class instance
-
-		Emits image_loaded signal when the episode image is loaded
-	'''
-	image_loaded = QtCore.pyqtSignal(object)
-	def __init__(self, episode):
-		super(EpisodeWidget, self).__init__()
-		self.episode = episode
-
-		self.ui = Ui_episode_banner_widget()
-		self.ui.setupUi(self)
-
-		self.image_loaded.connect(self.load_image)
-		self.download_image(self.episode.image)
-		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
-
-	@threaded
-	def download_image(self, url):
-		'''Thread to downlaod episode image'''
-		data = urllib.urlopen(url).read()
-		self.image_loaded.emit(data)
-
-	def load_image(self, data):
-		'''Triggered by image_loaded signal. Loads image to the widget'''
-		image=QPixmap()
-		image.loadFromData(data)
-		self.ui.image.setPixmap(image)
+	def toogle_watched(self):
+		'''Toogles watdched state'''
+		self.tvshow.toogle_watched()
+		self.update_shout.emit() #update button
 
 class SeasonWidget(QWidget):
 	'''Season Widget class
@@ -235,17 +221,29 @@ class SeasonWidget(QWidget):
 		Emits poster_loaded signal when season poster is loaded
 	'''
 	poster_loaded = QtCore.pyqtSignal(object)
-	def __init__(self, season):
+	def __init__(self, season, window):
 		super(SeasonWidget, self).__init__()
 		self.season = season
+		self.window = window
 
 		self.ui = Ui_season_banner_widget()
 		self.ui.setupUi(self)
 
-		self.ui.mark_button.clicked.connect(self.mark_season)
+		self.update_me()
+		self.window.update_shout.connect(self.update_me)
+		self.ui.mark_button.clicked.connect(self.toogle_season)
 		self.poster_loaded.connect(self.load_poster)
 		if len(self.season.poster) > 0:
-			self.download_poster(self.season.poster[0])
+    			self.download_poster(self.season.poster[0])
+			
+	def update_me(self):
+		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
+		if self.season.watched:
+			self.ui.mark_button.setText("umark")
+			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+		else:
+			self.ui.mark_button.setText("mark")
+			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
 
 	@threaded
 	def download_poster(self, url):
@@ -259,6 +257,57 @@ class SeasonWidget(QWidget):
 		poster.loadFromData(data)
 		self.ui.poster.setPixmap(poster)
 
-	def mark_season(self):
-		'''Mark this season as watched'''
-		pass
+	def toogle_season(self):
+		'''Toogle season watched state'''
+		self.season.toogle_watched()
+		self.window.update_shout.emit()
+
+class EpisodeWidget(QWidget):
+	'''Episode Widget class
+
+	Parameters:
+		episode -- Episode class instance
+
+		Emits image_loaded signal when the episode image is loaded
+	'''
+	image_loaded = QtCore.pyqtSignal(object)
+	def __init__(self, episode, window):
+		super(EpisodeWidget, self).__init__()
+		self.episode = episode
+		self.window = window
+
+		self.ui = Ui_episode_banner_widget()
+		self.ui.setupUi(self)
+
+		self.update_me()
+		self.ui.mark_button.clicked.connect(self.toogle_episode)
+		self.window.update_shout.connect(self.update_me)
+		self.image_loaded.connect(self.load_image)
+		self.download_image(self.episode.image)
+		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
+
+	def update_me(self):
+		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
+		if self.episode.watched:
+			self.ui.mark_button.setText("umark")
+			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+		else:
+			self.ui.mark_button.setText("mark")
+			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
+			
+	@threaded
+	def download_image(self, url):
+		'''Thread to downlaod episode image'''
+		data = urllib.urlopen(url).read()
+		self.image_loaded.emit(data)
+
+	def load_image(self, data):
+		'''Triggered by image_loaded signal. Loads image to the widget'''
+		image=QPixmap()
+		image.loadFromData(data)
+		self.ui.image.setPixmap(image)
+
+	def toogle_episode(self):
+		'''Toogle season watched state'''
+		self.episode.toogle_watched()
+		self.window.update_shout.emit()

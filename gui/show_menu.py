@@ -218,7 +218,6 @@ class ShowWidget(QWidget):
 		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
 		self.ui.name_label.setText('< %s >' % name)
 		clickable(self).connect(self.view_show)
-		
 
 		self.ui.add_button.clicked.connect(self.add_show)
 		if self.main_window.user_state.is_tracked(name):

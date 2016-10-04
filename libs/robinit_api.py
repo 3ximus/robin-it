@@ -171,7 +171,6 @@ class UserContent:
 
 	def remove_show(self, name):
 		'''Remove show by name
-
 			Returns show name if was deleted sucessfully, None if show name is invalid or multiple exist
 		'''
 		show_to_delete = self.find_item(name)
@@ -180,21 +179,20 @@ class UserContent:
 		del(self.shows[show_to_delete])
 		return show_to_delete
 
-	def toogle_watched(self, name = None, item = None, selection_handler = None): # TODO marked for review
+	def toogle_watched(self, name = None, item = None):
 		'''Toogles watched value
 
 		If an item with watch state is given name is ignored
-		If name is given only updates that name otherwise update every show being followed
-		This recursivly sets all seasons and episodes to watched/unwatched if its a show
+		If name is given only updates that name
+		This recursivly sets all seasons and episodes to watched/unwatched if its a show/season
 		'''
 		if item:
 			try: item.toogle_watched() # if valid item
 			except AttributeError: raise ValueError("Invalid item passed to toogle_watched_show")
 		elif name: # by name
-			show = self.find_item(name, selection_handler = selection_handler)
+			show = self.find_item(name)
+			if type(show) == list: raise ValueError("I fucked up somewhere and didnt save the show with the real name")
 			if show: self.shows[show].toogle_watched()
-			else: raise ValueError("No Show found")
-		else: raise ValueError("No parameters passed to toogle_watched_show")
 
 	def mark_watched_until(self, name = None, season = None, episode = None, item = None, selection_handler = None):
 		'''Mark episodes/seasons watched until the episode/season given'''
@@ -214,15 +212,26 @@ class UserContent:
 		else:
 			for show in self.shows: self.shows[show].update_watched()
 
-	def unwatched_episodes(self):
+	def unwatched_episodes(self, name = None, show = None):
 		'''Get all episodes unwatched
 
+		Parameters:
+			name -- show to get episodes from
+			show -- Show instance to get episodes from
+
+			Note:show has precedence over name
+
+		If both parameters are omited it will return episodes from all shows
 		Returns a dictionary where keys are shows and the values are lists, these are lists
 			of pairs, being the first element the season id and the second a list with instances
 			of episode class:
 			{ <show_name> : { <season_id> : [ <episode>, <episode>, ... ] , ... }, ... }
 		'''
 		unwatched_dict = {}
+		if show:
+			pass # TODO get episodes from given show
+		if name:
+			pass # TODO get episodes from given show
 		for show in self.shows:
 			if self.shows[show].watched:
 				continue
