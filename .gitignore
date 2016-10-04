@@ -9,3 +9,4 @@ build
 dist
 robinit.conf
 venv
+update_script.sh
