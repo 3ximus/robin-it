@@ -434,13 +434,14 @@
   <property name="font">
    <font>
     <family>Hack</family>
+    <pointsize>11</pointsize>
    </font>
   </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.3</string>
+   <string>Robin_it_v0.4</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="../resources.qrc">
     <normaloff>:/resources/images/robinit.ico</normaloff>
     <disabledoff>:/resources/images/robinit_desaturated.ico</disabledoff>
     <disabledon>:/resources/images/robinit_desaturated.ico</disabledon>:/resources/images/robinit.ico</iconset>
@@ -506,9 +507,7 @@
       </property>
       <property name="font">
        <font>
-        <family>Roboto Mono Medium for Powerline</family>
-        <pointsize>32</pointsize>
-        <italic>false</italic>
+        <pointsize>28</pointsize>
        </font>
       </property>
       <property name="focusPolicy">
@@ -579,13 +578,6 @@
              </colorrole>
             </disabled>
            </palette>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
           </property>
           <property name="text">
            <string>&gt;</string>
@@ -685,13 +677,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string/>
           </property>
@@ -708,7 +693,7 @@
           <property name="maximumSize">
            <size>
             <width>40</width>
-            <height>16777215</height>
+            <height>25</height>
            </size>
           </property>
           <property name="palette">
@@ -747,13 +732,6 @@
              </colorrole>
             </disabled>
            </palette>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
           </property>
           <property name="text">
            <string>&gt;&gt;</string>
@@ -806,13 +784,6 @@
            </colorrole>
           </disabled>
          </palette>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
         </property>
         <property name="layoutDirection">
          <enum>Qt::RightToLeft</enum>

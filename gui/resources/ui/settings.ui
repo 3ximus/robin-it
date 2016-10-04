@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>579</width>
-    <height>552</height>
+    <width>577</width>
+    <height>538</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -433,11 +433,11 @@
   </property>
   <property name="font">
    <font>
-    <family>Hack</family>
+    <pointsize>11</pointsize>
    </font>
   </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.3</string>
+   <string>Robin_it_v0.4</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
@@ -494,8 +494,8 @@
       </property>
       <property name="font">
        <font>
-        <family>Roboto Mono Medium for Powerline</family>
-        <pointsize>62</pointsize>
+        <family>Hack</family>
+        <pointsize>48</pointsize>
         <italic>false</italic>
        </font>
       </property>
@@ -557,7 +557,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>499</width>
+         <width>497</width>
          <height>700</height>
         </rect>
        </property>
@@ -620,13 +620,6 @@
                </colorrole>
               </disabled>
              </palette>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
             </property>
             <property name="text">
              <string>&gt; set torrent_hosts</string>
@@ -694,13 +687,6 @@
                    </colorrole>
                   </disabled>
                  </palette>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
                 </property>
                 <property name="text">
                  <string>kickass &gt;</string>
@@ -860,13 +846,6 @@
                   </disabled>
                  </palette>
                 </property>
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
                 <property name="frame">
                  <bool>false</bool>
                 </property>
@@ -1001,13 +980,6 @@
                    </colorrole>
                   </disabled>
                  </palette>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
                 </property>
                 <property name="text">
                  <string>rarbg &gt;</string>
@@ -1167,13 +1139,6 @@
                   </disabled>
                  </palette>
                 </property>
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
                 <property name="frame">
                  <bool>false</bool>
                 </property>
@@ -1308,13 +1273,6 @@
                    </colorrole>
                   </disabled>
                  </palette>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
                 </property>
                 <property name="text">
                  <string>piratebay &gt;</string>
@@ -1473,13 +1431,6 @@
                    </colorrole>
                   </disabled>
                  </palette>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
                 </property>
                 <property name="frame">
                  <bool>false</bool>
@@ -1645,13 +1596,6 @@
               </disabled>
              </palette>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
             <property name="text">
              <string>&gt; set default_quality</string>
             </property>
@@ -1701,13 +1645,6 @@
                 </disabled>
                </palette>
               </property>
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
               <property name="text">
                <string>s&amp;tandard_definition</string>
               </property>
@@ -1751,13 +1688,6 @@
                  </colorrole>
                 </disabled>
                </palette>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
               </property>
               <property name="layoutDirection">
                <enum>Qt::RightToLeft</enum>
@@ -1837,13 +1767,6 @@
               </disabled>
              </palette>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
             <property name="text">
              <string>&gt; set subtitle_language</string>
             </property>
@@ -1893,13 +1816,6 @@
                 </disabled>
                </palette>
               </property>
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
               <property name="text">
                <string>english</string>
               </property>
@@ -1946,13 +1862,6 @@
                  </colorrole>
                 </disabled>
                </palette>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
               </property>
               <property name="text">
                <string>portuguese</string>
@@ -2100,13 +2009,6 @@
               </disabled>
              </palette>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
             <property name="text">
              <string>&gt; set storage_location</string>
             </property>
@@ -2210,13 +2112,6 @@
                 </disabled>
                </palette>
               </property>
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
               <property name="frame">
                <bool>false</bool>
               </property>
@@ -2275,13 +2170,6 @@
                </colorrole>
               </disabled>
              </palette>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
             </property>
             <property name="text">
              <string>&gt; set user_location</string>
@@ -2386,13 +2274,6 @@
                 </disabled>
                </palette>
               </property>
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
               <property name="text">
                <string/>
               </property>
@@ -2454,13 +2335,6 @@
                </colorrole>
               </disabled>
              </palette>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
             </property>
             <property name="text">
              <string>&gt; set cache_location</string>
@@ -2565,13 +2439,6 @@
                 </disabled>
                </palette>
               </property>
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
               <property name="frame">
                <bool>false</bool>
               </property>
@@ -2630,13 +2497,6 @@
                </colorrole>
               </disabled>
              </palette>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
             </property>
             <property name="text">
              <string>&gt; set default_user</string>
@@ -2741,13 +2601,6 @@
                 </disabled>
                </palette>
               </property>
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
               <property name="frame">
                <bool>false</bool>
               </property>
@@ -2790,7 +2643,7 @@
         <property name="maximumSize">
          <size>
           <width>40</width>
-          <height>16777215</height>
+          <height>25</height>
          </size>
         </property>
         <property name="palette">
@@ -2847,7 +2700,7 @@
         <property name="maximumSize">
          <size>
           <width>70</width>
-          <height>16777215</height>
+          <height>25</height>
          </size>
         </property>
         <property name="palette">

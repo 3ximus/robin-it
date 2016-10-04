@@ -1,12 +1,12 @@
 
 '''
 GUI for a TV Show window
-Latest Update - v0.3
+Latest Update - v0.4
 Created - 30.1.16
 Copyright (C) 2016 - eximus
 '''
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 # PYQT5 IMPORTS
 from PyQt5 import QtCore
@@ -19,7 +19,7 @@ from gui.resources.season_banner_widget import Ui_season_banner_widget
 from gui.resources.episode_banner_widget import Ui_episode_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable
+from gui_func import clickable, begin_hover, end_hover 
 from libs.tvshow import Show
 from libs.thread_decorator import threaded
 
@@ -30,6 +30,8 @@ from cStringIO import StringIO
 import urllib
 
 # FIXED VALUES
+MAIN_COLOR =  "#03a662"
+RED_COLOR =  "#bf273d"
 BLUR_RADIOUS = 10
 DARKNESS = 0.6
 
@@ -75,6 +77,7 @@ class ShowWindow(QMainWindow):
 
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
+	update_shout = QtCore.pyqtSignal()
 
 	def __init__(self, mainwindow, tvshow):
 		super(ShowWindow, self).__init__()
@@ -84,26 +87,34 @@ class ShowWindow(QMainWindow):
 		self.ui = Ui_show_window()
 		self.ui.setupUi(self)
 
+		self.update_shout.connect(self.update_me)
+
 		self.ui.back_button.clicked.connect(self.close)
+		self.ui.add_button.clicked.connect(self.add_show)
+		self.ui.mark_button.clicked.connect(self.toogle_watched)
 		
 		self.background = None
 
 		if type(tvshow) == dict:
 			self.ui.showname_label.setText("// %s" % tvshow['seriesname'])
 			self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
-
-			self.ui.add_button.setEnabled(False) # disable until show is loaded
-			self.ui.add_button.clicked.connect(self.add_show)
-
 			self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
-			self.get_show(tvshow['seriesname'])
+			self.get_show_data(tvshow['seriesname'])
 		else:
 			self.tvshow = tvshow
-			self.ui.add_button.setEnabled(False) # disable until show is loaded
 			self.load_show()
 
+	def update_me(self):
+		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
+		if self.tvshow.watched:
+			self.ui.mark_button.setText("umark")
+			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+		else:
+			self.ui.mark_button.setText("mark")
+			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
+
 	@threaded
-	def get_show(self, name):
+	def get_show_data(self, name):
 		'''Loads the show info from the database'''
 		self.tvshow = Show(name, cache=self.main_window.user_state.cache_dir)
 		self.show_loaded.emit()
@@ -122,13 +133,11 @@ class ShowWindow(QMainWindow):
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
 			
 		if self.main_window.user_state.is_tracked(self.tvshow.name):
-			self.ui.add_button.setText('added')
-		else:
-			self.ui.add_button.setEnabled(True)
+    			self.make_del_button()
 
 		# fill seasons
 		for s in self.tvshow.seasons:
-			season = SeasonWidget(s)
+			season = SeasonWidget(s, self)
 			clickable(season).connect(partial(self.load_episodes, sid=(s.s_id-1)))
 			self.ui.seasons_layout.addWidget(season)
 
@@ -167,46 +176,41 @@ class ShowWindow(QMainWindow):
 		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
 			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
 		for e in self.tvshow.seasons[sid].episodes:
-			self.ui.episodes_layout.addWidget(EpisodeWidget(e))
+			self.ui.episodes_layout.addWidget(EpisodeWidget(e, self))
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
 		self.main_window.user_state.add_show(self.tvshow.name)
 		self.main_window.user_state.save_state()
-		self.ui.add_button.setText('added')
-		self.ui.add_button.setEnabled(False)
+		print "Added: " + self.tvshow.name
+		self.make_del_button()
 
-class EpisodeWidget(QWidget):
-	'''Episode Widget class
+	def make_del_button(self):
+		'''Transforms the add button into a delete button'''
+		self.ui.add_button.clicked.disconnect()
+		self.ui.add_button.setText("-del")
+		self.ui.add_button.setStyleSheet("background-color: " + RED_COLOR)
+		self.ui.add_button.clicked.connect(self.delete_show)
 
-	Parameters:
-		episode -- Episode class instance
+	def delete_show(self):
+		'''Triggered by clicking on the add button when this show is added
+		
+			Stops show from being followed, deleting it from the self.main_window.user_state.shows
+		'''
+		self.ui.add_button.clicked.disconnect()
+		self.ui.add_button.setText("+ add")
+		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
 
-		Emits image_loaded signal when the episode image is loaded
-	'''
-	image_loaded = QtCore.pyqtSignal(object)
-	def __init__(self, episode):
-		super(EpisodeWidget, self).__init__()
-		self.episode = episode
+		name = self.main_window.user_state.remove_show(self.tvshow.real_name) # dont remove assignment (it returns none in case of failure to remove)
+		self.main_window.user_state.save_state()
+		print ("Removed: " + name) if name else "Already removed"
 
-		self.ui = Ui_episode_banner_widget()
-		self.ui.setupUi(self)
+		self.ui.add_button.clicked.connect(self.add_show)
 
-		self.image_loaded.connect(self.load_image)
-		self.download_image(self.episode.image)
-		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
-
-	@threaded
-	def download_image(self, url):
-		'''Thread to downlaod episode image'''
-		data = urllib.urlopen(url).read()
-		self.image_loaded.emit(data)
-
-	def load_image(self, data):
-		'''Triggered by image_loaded signal. Loads image to the widget'''
-		image=QPixmap()
-		image.loadFromData(data)
-		self.ui.image.setPixmap(image)
+	def toogle_watched(self):
+		'''Toogles watdched state'''
+		self.tvshow.toogle_watched()
+		self.update_shout.emit() #update button
 
 class SeasonWidget(QWidget):
 	'''Season Widget class
@@ -217,17 +221,29 @@ class SeasonWidget(QWidget):
 		Emits poster_loaded signal when season poster is loaded
 	'''
 	poster_loaded = QtCore.pyqtSignal(object)
-	def __init__(self, season):
+	def __init__(self, season, window):
 		super(SeasonWidget, self).__init__()
 		self.season = season
+		self.window = window
 
 		self.ui = Ui_season_banner_widget()
 		self.ui.setupUi(self)
 
-		self.ui.mark_button.clicked.connect(self.mark_season)
+		self.update_me()
+		self.window.update_shout.connect(self.update_me)
+		self.ui.mark_button.clicked.connect(self.toogle_season)
 		self.poster_loaded.connect(self.load_poster)
 		if len(self.season.poster) > 0:
-			self.download_poster(self.season.poster[0])
+    			self.download_poster(self.season.poster[0])
+			
+	def update_me(self):
+		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
+		if self.season.watched:
+			self.ui.mark_button.setText("umark")
+			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+		else:
+			self.ui.mark_button.setText("mark")
+			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
 
 	@threaded
 	def download_poster(self, url):
@@ -241,6 +257,57 @@ class SeasonWidget(QWidget):
 		poster.loadFromData(data)
 		self.ui.poster.setPixmap(poster)
 
-	def mark_season(self):
-		'''Mark this season as watched'''
-		pass
+	def toogle_season(self):
+		'''Toogle season watched state'''
+		self.season.toogle_watched()
+		self.window.update_shout.emit()
+
+class EpisodeWidget(QWidget):
+	'''Episode Widget class
+
+	Parameters:
+		episode -- Episode class instance
+
+		Emits image_loaded signal when the episode image is loaded
+	'''
+	image_loaded = QtCore.pyqtSignal(object)
+	def __init__(self, episode, window):
+		super(EpisodeWidget, self).__init__()
+		self.episode = episode
+		self.window = window
+
+		self.ui = Ui_episode_banner_widget()
+		self.ui.setupUi(self)
+
+		self.update_me()
+		self.ui.mark_button.clicked.connect(self.toogle_episode)
+		self.window.update_shout.connect(self.update_me)
+		self.image_loaded.connect(self.load_image)
+		self.download_image(self.episode.image)
+		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
+
+	def update_me(self):
+		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
+		if self.episode.watched:
+			self.ui.mark_button.setText("umark")
+			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+		else:
+			self.ui.mark_button.setText("mark")
+			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
+			
+	@threaded
+	def download_image(self, url):
+		'''Thread to downlaod episode image'''
+		data = urllib.urlopen(url).read()
+		self.image_loaded.emit(data)
+
+	def load_image(self, data):
+		'''Triggered by image_loaded signal. Loads image to the widget'''
+		image=QPixmap()
+		image.loadFromData(data)
+		self.ui.image.setPixmap(image)
+
+	def toogle_episode(self):
+		'''Toogle season watched state'''
+		self.episode.toogle_watched()
+		self.window.update_shout.emit()

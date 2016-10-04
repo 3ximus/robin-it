@@ -2,11 +2,11 @@
 
 '''
 Frontend Aplication GUI
-Latest Update - v0.3
+Latest Update - v0.4
 Created - 21.9.16
 Copyright (C) 2016 - eximus
 '''
-__version__ = '0.3'
+__version__ = '0.4'
 
 # PYQT5 IMPORTS
 from PyQt5.QtWidgets import QApplication, QMainWindow
@@ -167,9 +167,9 @@ class LoginWindow(QMainWindow):
 		'''
 		if self.ui.login_box.text() != "":
 			if self.autologin:
-				self.config.update({'default_user' : self.ui.login_box.text()})
+				self.config.update({'default_user' : self.ui.login_box.text().replace(' ', '_')})
 				save_config_file(self.config)
-			self.main_window.set_user_state(UserContent(self.ui.login_box.text()))
+			self.main_window.set_user_state(UserContent(self.ui.login_box.text().replace(' ', '_')))
 			self.main_window.setEnabled(True)
 			self.close()
 			self.destroy()
@@ -209,7 +209,7 @@ class SettingsWindow(QMainWindow):
 		self.close()
 
 	def save(self):
-		'''Saves configuration to a file, ignores a setting if its set to default'''
+		'''Saves configuration to a file, ignores or deletes a settinf from config dict if its set to default'''
 		keys = self.config.keys()
 		if not self.ui.kickass_checkbox.checkState(): self.config['kickass_allow'] = 'False' # default is True
 		elif 'kickass_allow' in keys: del(self.config['kickass_allow'])
@@ -218,11 +218,11 @@ class SettingsWindow(QMainWindow):
 		if self.ui.piratebay_checkbox.checkState(): self.config['piratebay_allow'] = 'True' # default is False
 		elif 'piratebay_allow' in keys: del(self.config['piratebay_allow'])
 
-		if not self.ui.kickass_box.text() == "" : self.config['kickass'] = self.ui.kickass_box.text() # default is empty
+		if not self.ui.kickass_box.text() == "" : self.config['kickass'] = self.ui.kickass_box.text().replace(' ', '_') # default is empty
 		elif 'kickass' in keys: del(self.config['kickass'])
-		if not self.ui.rarbg_box.text() == "" : self.config['rarbg'] = self.ui.rarbg_box.text() # default is empty
+		if not self.ui.rarbg_box.text() == "" : self.config['rarbg'] = self.ui.rarbg_box.text().replace(' ', '_') # default is empty
 		elif 'rarbg' in keys: del(self.config['rarbg'])
-		if not self.ui.piratebay_box.text() == "" : self.config['piratebay'] = self.ui.piratebay_box.text() # default is empty
+		if not self.ui.piratebay_box.text() == "" : self.config['piratebay'] = self.ui.piratebay_box.text().replace(' ', '_') # default is empty
 		elif 'piratebay' in keys: del(self.config['piratebay'])
 
 		if not self.ui.ensub_checkbox.checkState(): self.config['sub_en'] = 'False' # default is True
@@ -233,14 +233,14 @@ class SettingsWindow(QMainWindow):
 		if self.ui.sd_button.isChecked(): self.config['def'] = 'sd'
 		if self.ui.hd_button.isChecked(): self.config['def'] = 'hd'
 
-		if not self.ui.storage_box.text() == "": self.config['storage_dir'] = self.ui.storage_box.text() # default is empty
+		if not self.ui.storage_box.text() == "": self.config['storage_dir'] = self.ui.storage_box.text().replace(' ', '_') # default is empty
 		elif 'storage_dir' in keys: del(self.config['storage_dir'])
-		if not self.ui.user_box.text() == "": self.config['user_dir'] = self.ui.user_box.text() # default is empty
+		if not self.ui.user_box.text() == "": self.config['user_dir'] = self.ui.user_box.text().replace(' ', '_') # default is empty
 		elif 'user_dir' in keys: del(self.config['user_dir'])
-		if not self.ui.cache_box.text() == "": self.config['cache_dir'] = self.ui.cache_box.text() # default is empty
+		if not self.ui.cache_box.text() == "": self.config['cache_dir'] = self.ui.cache_box.text().replace(' ', '_') # default is empty
 		elif 'cache_dir' in keys: del(self.config['cache_dir'])
 
-		if not self.ui.defaultuser_box.text() == "": self.config['default_user'] = self.ui.defaultuser_box.text()
+		if not self.ui.defaultuser_box.text() == "": self.config['default_user'] = self.ui.defaultuser_box.text().replace(' ', '_')
 		elif 'default_user' in keys: del(self.config['default_user'])
 
 		save_config_file(self.config)

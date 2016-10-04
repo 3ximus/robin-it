@@ -428,10 +428,11 @@
   <property name="font">
    <font>
     <family>Hack</family>
+    <pointsize>11</pointsize>
    </font>
   </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.3</string>
+   <string>Robin_it_v0.4</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
@@ -566,15 +567,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string>genre</string>
           </property>
@@ -624,15 +616,6 @@
              </colorrole>
             </disabled>
            </palette>
-          </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
           </property>
           <property name="text">
            <string>network</string>
@@ -684,15 +667,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string>air day</string>
           </property>
@@ -742,15 +716,6 @@
              </colorrole>
             </disabled>
            </palette>
-          </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
           </property>
           <property name="text">
            <string>runtime</string>
@@ -805,15 +770,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string>status</string>
           </property>
@@ -863,15 +819,6 @@
              </colorrole>
             </disabled>
            </palette>
-          </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
           </property>
           <property name="text">
            <string>imdb</string>
@@ -930,15 +877,6 @@
             </disabled>
            </palette>
           </property>
-          <property name="font">
-           <font>
-            <family>Hack</family>
-            <pointsize>14</pointsize>
-            <weight>50</weight>
-            <italic>false</italic>
-            <bold>false</bold>
-           </font>
-          </property>
           <property name="text">
            <string>description</string>
           </property>
@@ -958,7 +896,7 @@
              <x>0</x>
              <y>0</y>
              <width>543</width>
-             <height>170</height>
+             <height>182</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1006,15 +944,6 @@
                  </colorrole>
                 </disabled>
                </palette>
-              </property>
-              <property name="font">
-               <font>
-                <family>Hack</family>
-                <pointsize>11</pointsize>
-                <weight>50</weight>
-                <italic>false</italic>
-                <bold>false</bold>
-               </font>
               </property>
               <property name="text">
                <string/>
@@ -1075,15 +1004,6 @@
            </colorrole>
           </disabled>
          </palette>
-        </property>
-        <property name="font">
-         <font>
-          <family>Hack</family>
-          <pointsize>14</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-         </font>
         </property>
         <property name="text">
          <string>&lt; seasons &gt;</string>
@@ -1207,15 +1127,6 @@
           </disabled>
          </palette>
         </property>
-        <property name="font">
-         <font>
-          <family>Hack</family>
-          <pointsize>14</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-         </font>
-        </property>
         <property name="text">
          <string>&lt; episodes &gt;</string>
         </property>
@@ -1277,7 +1188,7 @@
          <x>0</x>
          <y>0</y>
          <width>1055</width>
-         <height>199</height>
+         <height>209</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -1298,7 +1209,7 @@
         <property name="maximumSize">
          <size>
           <width>40</width>
-          <height>16777215</height>
+          <height>25</height>
          </size>
         </property>
         <property name="palette">
@@ -1337,13 +1248,6 @@
            </colorrole>
           </disabled>
          </palette>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
         </property>
         <property name="text">
          <string>&lt;&lt;</string>
@@ -1367,16 +1271,43 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="add_button">
+       <widget class="QPushButton" name="mark_button">
         <property name="maximumSize">
          <size>
-          <width>55</width>
-          <height>16777215</height>
+          <width>60</width>
+          <height>25</height>
          </size>
         </property>
         <property name="palette">
          <palette>
           <active>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Dark">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
@@ -1388,6 +1319,33 @@
            </colorrole>
           </active>
           <inactive>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Dark">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
@@ -1399,24 +1357,175 @@
            </colorrole>
           </inactive>
           <disabled>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Dark">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>1</red>
-              <green>83</green>
-              <blue>49</blue>
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
              </color>
             </brush>
            </colorrole>
           </disabled>
          </palette>
         </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
+        <property name="text">
+         <string>mark</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="add_button">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Dark">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="ButtonText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Dark">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>0</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="ButtonText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Dark">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="ButtonText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>3</red>
+              <green>166</green>
+              <blue>98</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
         </property>
         <property name="text">
          <string>+add</string>
