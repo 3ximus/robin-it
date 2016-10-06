@@ -18,7 +18,7 @@ from gui.resources.shows_menu import Ui_shows_menu
 from gui.resources.show_banner_widget import Ui_show_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable, begin_hover, end_hover 
+from gui_func import clickable
 from show_window import ShowWindow
 from libs.tvshow import search_for_show
 from libs.thread_decorator import threaded

@@ -19,7 +19,7 @@ from gui.resources.season_banner_widget import Ui_season_banner_widget
 from gui.resources.episode_banner_widget import Ui_episode_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable, begin_hover, end_hover 
+from gui_func import clickable
 from libs.tvshow import Show
 from libs.thread_decorator import threaded
 
