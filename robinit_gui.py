@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
 	def display_shows(self):
 		'''Displays Shows Menu'''
 		self.shows_window = ShowsMenu(return_to=self, user_state=self.user_state)
-		self.shows_window.move(self.pos()+self.rect().center()-window.rect().center()) # position new window at the center position
+		self.shows_window.move(self.pos()+self.rect().center()-self.shows_window.rect().center()) # position new window at the center position
 		self.shows_window.show()
 		self.close()
 

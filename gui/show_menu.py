@@ -83,6 +83,9 @@ class ShowsMenu(QMainWindow):
 		self.ui.search_box.textChanged.connect(self.update_search)
 		self.ui.search_box_2.textChanged.connect(self.update_search_2)
 
+		self.col = 0
+		self.row = 0
+		
 	def search(self):
 		'''Searches for TV Show by a given keyword in the search box
 			Displays results on page 1
@@ -101,6 +104,21 @@ class ShowsMenu(QMainWindow):
 		'''
 		results = search_for_show(text)
 		self.search_complete.emit(results)
+		
+	def clear_layout(self, layout):
+		'''Clears all widgets from given layout'''
+		# reset rows and columns
+		self.col = 0
+		self.row = 0
+		for i in reversed(range(layout.count())): # clear previous results
+			layout.itemAt(i).widget().setParent(None)
+			
+	def add_to_layout(self, layout, widget):
+		'''Takes the widget to be added and the layout to add it to'''
+		layout.addWidget(widget, int(self.row), self.col)
+		self.row += 0.5
+		self.col = 1 if self.col == 0 else 0
+		return
 
 	def display_results(self, results):
 		'''Triggered by the self.search_complete signal. Displays TV show results on stack widget page 1
@@ -110,11 +128,7 @@ class ShowsMenu(QMainWindow):
 			is triggered, displaying the remaining results.
 			This is done in order to only display bannerless shows at the end
 		'''
-		def _add_to_layout(widget, *args):
-			'''Takes the widget to be added'''
-			self.ui.results_layout.addWidget(widget)
-			return
-
+		
 		def _status_update(results):
 			'''Updates Status bar loading message with progress_bar'''
 			self.loaded_results+=1
@@ -129,7 +143,7 @@ class ShowsMenu(QMainWindow):
 			'''This thread will simply wait until all shows with banners are loaded
 				Emits self.all_banners_loaded when finished
 			'''
-			while True:
+			while True: # TODO FIXME causes hanging!! (search for "the")
 				if self.loaded_results == len(results)-len(pending_add):
 					self.all_banners_loaded.emit()
 					return
@@ -138,11 +152,10 @@ class ShowsMenu(QMainWindow):
 		def _display_pending(pending):
 			'''Triggered by self.all_banners_loaded signal. Display shows without banner'''
 			for p in pending: # add the shows without banner at the end
-				self.ui.results_layout.addWidget(ShowWidget(p, self.user_state))
+				self.add_to_layout(self.ui.results_layout, ShowWidget(p, self.user_state))
 				_status_update(results=results)
 				
-		for i in reversed(range(self.ui.results_layout.count())): # clear previous results
-			self.ui.results_layout.itemAt(i).widget().setParent(None)
+		self.clear_layout(self.ui.results_layout)
 		if len(results) == 0: # no results found
 			self.ui.results_layout.addWidget(self.ui.noresults_label)
 		else:
@@ -155,7 +168,7 @@ class ShowsMenu(QMainWindow):
 				if 'banner' not in r: # shows without banners added to pending add
 					pending_add.append(r)
 				else:
-					banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
+					banner.banner_loaded.connect(partial(self.add_to_layout, layout=self.ui.results_layout, widget=banner))
 					banner.banner_loaded.connect(partial(_status_update, results=results))
 
 			_wait_for_loading(results, pending_add) # add bannerless when all other shows are loaded
@@ -175,10 +188,9 @@ class ShowsMenu(QMainWindow):
 		'''Load shows and got to page 2'''
 		self.ui.stackedWidget.setCurrentIndex(2)
 		self.ui.showfilter_box.setFocus()
-		for i in reversed(range(self.ui.myshows_layout.count())): # clear previous results
-			self.ui.myshows_layout.itemAt(i).widget().setParent(None)
+		self.clear_layout(self.ui.myshows_layout)
 		for show in self.user_state.shows.values():
-			self.ui.myshows_layout.addWidget(ShowWidget(show, self.user_state))
+			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state))
 
 	def update_filter(self):
 		'''Updates the news updates content according to content of filter_box'''

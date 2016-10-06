@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>994</width>
-    <height>700</height>
+    <width>1101</width>
+    <height>692</height>
    </rect>
   </property>
   <property name="palette">
@@ -1440,6 +1440,12 @@
         </item>
         <item row="2" column="0">
          <widget class="QScrollArea" name="scrollArea_2">
+          <property name="minimumSize">
+           <size>
+            <width>1000</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="palette">
            <palette>
             <active>
@@ -1488,13 +1494,13 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>500</height>
+             <width>1009</width>
+             <height>492</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <layout class="QGridLayout" name="results_layout">
+             <layout class="QGridLayout" name="results_layout" columnstretch="0">
               <item row="0" column="0">
                <widget class="QLabel" name="noresults_label">
                 <property name="palette">
@@ -1829,8 +1835,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>505</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_7">
@@ -2250,8 +2256,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>533</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
           </widget>

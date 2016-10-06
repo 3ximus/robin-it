@@ -11,13 +11,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_show_banner_widget(object):
     def setupUi(self, show_banner_widget):
         show_banner_widget.setObjectName("show_banner_widget")
-        show_banner_widget.resize(480, 120)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(show_banner_widget.sizePolicy().hasHeightForWidth())
-        show_banner_widget.setSizePolicy(sizePolicy)
-        show_banner_widget.setMinimumSize(QtCore.QSize(480, 120))
         show_banner_widget.setMaximumSize(QtCore.QSize(480, 120))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
@@ -198,7 +191,7 @@ class Ui_show_banner_widget(object):
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.banner = QtWidgets.QLabel(show_banner_widget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.banner.sizePolicy().hasHeightForWidth())
