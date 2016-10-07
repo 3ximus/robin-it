@@ -151,7 +151,7 @@ class ShowsMenu(QMainWindow):
 		def _display_pending(pending):
 			'''Triggered by self.all_banners_loaded signal. Display shows without banner'''
 			for p in pending: # add the shows without banner at the end
-				self.add_to_layout(self.ui.results_layout, ShowWidget(p, self.user_state))
+				self.add_to_layout(self.ui.results_layout, ShowWidget(p, self.user_state, self))
 				_status_update(results=results)
 				
 		self.clear_layout(self.ui.results_layout)
@@ -163,7 +163,7 @@ class ShowsMenu(QMainWindow):
 			except TypeError: pass
 			self.all_banners_loaded.connect(partial(_display_pending, pending=pending_add))
 			for r in results: # display new results
-				banner = ShowWidget(r, self.user_state)
+				banner = ShowWidget(r, self.user_state, self)
 				if 'banner' not in r: # shows without banners added to pending add
 					pending_add.append(r)
 				else:
@@ -189,7 +189,7 @@ class ShowsMenu(QMainWindow):
 		self.ui.showfilter_box.setFocus()
 		self.clear_layout(self.ui.myshows_layout)
 		for show in self.user_state.shows.values():
-			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state))
+			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state, self))
 
 	def update_filter(self):
 		'''Updates the news updates content according to content of filter_box'''
@@ -219,10 +219,11 @@ class ShowWidget(QWidget):
 	banner_loaded = QtCore.pyqtSignal(object)
 	unloadable_banner = QtCore.pyqtSignal()
 
-	def __init__(self, tvshow, user_state):
+	def __init__(self, tvshow, user_state, window):
 		super(ShowWidget, self).__init__()
 		self.tvshow = tvshow
 		self.user_state = user_state
+		self.window = window
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
@@ -266,9 +267,11 @@ class ShowWidget(QWidget):
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
+		self.window.ui.statusbar.showMessage("Adding \"%s\" ..." % self.tvshow['seriesname'])
 		self.user_state.add_show(self.tvshow['seriesname'])
 		self.user_state.save_state()
 		print "Added: " + self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
+		self.window.ui.statusbar.clearMessage()
 		self.make_del_button()
 
 	def make_del_button(self):
@@ -293,6 +296,4 @@ class ShowWidget(QWidget):
 		print ("Removed: " + name) if name else "Already removed"
 
 		self.ui.add_button.clicked.connect(self.add_show)
-
-			
-
+		

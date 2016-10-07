@@ -35,7 +35,7 @@ MAIN_COLOR =  "#03a662"
 RED_COLOR =  "#bf273d"
 BLUR_RADIOUS = 10
 DARKNESS = 0.6
-SEASON_MAX_COL = 4
+SEASON_MAX_COL = 5
 EPISODE_MAX_COL = 3
 
 # --------------------
@@ -96,6 +96,10 @@ class ShowWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.close)
 		self.ui.add_button.clicked.connect(self.add_show)
 		self.ui.mark_button.clicked.connect(self.toogle_watched)
+		
+		self.ui.add_button.setEnabled(False)
+		self.ui.mark_button.setEnabled(False)
+		self.ui.episodes_label.setText("")
 		
 		self.background = None
 		# Grid placement stuff
@@ -167,6 +171,9 @@ class ShowWindow(QMainWindow):
 		self.ui.status_label.setText('status - %s' % self.tvshow.status)
 		self.ui.imdb_label.setText('<a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
 		self.ui.description_box.setText(self.tvshow.description)
+		
+		self.ui.add_button.setEnabled(True)
+		self.ui.mark_button.setEnabled(True)
 
 	def display_seasons(self):
 		'''Adds clickable seasons posters to the window'''
@@ -184,6 +191,7 @@ class ShowWindow(QMainWindow):
     		'''Fills the GUI with episodes from selected season'''
 		self.episode_col = 0
 		self.episode_row = 0
+		self.ui.episodes_label.setText("< s%02d episodes >" % (sid+1))
 		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
 			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
 			
@@ -217,9 +225,11 @@ class ShowWindow(QMainWindow):
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
-		self.user_state.add_show(self.tvshow.name)
+		self.ui.statusbar.showMessage("Adding \"%s\"..." % self.tvshow.name)
+		self.user_state.add_show(show=self.tvshow)
 		self.user_state.save_state()
 		print "Added: " + self.tvshow.name
+		self.ui.statusbar.clearMessage()
 		self.make_del_button()
 
 	def make_del_button(self):
