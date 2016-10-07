@@ -106,8 +106,7 @@ class ShowsMenu(QMainWindow):
 		self.search_complete.emit(results)
 		
 	def clear_layout(self, layout):
-		'''Clears all widgets from given layout'''
-		# reset rows and columns
+		'''Clears all widgets from given layout'''		# reset rows and columns
 		self.col = 0
 		self.row = 0
 		for i in reversed(range(layout.count())): # clear previous results
@@ -250,7 +249,7 @@ class ShowWidget(QWidget):
 		if not url: return
 		data = None
 		try: data = urllib.urlopen(url).read()
-		except IOError: print "Name or Service unknown %s" % url
+		except IOError: print "Error Loading show banner url: %s" % url
 		self.banner_loaded.emit(data)
 
 	def load_banner(self, data):

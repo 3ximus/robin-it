@@ -919,7 +919,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>529</width>
-                   <height>677</height>
+                   <height>661</height>
                   </rect>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1032,7 +1032,30 @@
            </widget>
           </item>
           <item>
-           <layout class="QGridLayout" name="seasons_layout"/>
+           <layout class="QGridLayout" name="seasons_layout">
+            <property name="leftMargin">
+             <number>20</number>
+            </property>
+            <property name="rightMargin">
+             <number>20</number>
+            </property>
+            <property name="horizontalSpacing">
+             <number>10</number>
+            </property>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="last_row_seasons_layout">
+            <property name="leftMargin">
+             <number>20</number>
+            </property>
+            <property name="rightMargin">
+             <number>20</number>
+            </property>
+            <property name="horizontalSpacing">
+             <number>10</number>
+            </property>
+           </layout>
           </item>
           <item>
            <widget class="QLabel" name="episodes_label">
@@ -1083,6 +1106,9 @@
           </item>
           <item>
            <layout class="QGridLayout" name="episodes_layout"/>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="last_row_episodes_layout"/>
           </item>
          </layout>
         </item>

@@ -27,6 +27,7 @@ from libs.thread_decorator import threaded
 from functools import partial
 from PIL import Image, ImageFilter
 from cStringIO import StringIO
+import math
 import urllib
 
 # FIXED VALUES
@@ -34,6 +35,8 @@ MAIN_COLOR =  "#03a662"
 RED_COLOR =  "#bf273d"
 BLUR_RADIOUS = 10
 DARKNESS = 0.6
+SEASON_MAX_COL = 4
+EPISODE_MAX_COL = 3
 
 # --------------------
 #       Functions
@@ -95,6 +98,11 @@ class ShowWindow(QMainWindow):
 		self.ui.mark_button.clicked.connect(self.toogle_watched)
 		
 		self.background = None
+		# Grid placement stuff
+		self.season_col = 0
+		self.season_row = 0
+		self.episode_col = 0
+		self.episode_row = 0
 
 		if type(tvshow) == dict:
 			if not self.user_state.is_tracked(tvshow['seriesname']):
@@ -149,11 +157,8 @@ class ShowWindow(QMainWindow):
     			self.make_del_button()
 
 		# fill seasons
-		for s in self.tvshow.seasons:
-			season = SeasonWidget(s, self)
-			clickable(season).connect(partial(self.load_episodes, sid=(s.s_id-1)))
-			self.ui.seasons_layout.addWidget(season)
-
+		self.display_seasons()
+		
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
 		self.ui.genre_label.setText('genre - %s' % self.tvshow.genre)
 		self.ui.network_label.setText('network - %s' % self.tvshow.network)
@@ -162,6 +167,32 @@ class ShowWindow(QMainWindow):
 		self.ui.status_label.setText('status - %s' % self.tvshow.status)
 		self.ui.imdb_label.setText('<a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
 		self.ui.description_box.setText(self.tvshow.description)
+
+	def display_seasons(self):
+		'''Adds clickable seasons posters to the window'''
+		c = len(self.tvshow.seasons) - len(self.tvshow.seasons)%SEASON_MAX_COL
+		for i, s in enumerate(self.tvshow.seasons):
+			season = SeasonWidget(s, self)
+			clickable(season).connect(partial(self.display_episodes, sid=(s.s_id-1))) # 1 based
+			# this is a temporary workaround for seasons display
+			if i < c: self.ui.seasons_layout.addWidget(season, self.season_row, self.season_col%SEASON_MAX_COL)
+			else: self.ui.last_row_seasons_layout.addWidget(season, self.season_row, self.season_col%SEASON_MAX_COL)
+			self.season_col+=1
+			if self.season_col%SEASON_MAX_COL==0: self.season_row+=1
+
+	def display_episodes(self, sid):
+    		'''Fills the GUI with episodes from selected season'''
+		self.episode_col = 0
+		self.episode_row = 0
+		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
+			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
+			
+		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%EPISODE_MAX_COL
+		for i, e in enumerate(self.tvshow.seasons[sid].episodes):
+			if i < c: self.ui.episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%EPISODE_MAX_COL)
+			else:  self.ui.last_row_episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%EPISODE_MAX_COL)
+			self.episode_col+=1
+			if self.episode_col%EPISODE_MAX_COL==0: self.episode_row+=1
 
 	def load_background(self, data):
 		'''Triggered by background_loaded signal.
@@ -183,13 +214,6 @@ class ShowWindow(QMainWindow):
 			self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
 			palette.setBrush(QPalette.Background, QBrush(self.background))
 			self.setPalette(palette)
-
-	def load_episodes(self, sid):
-		'''Fills the GUI with episodes from selected season'''
-		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
-			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
-		for e in self.tvshow.seasons[sid].episodes:
-			self.ui.episodes_layout.addWidget(EpisodeWidget(e, self))
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
@@ -262,7 +286,8 @@ class SeasonWidget(QWidget):
 	def download_poster(self, url):
 		'''Thread to download season poster'''
 		if not url: return
-		data = urllib.urlopen(url).read()
+		try: data = urllib.urlopen(url).read()
+		except IOError: print "Error Loading season poster url: %s" % url
 		self.poster_loaded.emit(data)
 
 	def load_poster(self, data):
@@ -314,7 +339,8 @@ class EpisodeWidget(QWidget):
 	def download_image(self, url):
 		'''Thread to downlaod episode image'''
 		if not url: return
-		data = urllib.urlopen(url).read()
+		try: data = urllib.urlopen(url).read()
+		except IOError: print "Error Loading episode image url: %s" % url
 		self.image_loaded.emit(data)
 
 	def load_image(self, data):
