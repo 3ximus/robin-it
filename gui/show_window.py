@@ -22,6 +22,7 @@ from gui.resources.episode_banner_widget import Ui_episode_banner_widget
 from gui_func import clickable
 from libs.tvshow import Show
 from libs.thread_decorator import threaded
+from libs.config import Config
 
 # TOOLS
 from functools import partial
@@ -96,11 +97,11 @@ class ShowWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.close)
 		self.ui.add_button.clicked.connect(self.add_show)
 		self.ui.mark_button.clicked.connect(self.toogle_watched)
-		
+
 		self.ui.add_button.setEnabled(False)
 		self.ui.mark_button.setEnabled(False)
 		self.ui.episodes_label.setText("")
-		
+
 		self.background = None
 		# Grid placement stuff
 		self.season_col = 0
@@ -117,10 +118,10 @@ class ShowWindow(QMainWindow):
 				self.get_show_data(tvshow['seriesname'])
 				return # everyithing done in this case / prevente rest of the code execution
 			else:
-    			# show is tracked but search result, get the followed show instance instead
+				# show is tracked but search result, get the followed show instance instead
 				self.tvshow = self.user_state.shows[tvshow['seriesname']]
 		else:
-    		# show is tracked -- all is good!
+			# show is tracked -- all is good!
 			self.tvshow = tvshow
 		# this in both cases where it is tracked
 		self.update_me()
@@ -156,13 +157,13 @@ class ShowWindow(QMainWindow):
 		if self.tvshow.poster: # load background
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
-			
+
 		if self.user_state.is_tracked(self.tvshow.name):
-    			self.make_del_button()
+			self.make_del_button()
 
 		# fill seasons
 		self.display_seasons()
-		
+
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
 		self.ui.genre_label.setText('genre - %s' % self.tvshow.genre)
 		self.ui.network_label.setText('network - %s' % self.tvshow.network)
@@ -171,7 +172,7 @@ class ShowWindow(QMainWindow):
 		self.ui.status_label.setText('status - %s' % self.tvshow.status)
 		self.ui.imdb_label.setText('<a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
 		self.ui.description_box.setText(self.tvshow.description)
-		
+
 		self.ui.add_button.setEnabled(True)
 		self.ui.mark_button.setEnabled(True)
 
@@ -188,13 +189,13 @@ class ShowWindow(QMainWindow):
 			if self.season_col%SEASON_MAX_COL==0: self.season_row+=1
 
 	def display_episodes(self, sid):
-    		'''Fills the GUI with episodes from selected season'''
+		'''Fills the GUI with episodes from selected season'''
 		self.episode_col = 0
 		self.episode_row = 0
 		self.ui.episodes_label.setText("< s%02d episodes >" % (sid+1))
 		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
 			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
-			
+
 		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%EPISODE_MAX_COL
 		for i, e in enumerate(self.tvshow.seasons[sid].episodes):
 			if i < c: self.ui.episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%EPISODE_MAX_COL)
@@ -241,7 +242,7 @@ class ShowWindow(QMainWindow):
 
 	def delete_show(self):
 		'''Triggered by clicking on the add button when this show is added
-		
+
 			Stops show from being followed, deleting it from the self.user_state.shows
 		'''
 		self.ui.add_button.clicked.disconnect()
@@ -281,8 +282,8 @@ class SeasonWidget(QWidget):
 		self.ui.mark_button.clicked.connect(self.toogle_season)
 		self.poster_loaded.connect(self.load_poster)
 		if len(self.season.poster) > 0:
-    			self.download_poster(self.season.poster[0])
-			
+			self.download_poster(self.season.poster[0])
+
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
 		if self.season.watched:
@@ -333,7 +334,7 @@ class EpisodeWidget(QWidget):
 		self.window.update_shout.connect(self.update_me)
 		self.image_loaded.connect(self.load_image)
 		self.download_image(self.episode.image)
-		
+
 		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
 
 	def update_me(self):
@@ -344,7 +345,7 @@ class EpisodeWidget(QWidget):
 		else:
 			self.ui.mark_button.setText("mark")
 			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
-			
+
 	@threaded
 	def download_image(self, url):
 		'''Thread to downlaod episode image'''

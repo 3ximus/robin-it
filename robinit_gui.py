@@ -43,38 +43,23 @@ from functools import partial
 import sys
 
 # ----------------------------
-#         Globals 
+#         Globals
 # ----------------------------
 
 CONFIG_FILE = 'robinit.conf'
-
-# ----------------------------
-#          Function
-# ----------------------------
-
-def save_config_file(content):
-	'''Save given content to the CONFIG_FILE'''
-	if type(content) == dict:
-		fp = open(CONFIG_FILE, 'w')
-		for key in content.keys():
-			fp.write("%s %s\n" % (key, content[key]))
-		fp.close()
-
-def load_config_file():
-	'''Load CONFIG_FILE to a dictionary, returning it'''
-	content = {}
-	try:
-		fp = open(CONFIG_FILE, 'r')
-		for n, line in enumerate(fp):
-			if line[0] == '#': continue
-			line = [s.strip('\n') for s in line.split(' ')]
-			if len(line) != 2 or line[1] == "":
-				raise ValueError("\033[0;31mError in line %d : \" %s \" in robinit.conf\033[0m" % (n, ' '.join(line)))
-			key, value = line
-			content.update({key : value})
-		fp.close()
-	except IOError: pass
-	return content
+DEFAULTS =  {'kickass_allow':True,
+				'rarbg_allow':False,
+				'pirateaby_allow':False,
+				'kickass':'',
+				'rarbg':'',
+				'piratebay':'',
+				'sub_en':True,
+				'sub_pt':True,
+				'definition':'hd',
+				'storage_dir':'',
+				'user_dir':'',
+				'cache_dir':'',
+				'default_user':''}
 
 # ----------------------------
 #         GUI Classes
@@ -82,7 +67,7 @@ def load_config_file():
 
 class MainWindow(QMainWindow):
 	'''Main window class containing the main menu
-	
+
 		This class launches other parts of the program like the Shows and Movies, through its menu
 		This class when created lods the CONFIG_FILE if available, if the default user is set its saved profile is loaded
 			otherwise a LoginWindow is presented so the user can select a profile or create a new one
@@ -101,12 +86,12 @@ class MainWindow(QMainWindow):
 		# User
 		self.user_state = None
 
-		self.config = load_config_file() # get configs
-		if 'default_user' in self.config.keys():
-			self.set_user_state(UserContent(self.config['default_user'],
-					user_dir=self.config['user_dir'] if 'user_dir' in self.config.keys() else None,
-					cache_dir=self.config['cache_dir'] if 'cache_dir' in self.config.keys() else None,
-					storage_dir=self.config['storage_dir'] if 'storage_dir' in self.config.keys() else None))
+		self.config = Config(CONFIG_FILE, default_config=DEFAULTS)
+		if self.config.has_property('default_user'):
+			self.set_user_state(UserContent(self.config.default_user,
+					user_dir=self.config.user_dir if self.config.has_property('user_dir') else None,
+					cache_dir=self.config.cache_dir if self.config.has_property('cache_dir') else None,
+					storage_dir=self.config.storage_dir if self.config.has_property('storage_dir') else None))
 		else: # create login window, this will use the function self.set_user_state to set the user_state
 			self.setEnabled(False)
 			self.loginwindow = LoginWindow(main_window=self, config=self.config)
@@ -140,7 +125,7 @@ class MainWindow(QMainWindow):
 
 	def closeEvent(self, event):
 		'''This is here because it stops segmentation fault when exiting, but stops the
-			possibily of returning to the main menu after other menus are loaded and 
+			possibily of returning to the main menu after other menus are loaded and
 			this one is closed
 
 			NOTE: something here needs tweaking to prevent fatal crash
@@ -151,12 +136,12 @@ class MainWindow(QMainWindow):
 
 class LoginWindow(QMainWindow):
 	'''Class for logging in the user
-	
+
 	Parameters:
 		main_window -- window to return after login (usually the main menu window)
 		config -- config dictionary loaded from CONFIG_FILE usually
 
-		Expect user to input username, if not given it creates a new one 
+		Expect user to input username, if not given it creates a new one
 		Autologin checkbox saves the user to the config dictionary given avoiding this window when app launched
 	'''
 	def __init__(self, main_window, config):
@@ -185,13 +170,13 @@ class LoginWindow(QMainWindow):
 		'''
 		if self.ui.login_box.text() != "":
 			if self.autologin:
-				self.config.update({'default_user' : self.ui.login_box.text().replace(' ', '_')})
-				save_config_file(self.config)
+				self.config.add_property('default_user', self.ui.login_box.text().replace(' ', '_'))
+				self.config.save()
 			self.main_window.set_user_state(
 				UserContent(self.ui.login_box.text().replace(' ', '_'),
-						user_dir=self.config['user_dir'] if 'user_dir' in self.config.keys() else None,
-						cache_dir=self.config['cache_dir'] if 'cache_dir' in self.config.keys() else None,
-						storage_dir=self.config['storage_dir'] if 'storage_dir' in self.config.keys() else None))
+						user_dir=self.config.user_dir if self.config.has_property('user_dir') else None,
+						cache_dir=self.config.cache_dir if self.config.has_property('cache_dir') else None,
+						storage_dir=self.config.storage_dir if self.config.has_property('storage_dir') else None))
 			self.main_window.setEnabled(True)
 			self.close()
 			self.destroy()
@@ -232,79 +217,64 @@ class SettingsWindow(QMainWindow):
 
 	def save(self):
 		'''Saves configuration to a file, ignores or deletes a settinf from config dict if its set to default'''
-		keys = self.config.keys()
-		if not self.ui.kickass_checkbox.checkState(): self.config['kickass_allow'] = 'False' # default is True
-		elif 'kickass_allow' in keys: del(self.config['kickass_allow'])
-		if self.ui.rarbg_checkbox.checkState(): self.config['rarbg_allow'] = 'True' # default is False
-		elif 'rarbg_allow' in keys: del(self.config['rarbg_allow'])
-		if self.ui.piratebay_checkbox.checkState(): self.config['piratebay_allow'] = 'True' # default is False
-		elif 'piratebay_allow' in keys: del(self.config['piratebay_allow'])
 
-		if not self.ui.kickass_box.text() == "" : self.config['kickass'] = self.ui.kickass_box.text().replace(' ', '_') # default is empty
-		elif 'kickass' in keys: del(self.config['kickass'])
-		if not self.ui.rarbg_box.text() == "" : self.config['rarbg'] = self.ui.rarbg_box.text().replace(' ', '_') # default is empty
-		elif 'rarbg' in keys: del(self.config['rarbg'])
-		if not self.ui.piratebay_box.text() == "" : self.config['piratebay'] = self.ui.piratebay_box.text().replace(' ', '_') # default is empty
-		elif 'piratebay' in keys: del(self.config['piratebay'])
+		self.config.add_property('kickass_allow', self.ui.kickass_checkbox.isChecked())
+		self.config.add_property('rarbg_allow', self.ui.rarbg_checkbox.isChecked())
+		self.config.add_property('piratebay_allow', self.ui.piratebay_checkbox.isChecked())
+		self.config.add_property('kickass', self.ui.kickass_box.text().replace(' ', '_'))
+		self.config.add_property('rarbg', self.ui.rarbg_box.text().replace(' ', '_'))
+		self.config.add_property('piratebay', self.ui.piratebay_box.text().replace(' ', '_'))
 
-		if not self.ui.ensub_checkbox.checkState(): self.config['sub_en'] = 'False' # default is True
-		elif 'sub_en' in keys: del(self.config['sub_en'])
-		if not self.ui.ptsub_checkbox.checkState(): self.config['sub_pt'] = 'False' # default is True
-		elif 'sub_pt' in keys: del(self.config['sub_pt'])
+		self.config.add_property('sub_en', self.ui.ensub_checkbox.isChecked())
+		self.config.add_property('sub_pt', self.ui.ensub_checkbox.isChecked())
 
-		if self.ui.sd_button.isChecked(): self.config['def'] = 'sd'
-		if self.ui.hd_button.isChecked(): self.config['def'] = 'hd'
+		if self.ui.sd_button.isChecked(): self.config.add_property('definition', 'sd')
+		if self.ui.hd_button.isChecked(): self.config.add_property('definition', 'hd')
 
-		if not self.ui.storage_box.text() == "": self.config['storage_dir'] = self.ui.storage_box.text().replace(' ', '_') # default is empty
-		elif 'storage_dir' in keys: del(self.config['storage_dir'])
-		if not self.ui.user_box.text() == "": self.config['user_dir'] = self.ui.user_box.text().replace(' ', '_') # default is empty
-		elif 'user_dir' in keys: del(self.config['user_dir'])
-		if not self.ui.cache_box.text() == "": self.config['cache_dir'] = self.ui.cache_box.text().replace(' ', '_') # default is empty
-		elif 'cache_dir' in keys: del(self.config['cache_dir'])
+		self.config.add_property('storage_dir',self.ui.storage_box.text().replace(' ', '_'))
+		self.config.add_property('user_dir', self.ui.user_box.text().replace(' ', '_'))
+		self.config.add_property('cache_dir', self.ui.cache_box.text().replace(' ', '_'))
 
-		if not self.ui.defaultuser_box.text() == "": self.config['default_user'] = self.ui.defaultuser_box.text().replace(' ', '_')
-		elif 'default_user' in keys: del(self.config['default_user'])
+		self.config.add_property('default_user',self.ui.defaultuser_box.text().replace(' ', '_'))
 
-		save_config_file(self.config)
+		self.config.save()
 		self.go_back()
 
 	def configure(self):
 		'''Sets the settings displayed according to given config dictionary'''
-		keys = self.config.keys()
-		if 'kickass_allow' in keys:
-			self.ui.kickass_checkbox.setCheckState(True if self.config['kickass_allow'] == 'True' else False)
-		if 'rarbg_allow' in keys:
-			self.ui.rarbg_checkbox.setCheckState(True if self.config['rarbg_allow'] == 'True' else False)
-		if 'piratebay_allow' in keys:
-			self.ui.piratebay_checkbox.setCheckState(True if self.config['piratebay_allow'] == 'True' else False)
+		if self.config.has_property('kickass_allow'):
+			self.ui.kickass_checkbox.setChecked(self.config.kickass_allow)
+		if self.config.has_property('rarbg_allow'):
+			self.ui.rarbg_checkbox.setChecked(self.config.rarbg_allow)
+		if self.config.has_property('piratebay_allow'):
+			self.ui.piratebay_checkbox.setChecked(self.config.piratebay_allow)
 
-		if 'kickass' in keys:
-			self.ui.kickass_box.setText(self.config['kickass'])
-		if 'rarbg' in keys:
-			self.ui.rarbg_box.setText(self.config['rarbg'])
-		if 'piratebay' in keys:
-			self.ui.piratebay_box.setText(self.config['piratebay'])
+		if self.config.has_property('kickass'):
+			self.ui.kickass_box.setText(self.config.kickass)
+		if self.config.has_property('rarbg'):
+			self.ui.rarbg_box.setText(self.config.rarbg)
+		if self.config.has_property('piratebay'):
+			self.ui.piratebay_box.setText(self.config.piratebay)
 
-		if 'sub_en' in keys:
-			self.ui.ensub_checkbox.setCheckState(True if self.config['sub_en'] == 'True' else False)
-		if 'sub_pt' in keys:
-			self.ui.ptsub_checkbox.setCheckState(True if self.config['sub_pt'] == 'True' else False)
+		if self.config.has_property('sub_en'):
+			self.ui.ensub_checkbox.setChecked(self.config.sub_en)
+		if self.config.has_property('sub_pt'):
+			self.ui.ptsub_checkbox.setChecked(self.config.sub_pt)
 
-		if 'def' in keys:
-			if self.config['def'] == 'sd':
+		if self.config.has_property('definition'):
+			if self.config.definition == 'sd':
 				self.ui.sd_button.setChecked(True)
-			elif self.config['def'] == 'hd':
+			elif self.config.definition == 'hd':
 				self.ui.hd_button.setChecked(True)
 
-		if 'storage_dir' in keys:
-			self.ui.storage_box.setText(self.config['storage_dir'])
-		if 'user_dir' in keys:
-			self.ui.user_box.setText(self.config['user_dir'])
-		if 'cache_dir' in keys:
-			self.ui.cache_box.setText(self.config['cache_dir'])
-		if 'default_user' in keys:
-			self.ui.defaultuser_box.setText(self.config['default_user'])
-
+		if self.config.has_property('storage_dir'):
+			self.ui.storage_box.setText(self.config.storage_dir)
+		if self.config.has_property('user_dir'):
+			self.ui.user_box.setText(self.config.user_dir)
+		if self.config.has_property('cache_dir'):
+			self.ui.cache_box.setText(self.config.cache_dir)
+		if self.config.has_property('default_user'):
+			self.ui.defaultuser_box.setText(self.config.default_user)
 
 # ----------------
 #		MAIN

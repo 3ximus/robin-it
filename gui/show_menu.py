@@ -85,7 +85,7 @@ class ShowsMenu(QMainWindow):
 
 		self.col = 0
 		self.row = 0
-		
+
 	def search(self):
 		'''Searches for TV Show by a given keyword in the search box
 			Displays results on page 1
@@ -104,14 +104,14 @@ class ShowsMenu(QMainWindow):
 		'''
 		results = search_for_show(text)
 		self.search_complete.emit(results)
-		
+
 	def clear_layout(self, layout):
 		'''Clears all widgets from given layout'''		# reset rows and columns
 		self.col = 0
 		self.row = 0
 		for i in reversed(range(layout.count())): # clear previous results
 			layout.itemAt(i).widget().setParent(None)
-			
+
 	def add_to_layout(self, layout, widget):
 		'''Takes the widget to be added and the layout to add it to'''
 		layout.addWidget(widget, int(self.row), self.col)
@@ -127,7 +127,7 @@ class ShowsMenu(QMainWindow):
 			is triggered, displaying the remaining results.
 			This is done in order to only display bannerless shows at the end
 		'''
-		
+
 		def _status_update(results):
 			'''Updates Status bar loading message with progress_bar'''
 			self.loaded_results+=1
@@ -153,7 +153,7 @@ class ShowsMenu(QMainWindow):
 			for p in pending: # add the shows without banner at the end
 				self.add_to_layout(self.ui.results_layout, ShowWidget(p, self.user_state, self))
 				_status_update(results=results)
-				
+
 		self.clear_layout(self.ui.results_layout)
 		if len(results) == 0: # no results found
 			self.ui.results_layout.addWidget(self.ui.noresults_label)
@@ -227,7 +227,7 @@ class ShowWidget(QWidget):
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
-		
+
 		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
 		self.ui.name_label.setText('< %s >' % name)
 		clickable(self).connect(self.view_show)
@@ -237,9 +237,9 @@ class ShowWidget(QWidget):
 			self.make_del_button()
 
 		if type(self.tvshow) == dict:
-    			if 'banner' in self.tvshow.keys():
-					self.banner_loaded.connect(self.load_banner)
-					self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])
+			if 'banner' in self.tvshow.keys():
+				self.banner_loaded.connect(self.load_banner)
+				self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])
 		else:
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)
@@ -283,7 +283,7 @@ class ShowWidget(QWidget):
 
 	def delete_show(self):
 		'''Triggered by clicking on the add button when this show is added
-		
+
 			Stops show from being followed, deleting it from the self.user_state.shows
 		'''
 		self.ui.add_button.clicked.disconnect()
@@ -296,4 +296,4 @@ class ShowWidget(QWidget):
 		print ("Removed: " + name) if name else "Already removed"
 
 		self.ui.add_button.clicked.connect(self.add_show)
-		
+
