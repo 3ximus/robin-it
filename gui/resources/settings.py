@@ -575,7 +575,7 @@ class Ui_settings_window(object):
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, brush)
         self.hd_button.setPalette(palette)
-        self.hd_button.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.hd_button.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.hd_button.setChecked(True)
         self.hd_button.setObjectName("hd_button")
         self.horizontalLayout_6.addWidget(self.hd_button)
@@ -946,7 +946,7 @@ class Ui_settings_window(object):
     def retranslateUi(self, settings_window):
         _translate = QtCore.QCoreApplication.translate
         settings_window.setWindowTitle(_translate("settings_window", "Robin_it_v0.6"))
-        self.shows_label.setText(_translate("settings_window", "> settings"))
+        self.shows_label.setText(_translate("settings_window", "[ settings ]"))
         self.label1_3.setText(_translate("settings_window", "> set torrent_hosts"))
         self.kickass_checkbox.setText(_translate("settings_window", "kickass >"))
         self.kickass_box.setPlaceholderText(_translate("settings_window", "http://kickasstorrents.to/"))

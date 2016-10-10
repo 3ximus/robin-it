@@ -46,20 +46,14 @@ import sys
 #         Globals
 # ----------------------------
 
-CONFIG_FILE = 'robinit.conf'
-DEFAULTS =  {'kickass_allow':True,
-				'rarbg_allow':False,
-				'pirateaby_allow':False,
-				'kickass':'',
-				'rarbg':'',
-				'piratebay':'',
-				'sub_en':True,
-				'sub_pt':True,
-				'definition':'hd',
-				'storage_dir':'',
-				'user_dir':'',
-				'cache_dir':'',
-				'default_user':''}
+CONFIG_FILE = 'config'
+DEFAULTS =  {'torrents': {'kickass_allow':True,
+						'rarbg_allow':False,
+						'piratebay_allow':False},
+			'subtitles': {'sub_en':True,
+						'sub_pt':True},
+			'directories':{ 'storage_dir':''},
+			'other':{'definition':'hd'}}
 
 # ----------------------------
 #         GUI Classes
@@ -88,10 +82,10 @@ class MainWindow(QMainWindow):
 
 		self.config = Config(CONFIG_FILE, default_config=DEFAULTS)
 		if self.config.has_property('default_user'):
-			self.set_user_state(UserContent(self.config.default_user,
-					user_dir=self.config.user_dir if self.config.has_property('user_dir') else None,
-					cache_dir=self.config.cache_dir if self.config.has_property('cache_dir') else None,
-					storage_dir=self.config.storage_dir if self.config.has_property('storage_dir') else None))
+			self.set_user_state(UserContent(self.config['default_user'],
+					user_dir=self.config['user_dir'] if self.config.has_property('user_dir') else None,
+					cache_dir=self.config['cache_dir'] if self.config.has_property('cache_dir') else None,
+					storage_dir=self.config['storage_dir'] if self.config.has_property('storage_dir') else None))
 		else: # create login window, this will use the function self.set_user_state to set the user_state
 			self.setEnabled(False)
 			self.loginwindow = LoginWindow(main_window=self, config=self.config)
@@ -174,9 +168,9 @@ class LoginWindow(QMainWindow):
 				self.config.save()
 			self.main_window.set_user_state(
 				UserContent(self.ui.login_box.text().replace(' ', '_'),
-						user_dir=self.config.user_dir if self.config.has_property('user_dir') else None,
-						cache_dir=self.config.cache_dir if self.config.has_property('cache_dir') else None,
-						storage_dir=self.config.storage_dir if self.config.has_property('storage_dir') else None))
+						user_dir=self.config['user_dir'] if self.config.has_property('user_dir') else None,
+						cache_dir=self.config['cache_dir'] if self.config.has_property('cache_dir') else None,
+						storage_dir=self.config['storage_dir'] if self.config.has_property('storage_dir') else None))
 			self.main_window.setEnabled(True)
 			self.close()
 			self.destroy()
@@ -218,22 +212,22 @@ class SettingsWindow(QMainWindow):
 	def save(self):
 		'''Saves configuration to a file, ignores or deletes a settinf from config dict if its set to default'''
 
-		self.config.add_property('kickass_allow', self.ui.kickass_checkbox.isChecked())
-		self.config.add_property('rarbg_allow', self.ui.rarbg_checkbox.isChecked())
-		self.config.add_property('piratebay_allow', self.ui.piratebay_checkbox.isChecked())
-		self.config.add_property('kickass', self.ui.kickass_box.text().replace(' ', '_'))
-		self.config.add_property('rarbg', self.ui.rarbg_box.text().replace(' ', '_'))
-		self.config.add_property('piratebay', self.ui.piratebay_box.text().replace(' ', '_'))
+		self.config.add_property('kickass_allow', self.ui.kickass_checkbox.isChecked(), 'torrents')
+		self.config.add_property('rarbg_allow', self.ui.rarbg_checkbox.isChecked(), 'torrents')
+		self.config.add_property('piratebay_allow', self.ui.piratebay_checkbox.isChecked(), 'torrents')
+		self.config.add_property('kickass', self.ui.kickass_box.text().replace(' ', '_'), 'torrents')
+		self.config.add_property('rarbg', self.ui.rarbg_box.text().replace(' ', '_'), 'torrents')
+		self.config.add_property('piratebay', self.ui.piratebay_box.text().replace(' ', '_'), 'torrents')
 
-		self.config.add_property('sub_en', self.ui.ensub_checkbox.isChecked())
-		self.config.add_property('sub_pt', self.ui.ensub_checkbox.isChecked())
+		self.config.add_property('sub_en', self.ui.ensub_checkbox.isChecked(), 'subtitles')
+		self.config.add_property('sub_pt', self.ui.ensub_checkbox.isChecked(), 'subtitles')
 
 		if self.ui.sd_button.isChecked(): self.config.add_property('definition', 'sd')
 		if self.ui.hd_button.isChecked(): self.config.add_property('definition', 'hd')
 
-		self.config.add_property('storage_dir',self.ui.storage_box.text().replace(' ', '_'))
-		self.config.add_property('user_dir', self.ui.user_box.text().replace(' ', '_'))
-		self.config.add_property('cache_dir', self.ui.cache_box.text().replace(' ', '_'))
+		self.config.add_property('storage_dir',self.ui.storage_box.text().replace(' ', '_'), 'directories')
+		self.config.add_property('user_dir', self.ui.user_box.text().replace(' ', '_'), 'directories')
+		self.config.add_property('cache_dir', self.ui.cache_box.text().replace(' ', '_'), 'directories')
 
 		self.config.add_property('default_user',self.ui.defaultuser_box.text().replace(' ', '_'))
 
@@ -243,38 +237,38 @@ class SettingsWindow(QMainWindow):
 	def configure(self):
 		'''Sets the settings displayed according to given config dictionary'''
 		if self.config.has_property('kickass_allow'):
-			self.ui.kickass_checkbox.setChecked(self.config.kickass_allow)
+			self.ui.kickass_checkbox.setChecked(self.config['kickass_allow'])
 		if self.config.has_property('rarbg_allow'):
-			self.ui.rarbg_checkbox.setChecked(self.config.rarbg_allow)
+			self.ui.rarbg_checkbox.setChecked(self.config['rarbg_allow'])
 		if self.config.has_property('piratebay_allow'):
-			self.ui.piratebay_checkbox.setChecked(self.config.piratebay_allow)
+			self.ui.piratebay_checkbox.setChecked(self.config['piratebay_allow'])
 
 		if self.config.has_property('kickass'):
-			self.ui.kickass_box.setText(self.config.kickass)
+			self.ui.kickass_box.setText(self.config['kickass'])
 		if self.config.has_property('rarbg'):
-			self.ui.rarbg_box.setText(self.config.rarbg)
+			self.ui.rarbg_box.setText(self.config['rarbg'])
 		if self.config.has_property('piratebay'):
-			self.ui.piratebay_box.setText(self.config.piratebay)
+			self.ui.piratebay_box.setText(self.config['piratebay'])
 
 		if self.config.has_property('sub_en'):
-			self.ui.ensub_checkbox.setChecked(self.config.sub_en)
+			self.ui.ensub_checkbox.setChecked(self.config['sub_en'])
 		if self.config.has_property('sub_pt'):
-			self.ui.ptsub_checkbox.setChecked(self.config.sub_pt)
+			self.ui.ptsub_checkbox.setChecked(self.config['sub_pt'])
 
 		if self.config.has_property('definition'):
-			if self.config.definition == 'sd':
+			if self.config['definition'] == 'sd':
 				self.ui.sd_button.setChecked(True)
-			elif self.config.definition == 'hd':
+			elif self.config['definition'] == 'hd':
 				self.ui.hd_button.setChecked(True)
 
 		if self.config.has_property('storage_dir'):
-			self.ui.storage_box.setText(self.config.storage_dir)
+			self.ui.storage_box.setText(self.config['storage_dir'])
 		if self.config.has_property('user_dir'):
-			self.ui.user_box.setText(self.config.user_dir)
+			self.ui.user_box.setText(self.config['user_dir'])
 		if self.config.has_property('cache_dir'):
-			self.ui.cache_box.setText(self.config.cache_dir)
+			self.ui.cache_box.setText(self.config['cache_dir'])
 		if self.config.has_property('default_user'):
-			self.ui.defaultuser_box.setText(self.config.default_user)
+			self.ui.defaultuser_box.setText(self.config['default_user'])
 
 # ----------------
 #		MAIN

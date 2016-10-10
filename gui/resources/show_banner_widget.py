@@ -11,6 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_show_banner_widget(object):
     def setupUi(self, show_banner_widget):
         show_banner_widget.setObjectName("show_banner_widget")
+        show_banner_widget.resize(472, 120)
         show_banner_widget.setMaximumSize(QtCore.QSize(480, 120))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
@@ -172,6 +173,21 @@ class Ui_show_banner_widget(object):
         self.name_label.setAlignment(QtCore.Qt.AlignCenter)
         self.name_label.setObjectName("name_label")
         self.horizontalLayout.addWidget(self.name_label)
+        self.download_button = QtWidgets.QPushButton(show_banner_widget)
+        self.download_button.setMaximumSize(QtCore.QSize(25, 20))
+        palette = QtGui.QPalette()
+        brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.ButtonText, brush)
+        brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.ButtonText, brush)
+        brush = QtGui.QBrush(QtGui.QColor(1, 83, 49))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, brush)
+        self.download_button.setPalette(palette)
+        self.download_button.setObjectName("download_button")
+        self.horizontalLayout.addWidget(self.download_button)
         self.add_button = QtWidgets.QPushButton(show_banner_widget)
         self.add_button.setMaximumSize(QtCore.QSize(60, 20))
         palette = QtGui.QPalette()
@@ -211,6 +227,7 @@ class Ui_show_banner_widget(object):
         _translate = QtCore.QCoreApplication.translate
         show_banner_widget.setWindowTitle(_translate("show_banner_widget", "Form"))
         self.name_label.setText(_translate("show_banner_widget", "<name>"))
+        self.download_button.setText(_translate("show_banner_widget", "↓⌚"))
         self.add_button.setText(_translate("show_banner_widget", "+add"))
 
 import resources_rc

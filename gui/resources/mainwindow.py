@@ -280,11 +280,11 @@ class Ui_mainwindow(object):
 
     def retranslateUi(self, mainwindow):
         _translate = QtCore.QCoreApplication.translate
-        self.robin_label.setText(_translate("mainwindow", "> run robin_it"))
+        self.robin_label.setText(_translate("mainwindow", "[ robin_it ]"))
         self.user_label.setText(_translate("mainwindow", "<user>"))
-        self.shows_button.setText(_translate("mainwindow", "> load tv_shows"))
-        self.movies_button.setText(_translate("mainwindow", "> load movies"))
-        self.other.setText(_translate("mainwindow", "> something_else"))
-        self.config_button.setText(_translate("mainwindow", "> configure"))
+        self.shows_button.setText(_translate("mainwindow", "load tv_shows"))
+        self.movies_button.setText(_translate("mainwindow", "load movies"))
+        self.other.setText(_translate("mainwindow", "something_else"))
+        self.config_button.setText(_translate("mainwindow", "configure"))
 
 import resources_rc

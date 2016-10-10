@@ -7,6 +7,6 @@ storage
 user
 build
 dist
-robinit.conf
+config
 venv
 update_script.sh

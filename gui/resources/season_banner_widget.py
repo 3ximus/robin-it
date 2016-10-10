@@ -209,6 +209,6 @@ class Ui_season_banner_widget(object):
         _translate = QtCore.QCoreApplication.translate
         season_banner_widget.setWindowTitle(_translate("season_banner_widget", "Form"))
         self.mark_button.setText(_translate("season_banner_widget", "mark"))
-        self.download_button.setText(_translate("season_banner_widget", "↓"))
+        self.download_button.setText(_translate("season_banner_widget", "↓⌚"))
 
 import resources_rc

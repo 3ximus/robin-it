@@ -6,8 +6,9 @@ Created - 7.10.16
 Copyright (C) 2016 - eximus
 '''
 
-CONFIG_FILE = 'robinit.conf'
-DEFAULTS = {}
+import re
+CAT_REGEX = re.compile("^\[.+\]$")
+CONF_REGEX = re.compile("^\t.+ = .+$")
 
 class Config():
 	'''Loads a config file if it exists otherwise creates a new one.
@@ -19,61 +20,88 @@ class Config():
 			will not be saved to the file, they will however be part of the class
 	'''
 	def __init__(self, config_file, start_config = None, default_config = None):
-		global CONFIG_FILE # use this in order to not have the file atribute
-		CONFIG_FILE = config_file # this way we can just save self.__dict__
-		global DEFAULTS
+		self.dict = {}
+		self.config_file = config_file
 		if default_config and type(default_config) == dict:
-			DEFAULTS = default_config
+			self.default_config = default_config
 			self.update(default_config)
+		else:
+				self.default_config = {}
 
 		self.load()
 		if start_config and type(start_config) == dict:
 			self.update(start_config)
 			self.save()
 
-	def has_property(self, prop):
-		return prop in self.__dict__
+	def has_property(self, key, defaults=False):
+		'''Check if jey exists, if defaults is True it will search in the default configuration instead'''
+		dic = self.dict if not defaults else self.default_config
+		for category in dic:
+				if key in dic[category]:
+					return True
+		return False
 
 	def __getitem__(self, key): # able to use config_instance['key']
-		return self.__dict__[key]
+		for category in self.dict:
+			if key in self.dict[category]:
+				return self.dict[category][key]
+		raise KeyError("[ERROR] Config has no atribute \'%s\'" % key)
 
 	def __setitem__(self, key, value): # able to use config_instance['key'] = val
-		self.__dict__[key] = value
+		self.add_property(key, value)
 
 	def __delitem__(self, key): # able to use del(config_instance['key'])
-		del(self.__dict__[key])
+		for category in self.dict:
+			if key in self.dict[category]:
+				del(self.dict[category][key])
 
-	def add_property(self, prop, value):
-		if type(prop) != str:
-			raise AttributeError("[\033[0;31mERROR\033[0m] Tried to add property to class with name not string")
+	def add_property(self, key, value, category=None):
+		if type(key) != str:
+			raise AttributeError("[ERROR] Tried to add property to class with name not string")
 		if type(value) != str and type(value) != bool and type(value) != unicode:
-			print "[\033[0;33mWARNING\033[0m] Property %s value is not a string nor bool" % prop
-		if value != "":
-			self.__dict__.update({prop:value})
+			key = 'la'
+			print "[\033[33mWARNING\033[0m] Property %s value is not a string nor bool" % key
+		cat = category if category else 'other'
+		if cat not in self.dict:
+			self.dict[cat] = {}
+		self.dict[cat].update({key:value})
 
 	def update(self, content):
-		for k in content: self.add_property(k, content[k])
+		for k in content:
+			if type(content[k]) == dict:
+				for key in content[k]:
+					self.add_property(key, content[k][key], category=k)
+			else: self.add_property(k, content[k])
 
 	def load(self):
 		'''Loads a config file to the self.__dict__ variable'''
 		try:
-			with open(CONFIG_FILE, 'r') as fp:
+			with open(self.config_file, 'r') as fp:
+				category = None
 				for n, line in enumerate(fp):
-					line.strip(' ')
+					line = line.strip(' \n')
 					if line[0] == '#' or line[0] == '\n': continue
-					line = [s.strip('\n') for s in line.split(' ')]
-					if len(line) != 2 or line[1] == "":
-						raise ValueError("[\033[0;31mERROR\033[0m] Line %d in %s: \" %s \"" % (n, CONFIG_FILE, ' '.join(line)))
-					key, value = line
-					if value == 'True': value = True
-					elif value == 'False': value = False
-					self.update({key : value})
+					if CAT_REGEX.match(line):
+						category = line.strip('[]')
+						continue
+					if CONF_REGEX.match(line):
+						key, eq, value = line.strip('\t').split(' ')
+						if value.lower() == 'true': value = True
+						elif value.lower() == 'false': value = False
+						self.add_property(key, value, category)
+						continue
+					raise ValueError("[ERROR] Line %d in %s: \" %s \"" % (n, self.config_file, ' '.join(line)))
 		except IOError: return None # file doesnt exist
-		return self.__dict__
+		return self.dict
 
 	def save(self):
-		with open(CONFIG_FILE, 'w') as fp:
-			for key in self.__dict__:
-				if key in DEFAULTS and self.__dict__[key] == DEFAULTS[key]:
-					continue
-				fp.write("%s %s\n" % (key, self.__dict__[key]))
+		with open(self.config_file, 'w') as fp:
+			for category in self.dict:
+				writter = "[%s]\n" % category
+				write = False
+				for key in self.dict[category]:
+					if self.dict[category][key] == "" or (self.has_property(key, defaults=True) and self.dict[category][key] == self.default_config[category][key]):
+						continue
+					writter += "\t%s = %s\n" % (key, self.dict[category][key])
+					write = True
+				if write: fp.write(writter)
