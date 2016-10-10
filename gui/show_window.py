@@ -165,12 +165,12 @@ class ShowWindow(QMainWindow):
 		self.display_seasons()
 
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
-		self.ui.genre_label.setText('genre - %s' % self.tvshow.genre)
-		self.ui.network_label.setText('network - %s' % self.tvshow.network)
-		self.ui.airday_label.setText('air day - %s : %s' % (self.tvshow.air_dayofweek, self.tvshow.air_time))
-		self.ui.runtime_label.setText('runtime - %s min' % self.tvshow.runtime)
-		self.ui.status_label.setText('status - %s' % self.tvshow.status)
-		self.ui.imdb_label.setText('<a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
+		self.ui.genre_label.setText('genre\t\t%s' % self.tvshow.genre)
+		self.ui.network_label.setText('network\t\t%s' % self.tvshow.network)
+		self.ui.airday_label.setText('air day\t\t%s : %s' % (self.tvshow.air_dayofweek, self.tvshow.air_time))
+		self.ui.runtime_label.setText('runtime\t\t%s min' % self.tvshow.runtime)
+		self.ui.status_label.setText('status\t\t%s' % self.tvshow.status)
+		self.ui.imdb_label.setText('<a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a>\t\t%s' % (self.tvshow.imdb_id, self.tvshow.rating))
 		self.ui.description_box.setText(self.tvshow.description)
 
 		self.ui.add_button.setEnabled(True)
@@ -192,9 +192,11 @@ class ShowWindow(QMainWindow):
 		'''Fills the GUI with episodes from selected season'''
 		self.episode_col = 0
 		self.episode_row = 0
-		self.ui.episodes_label.setText("< s%02d episodes >" % (sid+1))
+		self.ui.episodes_label.setText("[ s%02d episodes ]" % (sid+1))
 		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
 			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
+		for i in reversed(range(self.ui.last_row_episodes_layout.count())): # clear previous episodes displayed
+			self.ui.last_row_episodes_layout.itemAt(i).widget().setParent(None)
 
 		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%EPISODE_MAX_COL
 		for i, e in enumerate(self.tvshow.seasons[sid].episodes):
@@ -297,9 +299,10 @@ class SeasonWidget(QWidget):
 	def download_poster(self, url):
 		'''Thread to download season poster'''
 		if not url: return
-		try: data = urllib.urlopen(url).read()
+		try:
+			data = urllib.urlopen(url).read()
+			self.poster_loaded.emit(data)
 		except IOError: print "Error Loading season poster url: %s" % url
-		self.poster_loaded.emit(data)
 
 	def load_poster(self, data):
 		'''Load poster from downloaded data to the widget'''
@@ -328,6 +331,10 @@ class EpisodeWidget(QWidget):
 
 		self.ui = Ui_episode_banner_widget()
 		self.ui.setupUi(self)
+		
+		clickable(self).connect(self.toogle_details)
+		self.ui.filler.hide()
+		self.ui.description.hide()
 
 		self.update_me()
 		self.ui.mark_button.clicked.connect(self.toogle_episode)
@@ -335,7 +342,9 @@ class EpisodeWidget(QWidget):
 		self.image_loaded.connect(self.load_image)
 		self.download_image(self.episode.image)
 
-		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
+		self.ui.name_label.setText('[%02d] %s' % (int(self.episode.episode_number), self.episode.name))
+		self.ui.info_label.setText('%s %s' % (self.episode.airdate, self.episode.rating))
+		self.ui.description.setText(self.episode.description)
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
@@ -350,9 +359,10 @@ class EpisodeWidget(QWidget):
 	def download_image(self, url):
 		'''Thread to downlaod episode image'''
 		if not url: return
-		try: data = urllib.urlopen(url).read()
+		try:
+			data = urllib.urlopen(url).read()
+			self.image_loaded.emit(data)
 		except IOError: print "Error Loading episode image url: %s" % url
-		self.image_loaded.emit(data)
 
 	def load_image(self, data):
 		'''Triggered by image_loaded signal. Loads image to the widget'''
@@ -364,3 +374,12 @@ class EpisodeWidget(QWidget):
 		'''Toogle season watched state'''
 		self.episode.toogle_watched()
 		self.window.update_shout.emit()
+	
+	def toogle_details(self):
+		'''Toogle Details display'''
+		if self.ui.filler.isHidden():
+			self.ui.filler.show()
+			self.ui.description.show()
+		else:
+			self.ui.filler.hide()
+			self.ui.description.hide()

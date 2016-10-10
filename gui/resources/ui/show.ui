@@ -919,7 +919,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>529</width>
-                   <height>661</height>
+                   <height>597</height>
                   </rect>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -968,6 +968,12 @@
                       </disabled>
                      </palette>
                     </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>10</pointsize>
+                      <italic>true</italic>
+                     </font>
+                    </property>
                     <property name="text">
                      <string/>
                     </property>
@@ -983,6 +989,22 @@
              </layout>
             </item>
            </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QLabel" name="seasons_label">
@@ -1024,12 +1046,28 @@
              </palette>
             </property>
             <property name="text">
-             <string>&lt; seasons &gt;</string>
+             <string>[ seasons ]</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <layout class="QGridLayout" name="seasons_layout">
@@ -1056,6 +1094,22 @@
              <number>10</number>
             </property>
            </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QLabel" name="episodes_label">
@@ -1097,12 +1151,28 @@
              </palette>
             </property>
             <property name="text">
-             <string>&lt; episodes &gt;</string>
+             <string>[ episodes ]</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <layout class="QGridLayout" name="episodes_layout"/>
