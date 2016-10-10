@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>180</height>
+    <height>200</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>320</width>
-    <height>180</height>
+    <height>200</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>320</width>
-    <height>180</height>
+    <height>200</height>
    </size>
   </property>
   <property name="palette">
@@ -539,7 +539,7 @@
      <x>10</x>
      <y>158</y>
      <width>318</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="palette">
@@ -578,6 +578,14 @@
       </colorrole>
      </disabled>
     </palette>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+     <weight>75</weight>
+     <italic>true</italic>
+     <bold>true</bold>
+    </font>
    </property>
    <property name="text">
     <string>&lt;name&gt;</string>
@@ -648,8 +656,14 @@
      <x>-10</x>
      <y>158</y>
      <width>331</width>
-     <height>31</height>
+     <height>22</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>22</height>
+    </size>
    </property>
    <property name="palette">
     <palette>
@@ -722,11 +736,164 @@
     <enum>QFrame::NoFrame</enum>
    </property>
   </widget>
+  <widget class="QLabel" name="info_label">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>180</y>
+     <width>318</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>190</red>
+         <green>190</green>
+         <blue>190</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>190</red>
+         <green>190</green>
+         <blue>190</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>1</red>
+         <green>83</green>
+         <blue>49</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+     <weight>50</weight>
+     <italic>true</italic>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>&lt;info&gt;</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="filler">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>320</width>
+     <height>180</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="description">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>20</y>
+     <width>318</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>1</red>
+         <green>83</green>
+         <blue>49</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>&lt;description&gt;</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
+   <property name="indent">
+    <number>10</number>
+   </property>
+  </widget>
   <zorder>image</zorder>
-  <zorder>mark_button</zorder>
-  <zorder>download_button</zorder>
   <zorder>name_back</zorder>
   <zorder>name_label</zorder>
+  <zorder>info_label</zorder>
+  <zorder>filler</zorder>
+  <zorder>mark_button</zorder>
+  <zorder>download_button</zorder>
+  <zorder>description</zorder>
  </widget>
  <resources>
   <include location="../resources.qrc"/>
