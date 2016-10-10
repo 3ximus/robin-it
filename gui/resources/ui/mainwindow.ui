@@ -436,7 +436,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string notr="true">Robin_it_v0.5</string>
+   <string notr="true">Robin_it_v0.6</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
@@ -496,7 +496,7 @@
        </font>
       </property>
       <property name="text">
-       <string>&gt; run robin_it</string>
+       <string>[ robin_it ]</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -644,7 +644,7 @@
          <enum>Qt::WheelFocus</enum>
         </property>
         <property name="text">
-         <string>&gt; load tv_shows</string>
+         <string>load tv_shows</string>
         </property>
        </widget>
       </item>
@@ -675,7 +675,7 @@
          <enum>Qt::WheelFocus</enum>
         </property>
         <property name="text">
-         <string>&gt; load movies</string>
+         <string>load movies</string>
         </property>
        </widget>
       </item>
@@ -706,7 +706,7 @@
          <enum>Qt::WheelFocus</enum>
         </property>
         <property name="text">
-         <string>&gt; something_else</string>
+         <string>something_else</string>
         </property>
        </widget>
       </item>
@@ -734,7 +734,7 @@
          <enum>Qt::WheelFocus</enum>
         </property>
         <property name="text">
-         <string>&gt; configure</string>
+         <string>configure</string>
         </property>
        </widget>
       </item>

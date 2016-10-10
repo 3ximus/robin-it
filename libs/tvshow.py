@@ -225,7 +225,7 @@ class Season():
 		database = Tvdb(cache = self.cache, banners = banners)
 		try: posters = database[self.tv_show.real_name]['_banners']['season']
 		except tvdb_attributenotfound: pass # posters werent loaded so ignore them
-		except KeyError: print "No poster for %d : %s" % (self.s_id, self.tv_show.name) 
+		except KeyError: print "No poster for %d : %s" % (self.s_id, self.tv_show.name)
 		else: # update posters
 			self.poster = [] # clear cached value
 			if 'season' in posters: # check for existance

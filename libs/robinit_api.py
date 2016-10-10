@@ -4,11 +4,11 @@
 Api for traking TVShows and Movies
 User state is persistent across runs and saved in ./user/ directory
 
-Latest Update - v0.5
+Latest Update - v0.6
 Created - 29.12.15
 Copyright (C) 2016 - eximus
 '''
-__version__ = '0.5'
+__version__ = '0.6'
 
 
 import tvshow
@@ -21,7 +21,7 @@ import cPickle
 
 class UserContent:
 	'''User TV Shows Content Class
-	
+
 	Parameters:
 		uname -- username
 		cache_dir -- directory used to cache database querie results
@@ -48,23 +48,12 @@ class UserContent:
 # 	          BASIC METHODS
 # ==========================================
 
-	def get_show(self, show, selection_handler = None): # TODO marked for review
-		'''Get a specific show
-		Parameters:
-			show -- name of a show
-			selection_handler -- is a function that must return an integer (or None if canceled) and receives
-				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See top Documentation
-		'''
-		show_name = self.find_item(show, selection_handler)
-		if show_name: return self.shows[show_name]
-		return None
-
 	def is_tracked(self, name):
 		'''Returns True if show is being tracked, else otherwise'''
-		if self.find_item(name): return True
-		# TODO change to name in self.shows.keys() ???
-		return False
+		return name in self.shows
+		# TODO remove this if no problem has come up
+		#if self.find_item(name): return True
+		#return False
 
 # ==========================================
 # 	           MAIN METHODS

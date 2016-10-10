@@ -437,7 +437,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.5</string>
+   <string>Robin_it_v0.6</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
@@ -500,7 +500,7 @@
        </font>
       </property>
       <property name="text">
-       <string>&gt; settings</string>
+       <string>[ settings ]</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -1690,7 +1690,7 @@
                </palette>
               </property>
               <property name="layoutDirection">
-               <enum>Qt::RightToLeft</enum>
+               <enum>Qt::LeftToRight</enum>
               </property>
               <property name="text">
                <string>hi&amp;gh_definition</string>

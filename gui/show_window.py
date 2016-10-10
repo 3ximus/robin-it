@@ -1,12 +1,12 @@
 
 '''
 GUI for a TV Show window
-Latest Update - v0.5
+Latest Update - v0.6
 Created - 30.1.16
 Copyright (C) 2016 - eximus
 '''
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 # PYQT5 IMPORTS
 from PyQt5 import QtCore
@@ -19,14 +19,16 @@ from gui.resources.season_banner_widget import Ui_season_banner_widget
 from gui.resources.episode_banner_widget import Ui_episode_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable, begin_hover, end_hover 
+from gui_func import clickable
 from libs.tvshow import Show
 from libs.thread_decorator import threaded
+from libs.config import Config
 
 # TOOLS
 from functools import partial
 from PIL import Image, ImageFilter
 from cStringIO import StringIO
+import math
 import urllib
 
 # FIXED VALUES
@@ -34,6 +36,8 @@ MAIN_COLOR =  "#03a662"
 RED_COLOR =  "#bf273d"
 BLUR_RADIOUS = 10
 DARKNESS = 0.6
+SEASON_MAX_COL = 5
+EPISODE_MAX_COL = 3
 
 # --------------------
 #       Functions
@@ -93,8 +97,17 @@ class ShowWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.close)
 		self.ui.add_button.clicked.connect(self.add_show)
 		self.ui.mark_button.clicked.connect(self.toogle_watched)
-		
+
+		self.ui.add_button.setEnabled(False)
+		self.ui.mark_button.setEnabled(False)
+		self.ui.episodes_label.setText("")
+
 		self.background = None
+		# Grid placement stuff
+		self.season_col = 0
+		self.season_row = 0
+		self.episode_col = 0
+		self.episode_row = 0
 
 		if type(tvshow) == dict:
 			if not self.user_state.is_tracked(tvshow['seriesname']):
@@ -105,10 +118,10 @@ class ShowWindow(QMainWindow):
 				self.get_show_data(tvshow['seriesname'])
 				return # everyithing done in this case / prevente rest of the code execution
 			else:
-    			# show is tracked but search result, get the followed show instance instead
+				# show is tracked but search result, get the followed show instance instead
 				self.tvshow = self.user_state.shows[tvshow['seriesname']]
 		else:
-    		# show is tracked -- all is good!
+			# show is tracked -- all is good!
 			self.tvshow = tvshow
 		# this in both cases where it is tracked
 		self.update_me()
@@ -144,15 +157,12 @@ class ShowWindow(QMainWindow):
 		if self.tvshow.poster: # load background
 			self.background_loaded.connect(self.load_background)
 			download_image(self.background_loaded, self.tvshow.poster, filters=True)
-			
+
 		if self.user_state.is_tracked(self.tvshow.name):
-    			self.make_del_button()
+			self.make_del_button()
 
 		# fill seasons
-		for s in self.tvshow.seasons:
-			season = SeasonWidget(s, self)
-			clickable(season).connect(partial(self.load_episodes, sid=(s.s_id-1)))
-			self.ui.seasons_layout.addWidget(season)
+		self.display_seasons()
 
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
 		self.ui.genre_label.setText('genre - %s' % self.tvshow.genre)
@@ -162,6 +172,36 @@ class ShowWindow(QMainWindow):
 		self.ui.status_label.setText('status - %s' % self.tvshow.status)
 		self.ui.imdb_label.setText('<a href="%s"><span style=" text-decoration: underline; color:#03a662;">imdb</span></a> - %s' % (self.tvshow.imdb_id, self.tvshow.rating))
 		self.ui.description_box.setText(self.tvshow.description)
+
+		self.ui.add_button.setEnabled(True)
+		self.ui.mark_button.setEnabled(True)
+
+	def display_seasons(self):
+		'''Adds clickable seasons posters to the window'''
+		c = len(self.tvshow.seasons) - len(self.tvshow.seasons)%SEASON_MAX_COL
+		for i, s in enumerate(self.tvshow.seasons):
+			season = SeasonWidget(s, self)
+			clickable(season).connect(partial(self.display_episodes, sid=(s.s_id-1))) # 1 based
+			# this is a temporary workaround for seasons display
+			if i < c: self.ui.seasons_layout.addWidget(season, self.season_row, self.season_col%SEASON_MAX_COL)
+			else: self.ui.last_row_seasons_layout.addWidget(season, self.season_row, self.season_col%SEASON_MAX_COL)
+			self.season_col+=1
+			if self.season_col%SEASON_MAX_COL==0: self.season_row+=1
+
+	def display_episodes(self, sid):
+		'''Fills the GUI with episodes from selected season'''
+		self.episode_col = 0
+		self.episode_row = 0
+		self.ui.episodes_label.setText("< s%02d episodes >" % (sid+1))
+		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
+			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
+
+		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%EPISODE_MAX_COL
+		for i, e in enumerate(self.tvshow.seasons[sid].episodes):
+			if i < c: self.ui.episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%EPISODE_MAX_COL)
+			else:  self.ui.last_row_episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%EPISODE_MAX_COL)
+			self.episode_col+=1
+			if self.episode_col%EPISODE_MAX_COL==0: self.episode_row+=1
 
 	def load_background(self, data):
 		'''Triggered by background_loaded signal.
@@ -184,18 +224,13 @@ class ShowWindow(QMainWindow):
 			palette.setBrush(QPalette.Background, QBrush(self.background))
 			self.setPalette(palette)
 
-	def load_episodes(self, sid):
-		'''Fills the GUI with episodes from selected season'''
-		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
-			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
-		for e in self.tvshow.seasons[sid].episodes:
-			self.ui.episodes_layout.addWidget(EpisodeWidget(e, self))
-
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
-		self.user_state.add_show(self.tvshow.name)
+		self.ui.statusbar.showMessage("Adding \"%s\"..." % self.tvshow.name)
+		self.user_state.add_show(show=self.tvshow)
 		self.user_state.save_state()
 		print "Added: " + self.tvshow.name
+		self.ui.statusbar.clearMessage()
 		self.make_del_button()
 
 	def make_del_button(self):
@@ -207,7 +242,7 @@ class ShowWindow(QMainWindow):
 
 	def delete_show(self):
 		'''Triggered by clicking on the add button when this show is added
-		
+
 			Stops show from being followed, deleting it from the self.user_state.shows
 		'''
 		self.ui.add_button.clicked.disconnect()
@@ -247,8 +282,8 @@ class SeasonWidget(QWidget):
 		self.ui.mark_button.clicked.connect(self.toogle_season)
 		self.poster_loaded.connect(self.load_poster)
 		if len(self.season.poster) > 0:
-    			self.download_poster(self.season.poster[0])
-			
+			self.download_poster(self.season.poster[0])
+
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
 		if self.season.watched:
@@ -262,7 +297,8 @@ class SeasonWidget(QWidget):
 	def download_poster(self, url):
 		'''Thread to download season poster'''
 		if not url: return
-		data = urllib.urlopen(url).read()
+		try: data = urllib.urlopen(url).read()
+		except IOError: print "Error Loading season poster url: %s" % url
 		self.poster_loaded.emit(data)
 
 	def load_poster(self, data):
@@ -298,7 +334,7 @@ class EpisodeWidget(QWidget):
 		self.window.update_shout.connect(self.update_me)
 		self.image_loaded.connect(self.load_image)
 		self.download_image(self.episode.image)
-		
+
 		self.ui.name_label.setText('< %s - %s >' % (self.episode.episode_number, self.episode.name))
 
 	def update_me(self):
@@ -309,12 +345,13 @@ class EpisodeWidget(QWidget):
 		else:
 			self.ui.mark_button.setText("mark")
 			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
-			
+
 	@threaded
 	def download_image(self, url):
 		'''Thread to downlaod episode image'''
 		if not url: return
-		data = urllib.urlopen(url).read()
+		try: data = urllib.urlopen(url).read()
+		except IOError: print "Error Loading episode image url: %s" % url
 		self.image_loaded.emit(data)
 
 	def load_image(self, data):

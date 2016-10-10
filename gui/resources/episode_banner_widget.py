@@ -255,6 +255,6 @@ class Ui_episode_banner_widget(object):
         episode_banner_widget.setWindowTitle(_translate("episode_banner_widget", "Form"))
         self.mark_button.setText(_translate("episode_banner_widget", "mark"))
         self.name_label.setText(_translate("episode_banner_widget", "<name>"))
-        self.download_button.setText(_translate("episode_banner_widget", "↓"))
+        self.download_button.setText(_translate("episode_banner_widget", "↓⌚"))
 
 import resources_rc

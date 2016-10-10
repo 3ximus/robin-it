@@ -155,7 +155,7 @@ class Ui_mainwindow(object):
         font.setPointSize(11)
         font.setItalic(False)
         mainwindow.setFont(font)
-        mainwindow.setWindowTitle("Robin_it_v0.5")
+        mainwindow.setWindowTitle("Robin_it_v0.6")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon.addPixmap(QtGui.QPixmap(":/resources/images/robinit_desaturated.ico"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
@@ -280,11 +280,11 @@ class Ui_mainwindow(object):
 
     def retranslateUi(self, mainwindow):
         _translate = QtCore.QCoreApplication.translate
-        self.robin_label.setText(_translate("mainwindow", "> run robin_it"))
+        self.robin_label.setText(_translate("mainwindow", "[ robin_it ]"))
         self.user_label.setText(_translate("mainwindow", "<user>"))
-        self.shows_button.setText(_translate("mainwindow", "> load tv_shows"))
-        self.movies_button.setText(_translate("mainwindow", "> load movies"))
-        self.other.setText(_translate("mainwindow", "> something_else"))
-        self.config_button.setText(_translate("mainwindow", "> configure"))
+        self.shows_button.setText(_translate("mainwindow", "load tv_shows"))
+        self.movies_button.setText(_translate("mainwindow", "load movies"))
+        self.other.setText(_translate("mainwindow", "something_else"))
+        self.config_button.setText(_translate("mainwindow", "configure"))
 
 import resources_rc

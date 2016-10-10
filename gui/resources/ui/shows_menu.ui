@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>994</width>
-    <height>700</height>
+    <width>1101</width>
+    <height>692</height>
    </rect>
   </property>
   <property name="palette">
@@ -432,7 +432,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Robin_it_v0.5</string>
+   <string>Robin_it_v0.6</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources.qrc">
@@ -683,10 +683,7 @@
          </layout>
         </item>
         <item row="3" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <property name="spacing">
-           <number>30</number>
-          </property>
+         <layout class="QGridLayout" name="gridLayout_5">
           <property name="leftMargin">
            <number>30</number>
           </property>
@@ -699,69 +696,7 @@
           <property name="bottomMargin">
            <number>3</number>
           </property>
-          <item>
-           <widget class="QPushButton" name="myshows_button">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>400</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>400</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="palette">
-             <palette>
-              <active>
-               <colorrole role="ButtonText">
-                <brush brushstyle="SolidPattern">
-                 <color alpha="255">
-                  <red>255</red>
-                  <green>255</green>
-                  <blue>255</blue>
-                 </color>
-                </brush>
-               </colorrole>
-              </active>
-              <inactive>
-               <colorrole role="ButtonText">
-                <brush brushstyle="SolidPattern">
-                 <color alpha="255">
-                  <red>255</red>
-                  <green>255</green>
-                  <blue>255</blue>
-                 </color>
-                </brush>
-               </colorrole>
-              </inactive>
-              <disabled>
-               <colorrole role="ButtonText">
-                <brush brushstyle="SolidPattern">
-                 <color alpha="255">
-                  <red>1</red>
-                  <green>83</green>
-                  <blue>49</blue>
-                 </color>
-                </brush>
-               </colorrole>
-              </disabled>
-             </palette>
-            </property>
-            <property name="text">
-             <string>&gt; load my_shows</string>
-            </property>
-           </widget>
-          </item>
-          <item>
+          <item row="0" column="1">
            <widget class="QPushButton" name="towatch_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -819,7 +754,193 @@
              </palette>
             </property>
             <property name="text">
-             <string>&gt; set to_watch</string>
+             <string>display to_watch</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="myshows_button">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>400</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>1</red>
+                  <green>83</green>
+                  <blue>49</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="text">
+             <string>load my_shows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="calendar_button">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>400</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>1</red>
+                  <green>83</green>
+                  <blue>49</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="text">
+             <string>display calendar</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="downloads_button">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>400</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="ButtonText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>1</red>
+                  <green>83</green>
+                  <blue>49</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="text">
+             <string>set downloads</string>
             </property>
            </widget>
           </item>
@@ -933,7 +1054,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; search tv_shows</string>
+           <string>[ search tv_shows ]</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -1381,7 +1502,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; display results</string>
+           <string>[ display results ]</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -1440,6 +1561,12 @@
         </item>
         <item row="2" column="0">
          <widget class="QScrollArea" name="scrollArea_2">
+          <property name="minimumSize">
+           <size>
+            <width>1000</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="palette">
            <palette>
             <active>
@@ -1488,13 +1615,13 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>500</height>
+             <width>1009</width>
+             <height>492</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <layout class="QGridLayout" name="results_layout">
+             <layout class="QGridLayout" name="results_layout" columnstretch="0">
               <item row="0" column="0">
                <widget class="QLabel" name="noresults_label">
                 <property name="palette">
@@ -1535,7 +1662,7 @@
                  </palette>
                 </property>
                 <property name="text">
-                 <string>&lt;no results&gt;</string>
+                 <string>&lt;no_results&gt;</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -1829,8 +1956,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>505</height>
+             <width>1009</width>
+             <height>497</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_7">
@@ -1898,7 +2025,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; display my_shows</string>
+           <string>[ display my_shows ]</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -2193,7 +2320,7 @@
            </font>
           </property>
           <property name="text">
-           <string>&gt; set to_watch</string>
+           <string>[ set to_watch ]</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -2250,8 +2377,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>902</width>
-             <height>533</height>
+             <width>1009</width>
+             <height>525</height>
             </rect>
            </property>
           </widget>

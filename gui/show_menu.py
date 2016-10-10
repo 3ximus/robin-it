@@ -1,12 +1,12 @@
 
 '''
 GUI for the TV Shows main menu
-Latest Update - v0.5
+Latest Update - v0.6
 Created - 30.1.16
 Copyright (C) 2016 - eximus
 '''
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 # PYQT5 IMPORTS
 from PyQt5 import QtCore
@@ -18,7 +18,7 @@ from gui.resources.shows_menu import Ui_shows_menu
 from gui.resources.show_banner_widget import Ui_show_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable, begin_hover, end_hover 
+from gui_func import clickable
 from show_window import ShowWindow
 from libs.tvshow import search_for_show
 from libs.thread_decorator import threaded
@@ -83,6 +83,9 @@ class ShowsMenu(QMainWindow):
 		self.ui.search_box.textChanged.connect(self.update_search)
 		self.ui.search_box_2.textChanged.connect(self.update_search_2)
 
+		self.col = 0
+		self.row = 0
+
 	def search(self):
 		'''Searches for TV Show by a given keyword in the search box
 			Displays results on page 1
@@ -102,6 +105,20 @@ class ShowsMenu(QMainWindow):
 		results = search_for_show(text)
 		self.search_complete.emit(results)
 
+	def clear_layout(self, layout):
+		'''Clears all widgets from given layout'''		# reset rows and columns
+		self.col = 0
+		self.row = 0
+		for i in reversed(range(layout.count())): # clear previous results
+			layout.itemAt(i).widget().setParent(None)
+
+	def add_to_layout(self, layout, widget):
+		'''Takes the widget to be added and the layout to add it to'''
+		layout.addWidget(widget, int(self.row), self.col)
+		self.row += 0.5
+		self.col = 1 if self.col == 0 else 0
+		return
+
 	def display_results(self, results):
 		'''Triggered by the self.search_complete signal. Displays TV show results on stack widget page 1
 
@@ -110,10 +127,6 @@ class ShowsMenu(QMainWindow):
 			is triggered, displaying the remaining results.
 			This is done in order to only display bannerless shows at the end
 		'''
-		def _add_to_layout(widget, *args):
-			'''Takes the widget to be added'''
-			self.ui.results_layout.addWidget(widget)
-			return
 
 		def _status_update(results):
 			'''Updates Status bar loading message with progress_bar'''
@@ -129,7 +142,7 @@ class ShowsMenu(QMainWindow):
 			'''This thread will simply wait until all shows with banners are loaded
 				Emits self.all_banners_loaded when finished
 			'''
-			while True:
+			while True: # TODO FIXME causes hanging!! (search for "the")
 				if self.loaded_results == len(results)-len(pending_add):
 					self.all_banners_loaded.emit()
 					return
@@ -138,11 +151,10 @@ class ShowsMenu(QMainWindow):
 		def _display_pending(pending):
 			'''Triggered by self.all_banners_loaded signal. Display shows without banner'''
 			for p in pending: # add the shows without banner at the end
-				self.ui.results_layout.addWidget(ShowWidget(p, self.user_state))
+				self.add_to_layout(self.ui.results_layout, ShowWidget(p, self.user_state, self))
 				_status_update(results=results)
-				
-		for i in reversed(range(self.ui.results_layout.count())): # clear previous results
-			self.ui.results_layout.itemAt(i).widget().setParent(None)
+
+		self.clear_layout(self.ui.results_layout)
 		if len(results) == 0: # no results found
 			self.ui.results_layout.addWidget(self.ui.noresults_label)
 		else:
@@ -151,11 +163,11 @@ class ShowsMenu(QMainWindow):
 			except TypeError: pass
 			self.all_banners_loaded.connect(partial(_display_pending, pending=pending_add))
 			for r in results: # display new results
-				banner = ShowWidget(r, self.user_state)
+				banner = ShowWidget(r, self.user_state, self)
 				if 'banner' not in r: # shows without banners added to pending add
 					pending_add.append(r)
 				else:
-					banner.banner_loaded.connect(partial(_add_to_layout, widget=banner))
+					banner.banner_loaded.connect(partial(self.add_to_layout, layout=self.ui.results_layout, widget=banner))
 					banner.banner_loaded.connect(partial(_status_update, results=results))
 
 			_wait_for_loading(results, pending_add) # add bannerless when all other shows are loaded
@@ -175,10 +187,9 @@ class ShowsMenu(QMainWindow):
 		'''Load shows and got to page 2'''
 		self.ui.stackedWidget.setCurrentIndex(2)
 		self.ui.showfilter_box.setFocus()
-		for i in reversed(range(self.ui.myshows_layout.count())): # clear previous results
-			self.ui.myshows_layout.itemAt(i).widget().setParent(None)
+		self.clear_layout(self.ui.myshows_layout)
 		for show in self.user_state.shows.values():
-			self.ui.myshows_layout.addWidget(ShowWidget(show, self.user_state))
+			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state, self))
 
 	def update_filter(self):
 		'''Updates the news updates content according to content of filter_box'''
@@ -208,14 +219,15 @@ class ShowWidget(QWidget):
 	banner_loaded = QtCore.pyqtSignal(object)
 	unloadable_banner = QtCore.pyqtSignal()
 
-	def __init__(self, tvshow, user_state):
+	def __init__(self, tvshow, user_state, window):
 		super(ShowWidget, self).__init__()
 		self.tvshow = tvshow
 		self.user_state = user_state
+		self.window = window
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
-		
+
 		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
 		self.ui.name_label.setText('< %s >' % name)
 		clickable(self).connect(self.view_show)
@@ -225,9 +237,9 @@ class ShowWidget(QWidget):
 			self.make_del_button()
 
 		if type(self.tvshow) == dict:
-    			if 'banner' in self.tvshow.keys():
-					self.banner_loaded.connect(self.load_banner)
-					self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])
+			if 'banner' in self.tvshow.keys():
+				self.banner_loaded.connect(self.load_banner)
+				self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])
 		else:
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)
@@ -238,7 +250,7 @@ class ShowWidget(QWidget):
 		if not url: return
 		data = None
 		try: data = urllib.urlopen(url).read()
-		except IOError: print "Name or Service unknown %s" % url
+		except IOError: print "Error Loading show banner url: %s" % url
 		self.banner_loaded.emit(data)
 
 	def load_banner(self, data):
@@ -255,9 +267,11 @@ class ShowWidget(QWidget):
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
+		self.window.ui.statusbar.showMessage("Adding \"%s\" ..." % self.tvshow['seriesname'])
 		self.user_state.add_show(self.tvshow['seriesname'])
 		self.user_state.save_state()
 		print "Added: " + self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
+		self.window.ui.statusbar.clearMessage()
 		self.make_del_button()
 
 	def make_del_button(self):
@@ -269,7 +283,7 @@ class ShowWidget(QWidget):
 
 	def delete_show(self):
 		'''Triggered by clicking on the add button when this show is added
-		
+
 			Stops show from being followed, deleting it from the self.user_state.shows
 		'''
 		self.ui.add_button.clicked.disconnect()
@@ -282,6 +296,4 @@ class ShowWidget(QWidget):
 		print ("Removed: " + name) if name else "Already removed"
 
 		self.ui.add_button.clicked.connect(self.add_show)
-
-			
 
