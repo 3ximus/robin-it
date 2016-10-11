@@ -34,6 +34,7 @@ import urllib
 MAIN_COLOR =  "#03a662"
 RED_COLOR =  "#bf273d"
 TVDB_BANNER_PREFIX = "http://thetvdb.com/banners/"
+RESULTS_TIMEOUT = 20
 
 class ShowsMenu(QMainWindow):
 	'''Works with stacked pages
@@ -82,6 +83,8 @@ class ShowsMenu(QMainWindow):
 		self.ui.filter_box.textChanged.connect(self.update_filter)
 		self.ui.search_box.textChanged.connect(self.update_search)
 		self.ui.search_box_2.textChanged.connect(self.update_search_2)
+		
+		self.search_results = []
 
 		self.col = 0
 		self.row = 0
@@ -106,11 +109,17 @@ class ShowsMenu(QMainWindow):
 		self.search_complete.emit(results)
 
 	def clear_layout(self, layout):
-		'''Clears all widgets from given layout'''		# reset rows and columns
-		self.col = 0
+		'''Clears all widgets from given layout'''
+		self.col = 0 # reset rows and columns
 		self.row = 0
 		for i in reversed(range(layout.count())): # clear previous results
 			layout.itemAt(i).widget().setParent(None)
+		try: self.all_banners_loaded.disconnect() # disconnect signals in order to not connect duplicates
+		except TypeError: pass
+		for x in self.search_results:
+			try: x.disconnect() # prevent previous search from adding widgets to new search
+			except TypeError: continue
+		self.ui.statusbar.clearMessage()
 
 	def add_to_layout(self, layout, widget):
 		'''Takes the widget to be added and the layout to add it to'''
@@ -128,7 +137,7 @@ class ShowsMenu(QMainWindow):
 			This is done in order to only display bannerless shows at the end
 		'''
 
-		def _status_update(results):
+		def _status_update():
 			'''Updates Status bar loading message with progress_bar'''
 			self.loaded_results+=1
 			p = 100*self.loaded_results/len(results)
@@ -138,39 +147,40 @@ class ShowsMenu(QMainWindow):
 				self.ui.statusbar.clearMessage()
 
 		@threaded
-		def _wait_for_loading(results, pending_add):
+		def _wait_for_loading(pending_add):
 			'''This thread will simply wait until all shows with banners are loaded
 				Emits self.all_banners_loaded when finished
 			'''
-			while True: # TODO FIXME causes hanging!! (search for "the")
+			counter = RESULTS_TIMEOUT # timeout to prevent hanging
+			while counter > 0:
 				if self.loaded_results == len(results)-len(pending_add):
 					self.all_banners_loaded.emit()
 					return
 				sleep(1)
+				counter -= 1
 
 		def _display_pending(pending):
 			'''Triggered by self.all_banners_loaded signal. Display shows without banner'''
 			for p in pending: # add the shows without banner at the end
-				self.add_to_layout(self.ui.results_layout, ShowWidget(p, self.user_state, self))
-				_status_update(results=results)
+				self.add_to_layout(self.ui.results_layout, p)
+				_status_update()
 
 		self.clear_layout(self.ui.results_layout)
 		if len(results) == 0: # no results found
 			self.ui.results_layout.addWidget(self.ui.noresults_label)
-		else:
-			pending_add = []
-			try: self.all_banners_loaded.disconnect() # disconnect signals in order to not connect duplicates
-			except TypeError: pass
-			self.all_banners_loaded.connect(partial(_display_pending, pending=pending_add))
-			for r in results: # display new results
-				banner = ShowWidget(r, self.user_state, self)
-				if 'banner' not in r: # shows without banners added to pending add
-					pending_add.append(r)
-				else:
-					banner.banner_loaded.connect(partial(self.add_to_layout, layout=self.ui.results_layout, widget=banner))
-					banner.banner_loaded.connect(partial(_status_update, results=results))
+			return
+		pending_add = []
+		self.all_banners_loaded.connect(partial(_display_pending, pending=pending_add))
+		for r in results: # display new results
+			banner = ShowWidget(r, self.user_state, self)
+			self.search_results.append(banner)
+			if 'banner' not in r: # shows without banners added to pending add
+				pending_add.append(banner)
+			else:
+				banner.banner_loaded.connect(partial(self.add_to_layout, layout=self.ui.results_layout, widget=banner))
+				banner.banner_loaded.connect(_status_update)
 
-			_wait_for_loading(results, pending_add) # add bannerless when all other shows are loaded
+		_wait_for_loading(pending_add) # add bannerless when all other shows are loaded
 
 	def go_back(self):
 		'''Closes this window and opens the Main Menu'''
