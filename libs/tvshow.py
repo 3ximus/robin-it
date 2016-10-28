@@ -119,9 +119,9 @@ class Show:
 		imdb_id = database[self.real_name]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 
-	def toogle_watched(self):
-		''' Toogle the watched state '''
-		self.watched = not self.watched # toogle watched
+	def toogle_watched(self, state=None):
+		''' Toogle the watched state, if state is given set the the state to the given one'''
+		self.watched = (not self.watched) if state==None else state # toogle watched
 		for season in self.seasons: # replicate action to every season
 			season.set_watched(self.watched)
 

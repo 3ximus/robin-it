@@ -1,0 +1,1 @@
+make every call to download a threaded wrapper for the real download function. the wrapper will emit the signal to allow for static signal definition. the main function will then look for the banner in the cache -- allow for faster image load speeds
