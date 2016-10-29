@@ -18,23 +18,16 @@ from gui.resources.shows_menu import Ui_shows_menu
 from gui.resources.show_banner_widget import Ui_show_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable
+from gui_func import clickable, download_object
 from show_window import ShowWindow
 from libs.tvshow import search_for_show
 from libs.thread_decorator import threaded
 from libs.loading import progress_bar
+import settings
 
 # TOOLS
 from time import sleep
 from functools import partial
-import urllib
-
-# FIXED VALUES
-
-MAIN_COLOR =  "#03a662"
-RED_COLOR =  "#bf273d"
-TVDB_BANNER_PREFIX = "http://thetvdb.com/banners/"
-RESULTS_TIMEOUT = 20
 
 class ShowsMenu(QMainWindow):
 	'''Works with stacked pages
@@ -78,12 +71,12 @@ class ShowsMenu(QMainWindow):
 		self.ui.back_button_3.clicked.connect(partial(self.go_to, index=0))
 
 		self.ui.myshows_button.clicked.connect(self.load_my_shows)
-		self.ui.towatch_button.clicked.connect(partial(self.go_to, index=3))
+		self.ui.towatch_button.clicked.connect(self.load_unwatched)
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
 		self.ui.search_box.textChanged.connect(self.update_search)
 		self.ui.search_box_2.textChanged.connect(self.update_search_2)
-		
+
 		self.search_results = []
 
 		self.col = 0
@@ -151,7 +144,7 @@ class ShowsMenu(QMainWindow):
 			'''This thread will simply wait until all shows with banners are loaded
 				Emits self.all_banners_loaded when finished
 			'''
-			counter = RESULTS_TIMEOUT # timeout to prevent hanging
+			counter = settings._RESULTS_TIMEOUT # timeout to prevent hanging
 			while counter > 0:
 				if self.loaded_results == len(results)-len(pending_add):
 					self.all_banners_loaded.emit()
@@ -201,6 +194,17 @@ class ShowsMenu(QMainWindow):
 		for show in self.user_state.shows.values():
 			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state, self))
 
+	def load_unwatched(self):
+		'''Load tracked and go to page 3'''
+		# TODO fix names in UI itself
+		self.ui.stackedWidget.setCurrentIndex(3)
+		self.ui.tracked_filter.setFocus()
+		self.clear_layout(self.ui.unwatched_layout)
+
+		unwatched_dict = self.user_state.unwatched_episodes()
+		for show in unwatched_dict:
+			self.add_to_layout(self.ui.unwatched_layout, UnwatchedWidget(self.user_state.get_show(show), unwatched_dict[show], self.user_state))
+
 	def update_filter(self):
 		'''Updates the news updates content according to content of filter_box'''
 		print self.ui.filter_box.text()
@@ -219,6 +223,7 @@ class ShowWidget(QWidget):
 
 	Parameters:
 		tvshow -- search result to load the banner from or a Show instance
+		user_state -- UserContent class
 
 		The whole widget is clickable displaying a Show Window with the tvshow info
 		Has an add button to add the show to the followed shows
@@ -227,7 +232,6 @@ class ShowWidget(QWidget):
 		Used in search results
 	'''
 	banner_loaded = QtCore.pyqtSignal(object)
-	unloadable_banner = QtCore.pyqtSignal()
 
 	def __init__(self, tvshow, user_state, window):
 		super(ShowWidget, self).__init__()
@@ -249,7 +253,7 @@ class ShowWidget(QWidget):
 		if type(self.tvshow) == dict:
 			if 'banner' in self.tvshow.keys():
 				self.banner_loaded.connect(self.load_banner)
-				self.download_banner(TVDB_BANNER_PREFIX + self.tvshow['banner'])
+				self.download_banner(settings._TVDB_BANNER_PREFIX + self.tvshow['banner'])
 		else:
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)
@@ -258,9 +262,7 @@ class ShowWidget(QWidget):
 	def download_banner(self, url):
 		'''Thread to download banner, emits self.banner_loaded signal when complete'''
 		if not url: return
-		data = None
-		try: data = urllib.urlopen(url).read()
-		except IOError: print "Error Loading show banner url: %s" % url
+		data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
 		self.banner_loaded.emit(data)
 
 	def load_banner(self, data):
@@ -288,7 +290,7 @@ class ShowWidget(QWidget):
 		'''Transforms the add button into a delete button'''
 		self.ui.add_button.clicked.disconnect()
 		self.ui.add_button.setText("-del")
-		self.ui.add_button.setStyleSheet("background-color: " + RED_COLOR)
+		self.ui.add_button.setStyleSheet("background-color: " + settings._RED_COLOR)
 		self.ui.add_button.clicked.connect(self.delete_show)
 
 	def delete_show(self):
@@ -298,7 +300,7 @@ class ShowWidget(QWidget):
 		'''
 		self.ui.add_button.clicked.disconnect()
 		self.ui.add_button.setText("+ add")
-		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
+		self.ui.add_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 
 		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
 		name = self.user_state.remove_show(name) # dont remove assignment (it returns none in case of failure to remove)
@@ -307,3 +309,64 @@ class ShowWidget(QWidget):
 
 		self.ui.add_button.clicked.connect(self.add_show)
 
+class UnwatchedWidget(QWidget):
+	'''Small banner to identify a show and represent number of unwatched episodes in it
+
+	Parameters:
+		tvshow -- search result to load the banner from or a Show instance
+		unwatched_dict -- dictionary in the format {s_id:[episode list]}
+		user_state -- UserContent class
+	'''
+
+	banner_loaded = QtCore.pyqtSignal(object)
+
+	def __init__(self, tvshow, unwatched_dict, user_state):
+		super(UnwatchedWidget, self).__init__()
+		self.tvshow = tvshow
+		self.unwatched_dict = unwatched_dict
+		self.user_state = user_state
+
+		self.ui = Ui_show_unwatched_banner_widget()
+		self.ui.setupUi(self)
+
+		name = self.tvshow.real_name
+		self.ui.name_label.setText('< %s >' % name)
+
+		count = 0
+		for sid in self.unwatched_dict:
+			count += self.unwatched_dict[sid]
+		self.ui.counter_label.setText(str(count))
+
+		self.ui.mark_button.clicked.connect(self.mark_watched)
+
+		self.banner_loaded.connect(self.load_banner)
+		self.download_banner(self.tvshow.banner)
+		clickable(self).connect(self.view_show)
+
+		# TODO SETUP clickable signal etc
+
+	@threaded
+	def download_banner(self, url):
+		'''Thread to download banner, emits self.banner_loaded signal when complete'''
+		if not url: return
+		data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
+		self.banner_loaded.emit(data)
+
+	def load_banner(self, data):
+		'''Triggered by self.banner_loaded signal. Loads the banner from downloaded data'''
+		if not data: return # when banner was not loaded or url couldnt be reached
+		banner = QPixmap()
+		banner.loadFromData(data)
+		self.ui.banner.setPixmap(banner)
+
+	def view_show(self):
+		'''Triggered clicking on the widget. Displays Show Window'''
+		self.show_window = ShowWindow(self.tvshow, self.user_state)
+		self.show_window.show()
+		# TODO FIXME THIS MAY ORIINATE MEMORY LEAKS -- VERIFY BY DESTROYING POINTER self.show_window
+
+	def mark_watched(self):
+		'''Mark the remaining episodes as watched'''
+		for sid in self.unwatched_dict:
+			for e in self.unwatched_dict[sid]:
+				e.set_watched(True)

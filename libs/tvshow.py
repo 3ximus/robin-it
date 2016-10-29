@@ -119,9 +119,17 @@ class Show:
 		imdb_id = database[self.real_name]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
 
-	def toogle_watched(self):
-		''' Toogle the watched state '''
-		self.watched = not self.watched # toogle watched
+	def set_cache_dir(self, new_dir):
+		'''Sets the cache to a new directory'''
+		self.cache = new_dir
+		for s in self.seasons:
+			s.cache = new_dir
+			for e in s.episodes:
+				e.cache = new_dir
+
+	def toogle_watched(self, state=None):
+		''' Toogle the watched state, if state is given set the the state to the given one'''
+		self.watched = (not self.watched) if state==None else state # toogle watched
 		for season in self.seasons: # replicate action to every season
 			season.set_watched(self.watched)
 
@@ -250,6 +258,7 @@ class Season():
 
 	def toogle_watched(self):
 		''' Toogle the watched state '''
+		print self.cache
 		self.set_watched(not self.watched)
 		self.update_watched() # after setting the value call update_watched to propagate change
 

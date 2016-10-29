@@ -2172,7 +2172,7 @@
              </palette>
             </property>
             <property name="text">
-             <string>&gt; set user_location</string>
+             <string>&gt; set user_location [currently only works for new profiles]</string>
             </property>
            </widget>
           </item>

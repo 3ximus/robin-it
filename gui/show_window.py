@@ -19,10 +19,11 @@ from gui.resources.season_banner_widget import Ui_season_banner_widget
 from gui.resources.episode_banner_widget import Ui_episode_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable
+from gui_func import clickable, download_object
 from libs.tvshow import Show
 from libs.thread_decorator import threaded
 from libs.config import Config
+import settings
 
 # TOOLS
 from functools import partial
@@ -30,37 +31,6 @@ from PIL import Image, ImageFilter
 from cStringIO import StringIO
 import math
 import urllib
-
-# FIXED VALUES
-MAIN_COLOR =  "#03a662"
-RED_COLOR =  "#bf273d"
-BLUR_RADIOUS = 10
-DARKNESS = 0.6
-SEASON_MAX_COL = 5
-EPISODE_MAX_COL = 3
-
-# --------------------
-#       Functions
-# --------------------
-
-@threaded
-def download_image(signal, url, filters=False):
-	'''Thread to download image, emits signal when complete'''
-	data = urllib.urlopen(url).read()
-	if filters: data = apply_filters(data)
-	signal.emit(data)
-
-def apply_filters(data):
-	'''Function to apply filter to an image in the form of binary data'''
-	data = StringIO(data)
-	img = Image.open(data)
-	img = img.point(lambda x: x*DARKNESS) # darken
-	img = img.filter(ImageFilter.GaussianBlur(BLUR_RADIOUS)) # blur
-	tmp_data = StringIO()
-	img.save(tmp_data, format='PNG')
-	data = tmp_data.getvalue()
-	tmp_data.close()
-	return data
 
 # --------------------
 #      Classes
@@ -134,10 +104,10 @@ class ShowWindow(QMainWindow):
 		self.user_state.save_state()
 		if self.tvshow.watched:
 			self.ui.mark_button.setText("umark")
-			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._RED_COLOR)
 		else:
 			self.ui.mark_button.setText("mark")
-			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 
 	@threaded
 	def get_show_data(self, name):
@@ -156,7 +126,7 @@ class ShowWindow(QMainWindow):
 
 		if self.tvshow.poster: # load background
 			self.background_loaded.connect(self.load_background)
-			download_image(self.background_loaded, self.tvshow.poster, filters=True)
+			self.download_image(self.tvshow.poster)
 
 		if self.user_state.is_tracked(self.tvshow.name):
 			self.make_del_button()
@@ -178,15 +148,15 @@ class ShowWindow(QMainWindow):
 
 	def display_seasons(self):
 		'''Adds clickable seasons posters to the window'''
-		c = len(self.tvshow.seasons) - len(self.tvshow.seasons)%SEASON_MAX_COL
+		c = len(self.tvshow.seasons) - len(self.tvshow.seasons)%settings._SEASON_MAX_COL
 		for i, s in enumerate(self.tvshow.seasons):
 			season = SeasonWidget(s, self)
 			clickable(season).connect(partial(self.display_episodes, sid=(s.s_id-1))) # 1 based
 			# this is a temporary workaround for seasons display
-			if i < c: self.ui.seasons_layout.addWidget(season, self.season_row, self.season_col%SEASON_MAX_COL)
-			else: self.ui.last_row_seasons_layout.addWidget(season, self.season_row, self.season_col%SEASON_MAX_COL)
+			if i < c: self.ui.seasons_layout.addWidget(season, self.season_row, self.season_col%settings._SEASON_MAX_COL)
+			else: self.ui.last_row_seasons_layout.addWidget(season, self.season_row, self.season_col%settings._SEASON_MAX_COL)
 			self.season_col+=1
-			if self.season_col%SEASON_MAX_COL==0: self.season_row+=1
+			if self.season_col%settings._SEASON_MAX_COL==0: self.season_row+=1
 
 	def display_episodes(self, sid):
 		'''Fills the GUI with episodes from selected season'''
@@ -198,12 +168,32 @@ class ShowWindow(QMainWindow):
 		for i in reversed(range(self.ui.last_row_episodes_layout.count())): # clear previous episodes displayed
 			self.ui.last_row_episodes_layout.itemAt(i).widget().setParent(None)
 
-		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%EPISODE_MAX_COL
+		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%settings._EPISODE_MAX_COL
 		for i, e in enumerate(self.tvshow.seasons[sid].episodes):
-			if i < c: self.ui.episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%EPISODE_MAX_COL)
-			else:  self.ui.last_row_episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%EPISODE_MAX_COL)
+			if i < c: self.ui.episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%settings._EPISODE_MAX_COL)
+			else:  self.ui.last_row_episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%settings._EPISODE_MAX_COL)
 			self.episode_col+=1
-			if self.episode_col%EPISODE_MAX_COL==0: self.episode_row+=1
+			if self.episode_col%settings._EPISODE_MAX_COL==0: self.episode_row+=1
+
+	@threaded
+	def download_image(self, url):
+		'''Thread to download image, emits signal when complete'''
+		if not url: return
+		data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
+		data = self._apply_filters(data)
+		self.background_loaded.emit(data)
+
+	def _apply_filters(self, data):
+		'''Function to apply filter to an image in the form of binary data'''
+		data = StringIO(data)
+		img = Image.open(data)
+		img = img.point(lambda x: x*settings._DARKNESS) # darken
+		img = img.filter(ImageFilter.GaussianBlur(settings._BLUR_RADIOUS)) # blur
+		tmp_data = StringIO()
+		img.save(tmp_data, format='PNG')
+		data = tmp_data.getvalue()
+		tmp_data.close()
+		return data
 
 	def load_background(self, data):
 		'''Triggered by background_loaded signal.
@@ -239,7 +229,7 @@ class ShowWindow(QMainWindow):
 		'''Transforms the add button into a delete button'''
 		self.ui.add_button.clicked.disconnect()
 		self.ui.add_button.setText("-del")
-		self.ui.add_button.setStyleSheet("background-color: " + RED_COLOR)
+		self.ui.add_button.setStyleSheet("background-color: " + settings._RED_COLOR)
 		self.ui.add_button.clicked.connect(self.delete_show)
 
 	def delete_show(self):
@@ -249,7 +239,7 @@ class ShowWindow(QMainWindow):
 		'''
 		self.ui.add_button.clicked.disconnect()
 		self.ui.add_button.setText("+ add")
-		self.ui.add_button.setStyleSheet("background-color: " + MAIN_COLOR)
+		self.ui.add_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 
 		name = self.user_state.remove_show(self.tvshow.real_name) # dont remove assignment (it returns none in case of failure to remove)
 		self.user_state.save_state()
@@ -261,6 +251,9 @@ class ShowWindow(QMainWindow):
 		'''Toogles watdched state'''
 		self.tvshow.toogle_watched()
 		self.update_shout.emit() #update button
+
+	def closeEvent(self, event):
+		self.deleteLater()
 
 class SeasonWidget(QWidget):
 	'''Season Widget class
@@ -290,17 +283,17 @@ class SeasonWidget(QWidget):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
 		if self.season.watched:
 			self.ui.mark_button.setText("umark")
-			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._RED_COLOR)
 		else:
 			self.ui.mark_button.setText("mark")
-			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 
 	@threaded
 	def download_poster(self, url):
 		'''Thread to download season poster'''
 		if not url: return
 		try:
-			data = urllib.urlopen(url).read()
+			data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
 			self.poster_loaded.emit(data)
 		except IOError: print "Error Loading season poster url: %s" % url
 
@@ -331,7 +324,7 @@ class EpisodeWidget(QWidget):
 
 		self.ui = Ui_episode_banner_widget()
 		self.ui.setupUi(self)
-		
+
 		clickable(self).connect(self.toogle_details)
 		self.ui.filler.hide()
 		self.ui.description.hide()
@@ -350,17 +343,17 @@ class EpisodeWidget(QWidget):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
 		if self.episode.watched:
 			self.ui.mark_button.setText("umark")
-			self.ui.mark_button.setStyleSheet("background-color: " + RED_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._RED_COLOR)
 		else:
 			self.ui.mark_button.setText("mark")
-			self.ui.mark_button.setStyleSheet("background-color: " + MAIN_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 
 	@threaded
 	def download_image(self, url):
 		'''Thread to downlaod episode image'''
 		if not url: return
 		try:
-			data = urllib.urlopen(url).read()
+			data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
 			self.image_loaded.emit(data)
 		except IOError: print "Error Loading episode image url: %s" % url
 
@@ -374,7 +367,7 @@ class EpisodeWidget(QWidget):
 		'''Toogle season watched state'''
 		self.episode.toogle_watched()
 		self.window.update_shout.emit()
-	
+
 	def toogle_details(self):
 		'''Toogle Details display'''
 		if self.ui.filler.isHidden():
