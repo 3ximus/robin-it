@@ -215,9 +215,9 @@ class SettingsWindow(QMainWindow):
 		settings.config.add_property('storage_dir',self.ui.storage_box.text().replace(' ', '_'), 'directories')
 		settings.config.add_property('user_dir', self.ui.user_box.text().replace(' ', '_'), 'directories')
 		settings.config.add_property('cache_dir', self.ui.cache_box.text().replace(' ', '_'), 'directories')
-		self.main_window.user_state.set_storage_dir(self.ui.storage_box.text().replace(' ', '_'))
-		self.main_window.user_state.set_user_dir(self.ui.user_box.text().replace(' ', '_'))
-		self.main_window.user_state.set_cache_dir(self.ui.cache_box.text().replace(' ', '_'))
+		self.main_window.user_state.set_storage_dir(settings.config['storage_dir'] if settings.config['storage_dir'] != '' else None)
+		self.main_window.user_state.set_user_dir(settings.config['user_dir'] if settings.config['user_dir'] != '' else None)
+		self.main_window.user_state.set_cache_dir(settings.config['cache_dir'] if settings.config['cache_dir'] != '' else None)
 		self.main_window.user_state.save_state()
 
 		settings.config.add_property('default_user',self.ui.defaultuser_box.text().replace(' ', '_'))

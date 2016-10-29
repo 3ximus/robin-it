@@ -56,14 +56,17 @@ class UserContent:
 
 # SET METHODS
 	def set_cache_dir(self, new_dir):
+		if not new_dir: return
 		self.cache_dir = new_dir
 		for t in self.shows.values():
 			t.set_cache_dir(new_dir)
 
 	def set_storage_dir(self, new_dir):
+		if not new_dir: return
 		self.storage_dir = new_dir
 
 	def set_user_dir(self, new_dir):
+		if not new_dir: return
 		self.user_dir = new_dir
 
 # ==========================================
