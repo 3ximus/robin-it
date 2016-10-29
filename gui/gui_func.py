@@ -11,6 +11,15 @@ __version__ = '0.6'
 
 from PyQt5 import QtCore
 
+import urllib
+
+def download_object(url, cache_dir=None):
+	'''Download object at the given url, cache directory is used to cache objects to bypass downloads'''
+	data = None
+	try: data = urllib.urlopen(url).read()
+	except IOError: print "Error Loading show banner url: %s" % url
+	return data
+
 def clickable(widget):
 	'''Makes a widget clickable, returning the clicked event'''
 	class Filter(QtCore.QObject):

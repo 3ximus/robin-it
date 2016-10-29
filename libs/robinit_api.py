@@ -12,7 +12,7 @@ __version__ = '0.6'
 
 
 import tvshow
-from os import mkdir, path
+import os
 import cPickle
 
 # Torrent libs
@@ -37,12 +37,11 @@ class UserContent:
 
 		self.tvdb_apikey = '' # TODO API KEY
 		self.shows = {} # following tv shows
+
 		self.user_dir = user_dir if user_dir else 'user/' # force defaults if None
+		self.load_state(self.user_dir)
 		self.cache_dir = cache_dir if cache_dir else 'cache/' # force defaults if None
 		self.storage_dir = storage_dir if storage_dir else 'cache/' # force defaults if None
-
-		if not self.load_state(self.user_dir):
-			if not path.exists(self.user_dir): mkdir(self.user_dir)
 
 # ==========================================
 # 	          BASIC METHODS
@@ -55,6 +54,18 @@ class UserContent:
 		#if self.find_item(name): return True
 		#return False
 
+# SET METHODS
+	def set_cache_dir(self, new_dir):
+		self.cache_dir = new_dir
+		for t in self.shows.values():
+			t.set_cache_dir(new_dir)
+
+	def set_storage_dir(self, new_dir):
+		self.storage_dir = new_dir
+
+	def set_user_dir(self, new_dir):
+		self.user_dir = new_dir
+
 # ==========================================
 # 	           MAIN METHODS
 # ==========================================
@@ -66,11 +77,12 @@ class UserContent:
 		If no arguments were given the default path from the class will be used (self.user_dir)
 		This method closes the file descriptor if given
 		'''
+		if not os.path.exists(self.user_dir): os.mkdir(self.user_dir)
 		if path:
-			path = "%srobinit_%s_%s%s" % (path, __version__.split('.')[0], self.username, '.pkl')
+			path = "%s/robinit_%s_%s%s" % (path, __version__.split('.')[0], self.username, '.pkl')
 			fd = open(path, 'wb')
 		if not fd:
-			path = "%srobinit_%s_%s%s" % (self.user_dir, __version__.split('.')[0], self.username, '.pkl')
+			path = "%s/robinit_%s_%s%s" % (self.user_dir, __version__.split('.')[0], self.username, '.pkl')
 			fd = open(path, 'wb')
 		cPickle.dump(self.__dict__, fd, cPickle.HIGHEST_PROTOCOL)
 		fd.close()
@@ -83,11 +95,11 @@ class UserContent:
 		This method closes the file descriptor if given
 		'''
 		if path:
-			path = "%srobinit_%s_%s%s" % (path, __version__.split('.')[0], self.username, '.pkl')
+			path = "%s/robinit_%s_%s%s" % (path, __version__.split('.')[0], self.username, '.pkl')
 			try: fd = open(path, 'rb')
 			except IOError: return False
 		if not fd:
-			path = "%srobinit_%s_%s%s" % (self.user_dir, __version__.split('.')[0], self.username, '.pkl')
+			path = "%s/robinit_%s_%s%s" % (self.user_dir, __version__.split('.')[0], self.username, '.pkl')
 			try: fd = open(path, 'rb')
 			except IOError: return False
 		tmp_dict = cPickle.load(fd)

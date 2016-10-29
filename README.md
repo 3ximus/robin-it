@@ -14,10 +14,10 @@ Before manually installing try one of the compiled builds on the branches "relea
 The python version used is python2.7, i will popssibly port it to python3.5 since PyQt5 only officially supports 3.5 if i'm not mistaken. The main dependencies are listed in the requirements.txt, and can be installed through:
 
  `pip install -r requirements.txt`
- 
+
 Python bindings for Qt5 can be installed through:
 
-ubuntu: 	`apt-get install python-qt5`
+ubuntu: 	`apt-get install python-qt5` or ` python-pyqt5`
 arch: 		`pacman -S python2-pyqt5`
 
 Run `python robinit_gui.py`
@@ -27,6 +27,10 @@ Run `python robinit_gui.py`
 Run `python robinit_gui.py`
 
 ## Changelog
+
+**New in v0.5**
+
+- Stability Improvments
 
 **New in v0.4**
 

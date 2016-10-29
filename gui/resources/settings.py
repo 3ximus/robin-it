@@ -962,7 +962,7 @@ class Ui_settings_window(object):
         self.ptsub_checkbox.setText(_translate("settings_window", "portuguese"))
         self.label1.setText(_translate("settings_window", "> set storage_location"))
         self.storage_box.setPlaceholderText(_translate("settings_window", "./storage"))
-        self.label1_7.setText(_translate("settings_window", "> set user_location"))
+        self.label1_7.setText(_translate("settings_window", "> set user_location [currently only works for new profiles]"))
         self.user_box.setPlaceholderText(_translate("settings_window", "./user"))
         self.label1_6.setText(_translate("settings_window", "> set cache_location"))
         self.cache_box.setPlaceholderText(_translate("settings_window", "./cache"))
