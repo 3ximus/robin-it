@@ -76,7 +76,7 @@ class Show:
 
 		if self.cache:
 			if not os.path.exists(self.cache):
-				os.mkdir(self.cache) # make directory if unexistent
+				os.makedirs(self.cache) # make directory if unexistent
 
 		self.name = name.split('(')[0]
 		self.real_name = name

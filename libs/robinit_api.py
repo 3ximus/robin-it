@@ -86,7 +86,7 @@ class UserContent:
 		If no arguments were given the default path from the class will be used (self.user_dir)
 		This method closes the file descriptor if given
 		'''
-		if not os.path.exists(self.user_dir): os.mkdir(self.user_dir)
+		if not os.path.exists(self.user_dir): os.makedirs(self.user_dir)
 		if path:
 			path = "%s/robinit_%s_%s%s" % (path, __version__.split('.')[0], self.username, '.pkl')
 			fd = open(path, 'wb')
