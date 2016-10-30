@@ -253,11 +253,11 @@ class SettingsWindow(QMainWindow):
 				self.ui.hd_button.setChecked(True)
 
 		if settings.config.has_property('storage_dir'):
-			self.ui.storage_box.setText(settings.config['storage_dir'])
+			self.ui.storage_box.setText(settings.config['storage_dir'] if settings.config['storage_dir'] != './storage' else '')
 		if settings.config.has_property('user_dir'):
-			self.ui.user_box.setText(settings.config['user_dir'])
+			self.ui.user_box.setText(settings.config['user_dir'] if settings.config['user_dir'] != './user' else '')
 		if settings.config.has_property('cache_dir'):
-			self.ui.cache_box.setText(settings.config['cache_dir'])
+			self.ui.cache_box.setText(settings.config['cache_dir'] if settings.config['cache_dir'] != './cache' else '')
 
 		if settings.config.has_property('default_user'):
 			self.ui.defaultuser_box.setText(settings.config['default_user'])

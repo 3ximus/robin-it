@@ -10,27 +10,47 @@ __version__ = '0.6'
 
 
 from PyQt5 import QtCore
-
+from hashlib import md5
+import os
 import urllib
 
-def download_object(url, cache_dir=None):
-	'''Download object at the given url, cache directory is used to cache objects to bypass downloads'''
+def download_object(url, cache_dir=None, cache_this=True):
+	'''Download object at the given url
+
+		Cache directory is used to cache objects to bypass downloads
+		The cache_this parameter is used to avoid writing the object to the cache
+	'''
 	data = None
+	cache_image = False
+	if cache_dir:
+		cache = cache_dir+"/image/"
+		if not os.path.exists(cache): os.mkdir(cache)
+		md5_hash = md5()
+		md5_hash.update(url)
+		digest = md5_hash.hexdigest()
+		if digest in os.listdir(cache):
+			with open(cache+digest, "r") as image_file:
+				return image_file.read()
+		elif cache_this: cache_image = True
+	# else... download
 	try: data = urllib.urlopen(url).read()
 	except IOError: print "Error Loading show banner url: %s" % url
+	if cache_image and data:
+		with open(cache+digest, "w") as image_file:
+			image_file.write(data)
 	return data
 
 def clickable(widget):
 	'''Makes a widget clickable, returning the clicked event'''
 	class Filter(QtCore.QObject):
-		clicked = QtCore.pyqtSignal()
+    		clicked = QtCore.pyqtSignal()
 
 		def eventFilter(self, obj, event):
-			if obj == widget:
-				if event.type() == QtCore.QEvent.MouseButtonRelease:
-					if obj.rect().contains(event.pos()):
-						self.clicked.emit()
-						# use .emit(obj) to get the object within the slot.
+    			if obj == widget:
+    				if event.type() == QtCore.QEvent.MouseButtonRelease:
+    					if obj.rect().contains(event.pos()):
+							# use .emit(obj) to get the object within the slot.
+    						self.clicked.emit()
 						return True
 			return False
 

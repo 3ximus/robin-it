@@ -37,6 +37,7 @@ class UserContent:
 
 		self.tvdb_apikey = '' # TODO API KEY
 		self.shows = {} # following tv shows
+		self.actions = {}
 
 		self.user_dir = user_dir if user_dir else 'user/' # force defaults if None
 		self.load_state(self.user_dir)

@@ -207,7 +207,7 @@ class ShowsMenu(QMainWindow):
 			self.add_to_layout(self.ui.unwatched_layout, UnwatchedWidget(self.user_state.get_show(show), unwatched_dict[show], self.user_state))
 
 	def update_filter(self):
-		'''Updates the news updates content according to content of filter_box'''
+		'''Filters the news and updates box'''
 		print self.ui.filter_box.text()
 
 	def update_my_shows(self):
