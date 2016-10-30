@@ -59,7 +59,6 @@ class Config():
 		if type(key) != str:
 			raise AttributeError("[ERROR] Tried to add property to class with name not string")
 		if type(value) != str and type(value) != bool and type(value) != unicode:
-			key = 'la'
 			print "[\033[33mWARNING\033[0m] Property %s value is not a string nor bool" % key
 		cat = category if category else 'other'
 		if cat not in self.dict:

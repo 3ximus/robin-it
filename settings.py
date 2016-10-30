@@ -19,7 +19,9 @@ def init():
 							'piratebay_allow':False},
 				'subtitles': {'sub_en':True,
 							'sub_pt':True},
-				'directories':{ 'storage_dir':''},
+				'directories':{ 'storage_dir':'./storage',
+								'cache_dir':'./cache',
+								'user_dir':'./user'},
 				'other':{'definition':'hd'}}
 
 	global _CONFIG_FILE

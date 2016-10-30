@@ -74,6 +74,7 @@ class ShowsMenu(QMainWindow):
 		self.ui.towatch_button.clicked.connect(self.load_unwatched)
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
+		self.ui.showfilter_box.textChanged.connect(self.update_my_shows)
 		self.ui.search_box.textChanged.connect(self.update_search)
 		self.ui.search_box_2.textChanged.connect(self.update_search_2)
 
@@ -206,8 +207,17 @@ class ShowsMenu(QMainWindow):
 			self.add_to_layout(self.ui.unwatched_layout, UnwatchedWidget(self.user_state.get_show(show), unwatched_dict[show], self.user_state))
 
 	def update_filter(self):
-		'''Updates the news updates content according to content of filter_box'''
+		'''Filters the news and updates box'''
 		print self.ui.filter_box.text()
+
+	def update_my_shows(self):
+		'''Updates my shows content based on the filter'''
+		self.clear_layout(self.ui.myshows_layout)
+		items = self.user_state.find_item(self.ui.showfilter_box.text())
+		if not items: return
+		if type(items) == str: items = [items,]
+		for s in items:
+			self.add_to_layout(self.ui.myshows_layout, ShowWidget(self.user_state.shows[s], self.user_state, self))
 
 	def update_search(self):
 		'''Maintains search boxes from both stack pages in sync'''

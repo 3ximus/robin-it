@@ -207,6 +207,9 @@ class ShowWindow(QMainWindow):
 		palette.setBrush(QPalette.Background, QBrush(self.background))
 		self.setPalette(palette)
 		self.ui.statusbar.clearMessage()
+		# Force scrollareas to be transparent
+		self.ui.scrollArea_2.setStyleSheet("background-color: transparent;")
+		self.ui.scrollArea_3.setStyleSheet("background-color: transparent;")
 
 	def resizeEvent(self, event):
 		'''Called when resize is made'''

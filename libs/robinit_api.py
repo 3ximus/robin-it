@@ -37,6 +37,7 @@ class UserContent:
 
 		self.tvdb_apikey = '' # TODO API KEY
 		self.shows = {} # following tv shows
+		self.actions = {}
 
 		self.user_dir = user_dir if user_dir else 'user/' # force defaults if None
 		self.load_state(self.user_dir)
@@ -56,14 +57,17 @@ class UserContent:
 
 # SET METHODS
 	def set_cache_dir(self, new_dir):
+		if not new_dir: return
 		self.cache_dir = new_dir
 		for t in self.shows.values():
 			t.set_cache_dir(new_dir)
 
 	def set_storage_dir(self, new_dir):
+		if not new_dir: return
 		self.storage_dir = new_dir
 
 	def set_user_dir(self, new_dir):
+		if not new_dir: return
 		self.user_dir = new_dir
 
 # ==========================================
