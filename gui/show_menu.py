@@ -225,9 +225,8 @@ class ShowsMenu(QMainWindow):
 		self.clear_layout(self.ui.myshows_layout)
 		items = self.user_state.find_item(self.ui.showfilter_box.text())
 		if not items: return
-		if type(items) == str: items = [items,]
 		for s in items:
-			self.add_to_layout(self.ui.myshows_layout, ShowWidget(self.user_state.shows[s], self.user_state, self))
+			self.add_to_layout(self.ui.myshows_layout, ShowWidget(s, self.user_state, self))
 
 	def update_search(self):
 		'''Maintains search boxes from both stack pages in sync'''

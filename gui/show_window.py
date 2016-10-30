@@ -96,6 +96,8 @@ class ShowWindow(QMainWindow):
 		# this in both cases where it is tracked
 		self.update_me()
 		self.load_show()
+
+		# TODO uncoment this: self.ui.force_update_button.connect(self.force_update)
 		print 'View: \"%s\", last updated: %s' % (self.tvshow.name, self.tvshow.last_updated)
 
 	def update_me(self):
@@ -109,6 +111,10 @@ class ShowWindow(QMainWindow):
 		else:
 			self.ui.mark_button.setText("mark")
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+
+	@threaded
+	def force_update(self):
+		self.tvshow.update_info()
 
 	@threaded
 	def get_show_data(self, name):
