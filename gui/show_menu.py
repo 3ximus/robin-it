@@ -26,6 +26,7 @@ from libs.loading import progress_bar
 import settings
 
 # TOOLS
+import datetime
 from time import sleep
 from functools import partial
 
@@ -80,6 +81,11 @@ class ShowsMenu(QMainWindow):
 
 		self.search_results = []
 
+		for show in self.user_state.shows.values():
+			if show.last_updated:
+				if abs(show.last_updated - datetime.date.today()) > datetime.timedelta(settings._UPDATE_SHOW_INTERVAL):
+					self.update_show(show)
+
 		self.col = 0
 		self.row = 0
 
@@ -101,6 +107,10 @@ class ShowsMenu(QMainWindow):
 		'''
 		results = search_for_show(text)
 		self.search_complete.emit(results)
+
+	@threaded
+	def update_show(self, show):
+		show.update_info()
 
 	def clear_layout(self, layout):
 		'''Clears all widgets from given layout'''

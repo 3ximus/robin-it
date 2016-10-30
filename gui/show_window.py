@@ -86,7 +86,7 @@ class ShowWindow(QMainWindow):
 				self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
 				self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
 				self.get_show_data(tvshow['seriesname'])
-				return # everyithing done in this case / prevente rest of the code execution
+				return # everything done in this case / prevente rest of the code execution
 			else:
 				# show is tracked but search result, get the followed show instance instead
 				self.tvshow = self.user_state.shows[tvshow['seriesname']]
@@ -96,6 +96,7 @@ class ShowWindow(QMainWindow):
 		# this in both cases where it is tracked
 		self.update_me()
 		self.load_show()
+		print 'View: \"%s\", last updated: %s' % (self.tvshow.name, self.tvshow.last_updated)
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''

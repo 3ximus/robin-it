@@ -30,7 +30,7 @@ Run `python robinit_gui.py`
 
 **New in v0.5**
 
-- Stability Improvments
+- Stability Improvements
 
 **New in v0.4**
 
