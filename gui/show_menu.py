@@ -188,6 +188,8 @@ class ShowsMenu(QMainWindow):
 
 	def go_back(self):
 		'''Closes this window and opens the Main Menu'''
+		self.clear_layout(self.ui.myshows_layout)
+		self.clear_layout(self.ui.results_layout)
 		self.close()
 		self.return_to.show()
 		self.deleteLater()

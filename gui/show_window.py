@@ -72,7 +72,7 @@ class ShowWindow(QMainWindow):
 		self.ui.mark_button.setEnabled(False)
 		self.ui.episodes_label.setText("")
 
-		self.background = None
+		self.background_data = None
 		# Grid placement stuff
 		self.season_col = 0
 		self.season_row = 0
@@ -210,11 +210,12 @@ class ShowWindow(QMainWindow):
 			Loads window background from downloaded background image
 		'''
 		palette = QPalette()
-		self.background = QPixmap()
-		self.background.loadFromData(data)
-		self.back_ratio = self.background.size().width()/float(self.background.size().height())
-		self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
-		palette.setBrush(QPalette.Background, QBrush(self.background))
+		self.background_data = data
+		background = QPixmap()
+		background.loadFromData(self.background_data)
+		self.back_ratio = background.size().width()/float(background.size().height())
+		background=background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
+		palette.setBrush(QPalette.Background, QBrush(background))
 		self.setPalette(palette)
 		self.ui.statusbar.clearMessage()
 		# Force scrollareas to be transparent
@@ -223,10 +224,14 @@ class ShowWindow(QMainWindow):
 
 	def resizeEvent(self, event):
 		'''Called when resize is made'''
-		if self.background:
+		# NOTE if this causes performance issues later on, make the resize happen in sparse intervals
+		if self.background_data:
 			palette = QPalette()
-			self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
-			palette.setBrush(QPalette.Background, QBrush(self.background))
+			background = QPixmap()
+			background.loadFromData(self.background_data)
+			# TODO if the background reaches maximum its maximum height, then resize the width instead
+			background=background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
+			palette.setBrush(QPalette.Background, QBrush(background))
 			self.setPalette(palette)
 
 	def add_show(self):
