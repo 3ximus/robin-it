@@ -114,7 +114,9 @@ class MainWindow(QMainWindow):
 			NOTE: something here needs tweaking to prevent fatal crash
 			when other menus try to return to this window
 		'''
-		self.deleteLater()
+		pass
+		# TODO improve this
+		#self.deleteLater()
 
 
 class LoginWindow(QMainWindow):

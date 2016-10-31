@@ -24,7 +24,6 @@ def download_object(url, cache_dir=None, cache_this=True):
 	cache_image = False
 	if cache_dir:
 		cache = cache_dir+"/image/"
-		# TODO FIXME crashes here if cashe does not exist
 		if not os.path.exists(cache): os.makedirs(cache)
 		md5_hash = md5()
 		md5_hash.update(url)

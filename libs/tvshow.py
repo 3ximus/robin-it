@@ -188,6 +188,16 @@ class Show:
 				episodes_list.append(episode)
 		return episodes_list
 
+	def get_watched_ratio(self):
+		'''Returns 2 values: #watched eps, #total episodes'''
+		eps = 0
+		watched = 0
+		for s in self.seasons:
+			for e in s.episodes:
+				eps += 1
+				if e.watched: watched += 1
+		return watched, eps
+
 	def get_last_aired(self):
 		'''Returns last episode aired'''
 		for s in reversed(self.seasons):

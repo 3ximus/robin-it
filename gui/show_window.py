@@ -170,10 +170,8 @@ class ShowWindow(QMainWindow):
 		self.episode_col = 0
 		self.episode_row = 0
 		self.ui.episodes_label.setText("[ s%02d episodes ]" % (sid+1))
-		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
-			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
-		for i in reversed(range(self.ui.last_row_episodes_layout.count())): # clear previous episodes displayed
-			self.ui.last_row_episodes_layout.itemAt(i).widget().setParent(None)
+		self.clear_layout(self.ui.episodes_layout)
+		self.clear_layout(self.ui.last_row_episodes_layout)
 
 		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%settings._EPISODE_MAX_COL
 		for i, e in enumerate(self.tvshow.seasons[sid].episodes):
@@ -181,6 +179,11 @@ class ShowWindow(QMainWindow):
 			else:  self.ui.last_row_episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%settings._EPISODE_MAX_COL)
 			self.episode_col+=1
 			if self.episode_col%settings._EPISODE_MAX_COL==0: self.episode_row+=1
+
+	def clear_layout(self, layout):
+		'''Clear given layout'''
+		for i in reversed(range(layout.count())): # clear previous episodes displayed
+			layout.itemAt(i).widget().deleteLater()
 
 	@threaded
 	def download_image(self, url):
@@ -263,6 +266,10 @@ class ShowWindow(QMainWindow):
 		self.update_shout.emit() #update button
 
 	def closeEvent(self, event):
+		self.clear_layout(self.ui.episodes_layout)
+		self.clear_layout(self.ui.last_row_episodes_layout)
+		self.clear_layout(self.ui.seasons_layout)
+		self.clear_layout(self.ui.last_row_seasons_layout)
 		self.deleteLater()
 
 class SeasonWidget(QWidget):

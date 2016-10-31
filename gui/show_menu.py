@@ -117,7 +117,7 @@ class ShowsMenu(QMainWindow):
 		self.col = 0 # reset rows and columns
 		self.row = 0
 		for i in reversed(range(layout.count())): # clear previous results
-			layout.itemAt(i).widget().setParent(None)
+			layout.itemAt(i).widget().deleteLater() # forces its deletion
 		try: self.all_banners_loaded.disconnect() # disconnect signals in order to not connect duplicates
 		except TypeError: pass
 		for x in self.search_results:
@@ -189,8 +189,8 @@ class ShowsMenu(QMainWindow):
 	def go_back(self):
 		'''Closes this window and opens the Main Menu'''
 		self.close()
-		self.return_to.move(self.x(),self.y())
 		self.return_to.show()
+		self.deleteLater()
 
 	def go_to(self, index):
 		'''Got to one of the stacked pages given by index'''
@@ -382,7 +382,7 @@ class UnwatchedWidget(QWidget):
 		'''Triggered clicking on the widget. Displays Show Window'''
 		self.show_window = ShowWindow(self.tvshow, self.user_state)
 		self.show_window.show()
-		# TODO FIXME THIS MAY ORIINATE MEMORY LEAKS -- VERIFY BY DESTROYING POINTER self.show_window
+		# TODO FIXME THIS MAY ORIGINATE MEMORY LEAKS -- VERIFY BY DESTROYING POINTER self.show_window
 
 	def mark_watched(self):
 		'''Mark the remaining episodes as watched'''
