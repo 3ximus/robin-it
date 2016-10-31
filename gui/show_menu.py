@@ -26,6 +26,7 @@ from libs.loading import progress_bar
 import settings
 
 # TOOLS
+import datetime
 from time import sleep
 from functools import partial
 
@@ -80,6 +81,11 @@ class ShowsMenu(QMainWindow):
 
 		self.search_results = []
 
+		for show in self.user_state.shows.values():
+			if show.last_updated:
+				if abs(show.last_updated - datetime.date.today()) > datetime.timedelta(settings._UPDATE_SHOW_INTERVAL):
+					self.update_show(show)
+
 		self.col = 0
 		self.row = 0
 
@@ -102,12 +108,16 @@ class ShowsMenu(QMainWindow):
 		results = search_for_show(text)
 		self.search_complete.emit(results)
 
+	@threaded
+	def update_show(self, show):
+		show.update_info()
+
 	def clear_layout(self, layout):
 		'''Clears all widgets from given layout'''
 		self.col = 0 # reset rows and columns
 		self.row = 0
 		for i in reversed(range(layout.count())): # clear previous results
-			layout.itemAt(i).widget().setParent(None)
+			layout.itemAt(i).widget().deleteLater() # forces its deletion
 		try: self.all_banners_loaded.disconnect() # disconnect signals in order to not connect duplicates
 		except TypeError: pass
 		for x in self.search_results:
@@ -178,9 +188,11 @@ class ShowsMenu(QMainWindow):
 
 	def go_back(self):
 		'''Closes this window and opens the Main Menu'''
+		self.clear_layout(self.ui.myshows_layout)
+		self.clear_layout(self.ui.results_layout)
 		self.close()
-		self.return_to.move(self.x(),self.y())
 		self.return_to.show()
+		self.deleteLater()
 
 	def go_to(self, index):
 		'''Got to one of the stacked pages given by index'''
@@ -215,9 +227,8 @@ class ShowsMenu(QMainWindow):
 		self.clear_layout(self.ui.myshows_layout)
 		items = self.user_state.find_item(self.ui.showfilter_box.text())
 		if not items: return
-		if type(items) == str: items = [items,]
 		for s in items:
-			self.add_to_layout(self.ui.myshows_layout, ShowWidget(self.user_state.shows[s], self.user_state, self))
+			self.add_to_layout(self.ui.myshows_layout, ShowWidget(s, self.user_state, self))
 
 	def update_search(self):
 		'''Maintains search boxes from both stack pages in sync'''
@@ -373,7 +384,7 @@ class UnwatchedWidget(QWidget):
 		'''Triggered clicking on the widget. Displays Show Window'''
 		self.show_window = ShowWindow(self.tvshow, self.user_state)
 		self.show_window.show()
-		# TODO FIXME THIS MAY ORIINATE MEMORY LEAKS -- VERIFY BY DESTROYING POINTER self.show_window
+		# TODO FIXME THIS MAY ORIGINATE MEMORY LEAKS -- VERIFY BY DESTROYING POINTER self.show_window
 
 	def mark_watched(self):
 		'''Mark the remaining episodes as watched'''

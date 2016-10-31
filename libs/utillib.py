@@ -85,7 +85,7 @@ def download_file(url, fname, location = './cache/', name_parser = False, extens
 		name_parser -- function to parse filenames
 		extension -- extension given to the file
 	'''
-	if not os.path.exists(location): os.mkdir(location) # check for folder existence
+	if not os.path.exists(location): os.makedirs(location) # check for folder existence
 	if name_parser: fname = name_parser(fname) # use a name parser to generate a better filename
 	fname = '%s%s%s' % (location, fname, extension) # complete the filename with the full path
 	try:

@@ -72,7 +72,7 @@ class ShowWindow(QMainWindow):
 		self.ui.mark_button.setEnabled(False)
 		self.ui.episodes_label.setText("")
 
-		self.background = None
+		self.background_data = None
 		# Grid placement stuff
 		self.season_col = 0
 		self.season_row = 0
@@ -86,7 +86,7 @@ class ShowWindow(QMainWindow):
 				self.ui.statusbar.showMessage("Loading \"%s\" page..." % tvshow['seriesname'])
 				self.show_loaded.connect(self.load_show) # fills info on gui after the show info is retrieved
 				self.get_show_data(tvshow['seriesname'])
-				return # everyithing done in this case / prevente rest of the code execution
+				return # everything done in this case / prevente rest of the code execution
 			else:
 				# show is tracked but search result, get the followed show instance instead
 				self.tvshow = self.user_state.shows[tvshow['seriesname']]
@@ -96,6 +96,9 @@ class ShowWindow(QMainWindow):
 		# this in both cases where it is tracked
 		self.update_me()
 		self.load_show()
+
+		# TODO uncoment this: self.ui.force_update_button.connect(self.force_update)
+		print 'View: \"%s\", last updated: %s' % (self.tvshow.name, self.tvshow.last_updated)
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
@@ -108,6 +111,10 @@ class ShowWindow(QMainWindow):
 		else:
 			self.ui.mark_button.setText("mark")
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+
+	@threaded
+	def force_update(self):
+		self.tvshow.update_info()
 
 	@threaded
 	def get_show_data(self, name):
@@ -163,10 +170,8 @@ class ShowWindow(QMainWindow):
 		self.episode_col = 0
 		self.episode_row = 0
 		self.ui.episodes_label.setText("[ s%02d episodes ]" % (sid+1))
-		for i in reversed(range(self.ui.episodes_layout.count())): # clear previous episodes displayed
-			self.ui.episodes_layout.itemAt(i).widget().setParent(None)
-		for i in reversed(range(self.ui.last_row_episodes_layout.count())): # clear previous episodes displayed
-			self.ui.last_row_episodes_layout.itemAt(i).widget().setParent(None)
+		self.clear_layout(self.ui.episodes_layout)
+		self.clear_layout(self.ui.last_row_episodes_layout)
 
 		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%settings._EPISODE_MAX_COL
 		for i, e in enumerate(self.tvshow.seasons[sid].episodes):
@@ -174,6 +179,11 @@ class ShowWindow(QMainWindow):
 			else:  self.ui.last_row_episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%settings._EPISODE_MAX_COL)
 			self.episode_col+=1
 			if self.episode_col%settings._EPISODE_MAX_COL==0: self.episode_row+=1
+
+	def clear_layout(self, layout):
+		'''Clear given layout'''
+		for i in reversed(range(layout.count())): # clear previous episodes displayed
+			layout.itemAt(i).widget().deleteLater()
 
 	@threaded
 	def download_image(self, url):
@@ -200,11 +210,12 @@ class ShowWindow(QMainWindow):
 			Loads window background from downloaded background image
 		'''
 		palette = QPalette()
-		self.background = QPixmap()
-		self.background.loadFromData(data)
-		self.back_ratio = self.background.size().width()/float(self.background.size().height())
-		self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
-		palette.setBrush(QPalette.Background, QBrush(self.background))
+		self.background_data = data
+		background = QPixmap()
+		background.loadFromData(self.background_data)
+		self.back_ratio = background.size().width()/float(background.size().height())
+		background=background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
+		palette.setBrush(QPalette.Background, QBrush(background))
 		self.setPalette(palette)
 		self.ui.statusbar.clearMessage()
 		# Force scrollareas to be transparent
@@ -213,10 +224,14 @@ class ShowWindow(QMainWindow):
 
 	def resizeEvent(self, event):
 		'''Called when resize is made'''
-		if self.background:
+		# NOTE if this causes performance issues later on, make the resize happen in sparse intervals
+		if self.background_data:
 			palette = QPalette()
-			self.background=self.background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
-			palette.setBrush(QPalette.Background, QBrush(self.background))
+			background = QPixmap()
+			background.loadFromData(self.background_data)
+			# TODO if the background reaches maximum its maximum height, then resize the width instead
+			background=background.scaled(QtCore.QSize(self.size().width(),self.size().width()/float(self.back_ratio)))
+			palette.setBrush(QPalette.Background, QBrush(background))
 			self.setPalette(palette)
 
 	def add_show(self):
@@ -256,6 +271,10 @@ class ShowWindow(QMainWindow):
 		self.update_shout.emit() #update button
 
 	def closeEvent(self, event):
+		self.clear_layout(self.ui.episodes_layout)
+		self.clear_layout(self.ui.last_row_episodes_layout)
+		self.clear_layout(self.ui.seasons_layout)
+		self.clear_layout(self.ui.last_row_seasons_layout)
 		self.deleteLater()
 
 class SeasonWidget(QWidget):

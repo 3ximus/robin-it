@@ -36,15 +36,15 @@ class Config():
 	def has_property(self, key, defaults=False):
 		'''Check if jey exists, if defaults is True it will search in the default configuration instead'''
 		dic = self.dict if not defaults else self.default_config
-		for category in dic:
-				if key in dic[category]:
-					return True
+		for category in dic.values():
+			if key in category:
+				return True
 		return False
 
 	def __getitem__(self, key): # able to use config_instance['key']
-		for category in self.dict:
-			if key in self.dict[category]:
-				return self.dict[category][key]
+		for category in self.dict.values():
+			if key in category:
+				return category[key]
 		raise KeyError("[ERROR] Config has no atribute \'%s\'" % key)
 
 	def __setitem__(self, key, value): # able to use config_instance['key'] = val
@@ -95,12 +95,12 @@ class Config():
 
 	def save(self):
 		with open(self.config_file, 'w') as fp:
-			for category in self.dict:
+			for category, content in self.dict.iteritems():
 				writter = "[%s]\n" % category
 				write = False
-				for key in self.dict[category]:
-					if self.dict[category][key] == "" or (self.has_property(key, defaults=True) and self.dict[category][key] == self.default_config[category][key]):
+				for key, value in content.iteritems():
+					if value == "" or (self.has_property(key, defaults=True) and value == self.default_config[category][key]):
 						continue
-					writter += "\t%s = %s\n" % (key, self.dict[category][key])
+					writter += "\t%s = %s\n" % (key, value)
 					write = True
 				if write: fp.write(writter)

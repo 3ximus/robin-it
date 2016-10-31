@@ -72,10 +72,11 @@ class Show:
 		self.watched = False
 		self.torrent = None
 		self.cache=cache
+		self.last_updated = None
 
 		if self.cache:
 			if not os.path.exists(self.cache):
-				os.mkdir(self.cache) # make directory if unexistent
+				os.makedirs(self.cache) # make directory if unexistent
 
 		self.name = name.split('(')[0]
 		self.real_name = name
@@ -102,6 +103,8 @@ class Show:
 			for i in seasons_list: # generates the seasons list
 				new_season = Season(s_id = i, tv_show = self, cache=(self.cache if not override_cache else override_cache))
 				self.seasons.append(new_season)
+
+		self.last_updated = datetime.date.today()
 
 		# update TV Show info
 		self.description = database[self.real_name]['overview']
@@ -184,6 +187,16 @@ class Show:
 			for episode in season.episodes:
 				episodes_list.append(episode)
 		return episodes_list
+
+	def get_watched_ratio(self):
+		'''Returns 2 values: #watched eps, #total episodes'''
+		eps = 0
+		watched = 0
+		for s in self.seasons:
+			for e in s.episodes:
+				eps += 1
+				if e.watched: watched += 1
+		return watched, eps
 
 	def get_last_aired(self):
 		'''Returns last episode aired'''
@@ -361,6 +374,7 @@ class Episode:
 		self.tv_show.seasons[self.s_id-1].update_watched()
 
 	def already_aired(self):
+		'''Returns bollean if this this episode has aired or not'''
 		if self.airdate == None: return False
 		date_split = self.airdate.split('-')
 		return datetime.date.today() > datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))

@@ -51,9 +51,14 @@ class UserContent:
 	def is_tracked(self, name):
 		'''Returns True if show is being tracked, else otherwise'''
 		return name in self.shows
-		# TODO remove this if no problem has come up
-		#if self.find_item(name): return True
-		#return False
+
+	def find_item(self, name):
+		'''Find shows in the dictionary using a partial name'''
+		matches = []
+		for name_key, value in self.shows.iteritems(): # build match list
+			if name.lower() in name_key.lower():
+				matches.append(value)
+		return matches
 
 # SET METHODS
 	def set_cache_dir(self, new_dir):
@@ -81,7 +86,7 @@ class UserContent:
 		If no arguments were given the default path from the class will be used (self.user_dir)
 		This method closes the file descriptor if given
 		'''
-		if not os.path.exists(self.user_dir): os.mkdir(self.user_dir)
+		if not os.path.exists(self.user_dir): os.makedirs(self.user_dir)
 		if path:
 			path = "%s/robinit_%s_%s%s" % (path, __version__.split('.')[0], self.username, '.pkl')
 			fd = open(path, 'wb')
@@ -111,39 +116,6 @@ class UserContent:
 		self.__dict__.update(tmp_dict)
 		return True
 
-	def find_item(self, name):
-		'''Find a key in a dictionary using a partial name returning correct name '''
-		matches = []
-		for name_key in self.shows: # build match list
-			if name.lower() in name_key.lower():
-				matches.append(name_key)
-		if len(matches) == 0: return None # no matches found
-		elif len(matches) == 1: return matches[0] # return only match found
-		else: return matches
-
-	def force_update(self, name = None, selection_handler = None): # TODO marked for review
-		'''Force update
-
-		This is a generator function, so to run it you must iterate over it, it will yield the name
-			of the show being updated each time
-		Note: this may take a long time because it updates all the information contained
-		Parameters:
-			selection_handler -- is a function that must return an integer (or None if canceled) and receives
-				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See top Documentation
-			name -- if this is not given everything is updated
-		'''
-		if name: # if name was given
-			show = self.find_item(name, selection_handler = selection_handler)
-			if show:
-				yield show
-				self.shows[show].update_info()
-			else: return # show not found
-		else:
-			for show in self.shows:
-				yield show
-				self.shows[show].update_info() # update everything
-
 	def add_show(self, name = None, show = None) :
 		'''Add TV SHOW to the followed tvshows (self.shows) dictionary
 
@@ -163,16 +135,12 @@ class UserContent:
 		else:
 			return None
 
-
 	def remove_show(self, name):
 		'''Remove show by name
 			Returns show name if was deleted sucessfully, None if show name is invalid or multiple exist
 		'''
-		show_to_delete = self.find_item(name)
-		if not show_to_delete or type(show_to_delete) == list: return None
-
-		del(self.shows[show_to_delete])
-		return show_to_delete
+		if not self.is_tracked(name): return None
+		del(self.shows[name])
 
 	def toogle_watched(self, name = None, item = None):
 		'''Toogles watched value
@@ -185,9 +153,10 @@ class UserContent:
 			try: item.toogle_watched() # if valid item
 			except AttributeError: raise ValueError("Invalid item passed to toogle_watched_show")
 		elif name: # by name
-			show = self.find_item(name)
-			if type(show) == list: raise ValueError("I fucked up somewhere and didnt save the show with the real name")
-			if show: self.shows[show].toogle_watched()
+			if not self.is_tracked(name):
+				raise ValueError("I fucked up somewhere and didnt save the show with the real name")
+    		else:
+				if show: self.shows[show].toogle_watched()
 
 	def mark_watched_until(self, name = None, season = None, episode = None, item = None, selection_handler = None):
 		'''Mark episodes/seasons watched until the episode/season given'''
@@ -223,39 +192,20 @@ class UserContent:
 			{ <show_name> : { <season_id> : [ <episode>, <episode>, ... ] , ... }, ... }
 		'''
 		unwatched_dict = {}
+
+		def _make_unwatched_dict(show):
+			if show.watched: return
+			if seasons_dict != {}: unwatched_dict.update({show.realname:show.get_unwatched_episodes()})
+
 		if show:
-			pass # TODO get episodes from given show
-		if name:
-			pass # TODO get episodes from given show
-		for show in self.shows:
-			if self.shows[show].watched:
-				continue
-			seasons_dict = self.shows[show].get_unwatched_episodes()
-			if seasons_dict != {}:
-				unwatched_dict.update({show:seasons_dict})
+			_make_unwatched_dict(show)
+		elif name:
+			if self.is_tracked(name):
+				_make_unwatched_dict(self.shows[name])
+		else:
+			for show in self.shows.values():
+				_make_unwatched_dict(show)
 		return unwatched_dict
-
-	def get_episodes_in_range(self, name = None, show = None, season_filter = None, episode_filter = None, reverse = False, selection_handler = None):
-		'''Get Episodes with a given season or episode filter
-
-		Parameters:
-			name -- name of show to select
-			show -- show to select
-			season_filter -- list of seasons
-			episode_filter -- list of episodes. This will be applied after the season filter so any range given here
-								will be applied after unwanted seasons are removed.
-			reverse -- if True the range assumes that 0 is the last episode aired and so on in reverse order
-			selection_handler -- is a function that must return an integer (or None if canceled) and receives
-				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See top Documentation
-		'''
-		if not show: show = self.get_show(name, selection_handler = selection_handler)
-		if not show: return None
-		aired_list = [ep for ep in show.get_episodes_list() if ep.already_aired()]
-		if reverse: aired_list = list(reversed(aired_list))
-		if season_filter: aired_list = filter(lambda x: x.s_id in season_filter, aired_list)
-		if episode_filter: aired_list = filter(lambda x: aired_list.index(x) in map(lambda x: x-1,episode_filter), aired_list)
-		return aired_list
 
 	def assign_torrents(self, episode_list, force=False, selection_handler=None):
 		'''Assign torrents to every episode given
