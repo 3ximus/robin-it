@@ -294,7 +294,7 @@ class Ui_episode_banner_widget(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, brush)
         self.description.setPalette(palette)
         font = QtGui.QFont()
-        font.setPointSize(10)
+        font.setPointSize(9)
         self.description.setFont(font)
         self.description.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.description.setWordWrap(True)
