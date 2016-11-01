@@ -10,7 +10,7 @@ __version__ = '0.6'
 
 # PYQT5 IMPORTS
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow, QWidget
+from PyQt5.QtWidgets import QMainWindow, QWidget, QSpacerItem
 from PyQt5.QtGui import QPixmap, QPalette, QBrush, QColor
 
 # IMPORT FORMS
@@ -18,7 +18,7 @@ from gui.resources.shows_menu import Ui_shows_menu
 from gui.resources.show_banner_widget import Ui_show_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable, download_object
+from gui_func import clickable, download_object, end_hover, begin_hover
 from show_window import ShowWindow
 from libs.tvshow import search_for_show
 from libs.thread_decorator import threaded
@@ -140,6 +140,7 @@ class ShowsMenu(QMainWindow):
 			is triggered, displaying the remaining results.
 			This is done in order to only display bannerless shows at the end
 		'''
+		# TODO ditch all this nonsense and just display all results, lett images load when they can
 
 		def _status_update():
 			'''Updates Status bar loading message with progress_bar'''
@@ -271,13 +272,32 @@ class ShowWidget(QWidget):
 		if self.user_state.is_tracked(name):
 			self.make_del_button()
 
-		if type(self.tvshow) == dict:
+		if type(self.tvshow) == dict: # this is a search result
 			if 'banner' in self.tvshow.keys():
 				self.banner_loaded.connect(self.load_banner)
 				self.download_banner(settings._TVDB_BANNER_PREFIX + self.tvshow['banner'])
-		else:
+		else: # this is a tracked show and not a search result
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)
+
+# -------------- FIXME NOT WORKING
+			begin_hover(self).connect(self.show_counter)
+			end_hover(self).connect(self.hide_counter)
+# ---------------
+			#self.ui.counter_label.hide()
+
+			watched, total = self.tvshow.get_watched_ratio()
+			self.ui.counter_label.setText("%d, %d " % (watched, total))
+			# spacer items dont get a reference from pyuic so we must get it from the layout
+			if watched == 0:
+				self.ui.progress_bar.hide()
+			else:
+				for i in range(self.ui.bar_layout.count()):
+					if type(self.ui.bar_layout.itemAt(i)) == QSpacerItem:
+						width = self.ui.banner.size().width()
+						self.ui.bar_layout.itemAt(i).changeSize(width - float(watched)/total * width,0)
+						break
+			self.ui.progress_bar.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 
 	@threaded
 	def download_banner(self, url):
@@ -295,15 +315,16 @@ class ShowWidget(QWidget):
 
 	def view_show(self):
 		'''Triggered clicking on the widget. Displays Show Window'''
-		self.show_window = ShowWindow(self.tvshow, self.user_state)
+		self.show_window = ShowWindow(self.tvshow, self.user_state, self.window)
 		self.show_window.show()
 
 	def add_show(self):
 		'''Triggered by clicking on self.ui.add_button. Adds show to be tracked'''
-		self.window.ui.statusbar.showMessage("Adding \"%s\" ..." % self.tvshow['seriesname'])
-		self.user_state.add_show(self.tvshow['seriesname'])
+		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
+		self.window.ui.statusbar.showMessage("Adding \"%s\" ..." % name)
+		self.user_state.add_show(name)
 		self.user_state.save_state()
-		print "Added: " + self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
+		print "Added: " + name
 		self.window.ui.statusbar.clearMessage()
 		self.make_del_button()
 
@@ -329,6 +350,20 @@ class ShowWidget(QWidget):
 		print ("Removed: " + name) if name else "Already removed"
 
 		self.ui.add_button.clicked.connect(self.add_show)
+
+# -------------- FIXME NOT WORKING
+	def show_counter(self):
+		print "hover"
+		if type(self.tvshow) == dict or not self.user_state.is_tracked(self.tvshow.real_name):
+			return
+		watched, total = self.tvshow.get_watched_ratio()
+		self.ui.counter_label.setText("[%d, %d] %d%" % (watched, total, watched/total * 100))
+		self.ui.counter_label.show()
+
+	def hide_counter(self):
+		print "end hover"
+		self.ui.counter_label.hide()
+# --------------
 
 class UnwatchedWidget(QWidget):
 	'''Small banner to identify a show and represent number of unwatched episodes in it

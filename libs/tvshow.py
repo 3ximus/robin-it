@@ -150,16 +150,6 @@ class Show:
 		'''Set torrent instance associated with this episode'''
 		self.torrent=torrent
 
-	def get_status(self):
-		'''Returns the status this show has, in respect to the user'''
-		if self.watched:
-			if self.status == 'Ended':
-				return "completed"
-			elif self.status == 'Continuing':
-				return "watched"
-		else: return "unwatched"
-# TODO handle episode air date
-
 	def to_string(self):
 		'''Print this class information'''
 		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %sBanner: %s\nIMDB Link: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.banner, self.imdb_id)
@@ -271,7 +261,6 @@ class Season():
 
 	def toogle_watched(self):
 		''' Toogle the watched state '''
-		print self.cache
 		self.set_watched(not self.watched)
 		self.update_watched() # after setting the value call update_watched to propagate change
 
@@ -293,16 +282,6 @@ class Season():
 			if episode.watched: cont += 1
 		if cont == len(self.episodes): self.watched = True
 		self.tv_show.update_watched() # call update on tv show
-
-	def get_status(self):
-		'''Returns the status this show has, in repect to the user'''
-		if self.watched:
-			if self.tv_show.status == 'Ended':
-				return "completed"
-			elif self.tv_show.status == 'Continuing':
-				return "watched"
-		else: return "unwatched"
-# TODO handle episode air date
 
 class Episode:
 	'''Class defining a Season Episode
@@ -378,16 +357,6 @@ class Episode:
 		if self.airdate == None: return False
 		date_split = self.airdate.split('-')
 		return datetime.date.today() > datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
-
-	def get_status(self):
-		'''Returns the status this show has, in repect to the user'''
-		if self.watched:
-			if self.tv_show.status == 'Ended':
-				return "completed"
-			elif self.tv_show.status == 'Continuing':
-				return "watched"
-		else: return "unwatched"
-# TODO handle episode air date
 
 # ------------------------------------------------------
 

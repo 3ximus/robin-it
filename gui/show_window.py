@@ -54,9 +54,10 @@ class ShowWindow(QMainWindow):
 	background_loaded = QtCore.pyqtSignal(object)
 	update_shout = QtCore.pyqtSignal()
 
-	def __init__(self, tvshow, user_state):
+	def __init__(self, tvshow, user_state, origin_window):
 		super(ShowWindow, self).__init__()
 		self.user_state = user_state
+		self.origin_window = origin_window
 
 		# set up UI from QtDesigner
 		self.ui = Ui_show_window()
@@ -111,6 +112,8 @@ class ShowWindow(QMainWindow):
 		else:
 			self.ui.mark_button.setText("mark")
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+		# maybe there is a better way for this?
+		self.origin_window.update_my_shows()
 
 	@threaded
 	def force_update(self):
@@ -141,6 +144,7 @@ class ShowWindow(QMainWindow):
 		# fill seasons
 		self.display_seasons()
 
+		if self.tvshow.last_updated: self.ui.last_updated_label.setText("last updated %s" % self.tvshow.last_updated)
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
 		self.ui.genre_label.setText('genre\t\t%s' % self.tvshow.genre)
 		self.ui.network_label.setText('network\t\t%s' % self.tvshow.network)
@@ -218,7 +222,7 @@ class ShowWindow(QMainWindow):
 		palette.setBrush(QPalette.Background, QBrush(background))
 		self.setPalette(palette)
 		self.ui.statusbar.clearMessage()
-		# Force scrollareas to be transparent
+		# Forces scrollareas to be transparent
 		self.ui.scrollArea_2.setStyleSheet("background-color: transparent;")
 		self.ui.scrollArea_3.setStyleSheet("background-color: transparent;")
 
