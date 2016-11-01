@@ -10,7 +10,7 @@ __version__ = '0.6'
 
 # PYQT5 IMPORTS
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow, QWidget
+from PyQt5.QtWidgets import QMainWindow, QWidget, QSpacerItem
 from PyQt5.QtGui import QPixmap, QPalette, QBrush, QColor
 
 # IMPORT FORMS
@@ -268,27 +268,36 @@ class ShowWidget(QWidget):
 		self.ui.name_label.setText('< %s >' % name)
 		clickable(self).connect(self.view_show)
 
-
 		self.ui.add_button.clicked.connect(self.add_show)
 		if self.user_state.is_tracked(name):
 			self.make_del_button()
 
-		if type(self.tvshow) == dict:
+		if type(self.tvshow) == dict: # this is a search result
 			if 'banner' in self.tvshow.keys():
 				self.banner_loaded.connect(self.load_banner)
 				self.download_banner(settings._TVDB_BANNER_PREFIX + self.tvshow['banner'])
-		else:
+		else: # this is a tracked show and not a search result
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)
 
 # -------------- FIXME NOT WORKING
-		begin_hover(self).connect(self.show_counter)
-		end_hover(self).connect(self.hide_counter)
+			begin_hover(self).connect(self.show_counter)
+			end_hover(self).connect(self.hide_counter)
 # ---------------
-		#self.ui.counter_label.hide()
+			#self.ui.counter_label.hide()
 
-		watched, total = self.tvshow.get_watched_ratio()
-		self.ui.counter_label.setText("[%d, %d] %d%% " % (watched, total, watched/total * 100))
+			watched, total = self.tvshow.get_watched_ratio()
+			self.ui.counter_label.setText("%d, %d " % (watched, total))
+			# spacer items dont get a reference from pyuic so we must get it from the layout
+			if watched == 0:
+				self.ui.progress_bar.hide()
+			else:
+				for i in range(self.ui.bar_layout.count()):
+					if type(self.ui.bar_layout.itemAt(i)) == QSpacerItem:
+						width = self.ui.banner.size().width()
+						self.ui.bar_layout.itemAt(i).changeSize(width - float(watched)/total * width,0)
+						break
+			self.ui.progress_bar.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 
 	@threaded
 	def download_banner(self, url):
@@ -306,7 +315,7 @@ class ShowWidget(QWidget):
 
 	def view_show(self):
 		'''Triggered clicking on the widget. Displays Show Window'''
-		self.show_window = ShowWindow(self.tvshow, self.user_state)
+		self.show_window = ShowWindow(self.tvshow, self.user_state, self.window)
 		self.show_window.show()
 
 	def add_show(self):

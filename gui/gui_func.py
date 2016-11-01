@@ -43,15 +43,15 @@ def download_object(url, cache_dir=None, cache_this=True):
 def clickable(widget):
 	'''Makes a widget clickable, returning the clicked event'''
 	class Filter(QtCore.QObject):
-    		clicked = QtCore.pyqtSignal()
+		clicked = QtCore.pyqtSignal()
 
 		def eventFilter(self, obj, event):
-    			if obj == widget:
-    				if event.type() == QtCore.QEvent.MouseButtonRelease:
-    					if obj.rect().contains(event.pos()):
-							# use .emit(obj) to get the object within the slot.
-    						self.clicked.emit()
-						return True
+			if obj == widget:
+				if event.type() == QtCore.QEvent.MouseButtonRelease:
+					if obj.rect().contains(event.pos()):
+						# use .emit(obj) to get the object within the slot.
+						self.clicked.emit()
+					return True
 			return False
 
 	filter = Filter(widget)
