@@ -141,6 +141,7 @@ class ShowWindow(QMainWindow):
 		# fill seasons
 		self.display_seasons()
 
+		if self.tvshow.last_updated: self.ui.last_updated_label.setText("last updated %s" % self.tvshow.last_updated)
 		self.ui.showname_label.setText("// %s" % self.tvshow.name)
 		self.ui.genre_label.setText('genre\t\t%s' % self.tvshow.genre)
 		self.ui.network_label.setText('network\t\t%s' % self.tvshow.network)
@@ -218,7 +219,7 @@ class ShowWindow(QMainWindow):
 		palette.setBrush(QPalette.Background, QBrush(background))
 		self.setPalette(palette)
 		self.ui.statusbar.clearMessage()
-		# Force scrollareas to be transparent
+		# Forces scrollareas to be transparent
 		self.ui.scrollArea_2.setStyleSheet("background-color: transparent;")
 		self.ui.scrollArea_3.setStyleSheet("background-color: transparent;")
 
