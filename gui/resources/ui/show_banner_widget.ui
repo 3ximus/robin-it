@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>478</width>
+    <width>473</width>
     <height>120</height>
    </rect>
   </property>
@@ -442,7 +442,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="bottomMargin">
-    <number>1</number>
+    <number>3</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -643,15 +643,12 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <layout class="QVBoxLayout" name="_2">
      <property name="spacing">
       <number>0</number>
      </property>
      <property name="sizeConstraint">
       <enum>QLayout::SetNoConstraint</enum>
-     </property>
-     <property name="bottomMargin">
-      <number>0</number>
      </property>
      <item>
       <layout class="QHBoxLayout" name="counter_layout">
@@ -806,7 +803,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="progress_bar_spacer">
+        <spacer name="spacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -815,7 +812,7 @@
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>50</width>
+           <width>200</width>
            <height>0</height>
           </size>
          </property>

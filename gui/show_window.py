@@ -19,7 +19,7 @@ from gui.resources.season_banner_widget import Ui_season_banner_widget
 from gui.resources.episode_banner_widget import Ui_episode_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable, download_object
+from gui_func import clickable, download_object, begin_hover, end_hover
 from libs.tvshow import Show
 from libs.thread_decorator import threaded
 from libs.config import Config
@@ -99,7 +99,6 @@ class ShowWindow(QMainWindow):
 		self.load_show()
 
 		# TODO uncoment this: self.ui.force_update_button.connect(self.force_update)
-		print 'View: \"%s\", last updated: %s' % (self.tvshow.name, self.tvshow.last_updated)
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
@@ -111,7 +110,7 @@ class ShowWindow(QMainWindow):
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._RED_COLOR)
 		else:
 			self.ui.mark_button.setText("mark")
-			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
 		# maybe there is a better way for this?
 		self.origin_window.update_my_shows()
 
@@ -261,7 +260,7 @@ class ShowWindow(QMainWindow):
 		'''
 		self.ui.add_button.clicked.disconnect()
 		self.ui.add_button.setText("+ add")
-		self.ui.add_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+		self.ui.add_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
 
 		name = self.user_state.remove_show(self.tvshow.real_name) # dont remove assignment (it returns none in case of failure to remove)
 		self.user_state.save_state()
@@ -302,6 +301,7 @@ class SeasonWidget(QWidget):
 		self.window.update_shout.connect(self.update_me)
 		self.ui.mark_button.clicked.connect(self.toogle_season)
 		self.poster_loaded.connect(self.load_poster)
+		self.ui.download_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 		if len(self.season.poster) > 0:
 			self.download_poster(self.season.poster[0])
 
@@ -312,7 +312,7 @@ class SeasonWidget(QWidget):
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._RED_COLOR)
 		else:
 			self.ui.mark_button.setText("mark")
-			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
 
 	@threaded
 	def download_poster(self, url):
@@ -351,7 +351,8 @@ class EpisodeWidget(QWidget):
 		self.ui = Ui_episode_banner_widget()
 		self.ui.setupUi(self)
 
-		clickable(self).connect(self.toogle_details)
+		begin_hover(self).connect(self.show_details)
+		end_hover(self).connect(self.hide_details)
 		self.ui.filler.hide()
 		self.ui.description.hide()
 
@@ -364,6 +365,8 @@ class EpisodeWidget(QWidget):
 		self.ui.name_label.setText('[%02d] %s' % (int(self.episode.episode_number), self.episode.name))
 		self.ui.info_label.setText('%s %s' % (self.episode.airdate, self.episode.rating))
 		self.ui.description.setText(self.episode.description)
+		self.ui.download_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+		self.ui.filler.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
@@ -372,7 +375,7 @@ class EpisodeWidget(QWidget):
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._RED_COLOR)
 		else:
 			self.ui.mark_button.setText("mark")
-			self.ui.mark_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+			self.ui.mark_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
 
 	@threaded
 	def download_image(self, url):
@@ -394,11 +397,10 @@ class EpisodeWidget(QWidget):
 		self.episode.toogle_watched()
 		self.window.update_shout.emit()
 
-	def toogle_details(self):
-		'''Toogle Details display'''
-		if self.ui.filler.isHidden():
-			self.ui.filler.show()
-			self.ui.description.show()
-		else:
-			self.ui.filler.hide()
-			self.ui.description.hide()
+	def show_details(self):
+		self.ui.filler.show()
+		self.ui.description.show()
+
+	def hide_details(self):
+		self.ui.filler.hide()
+		self.ui.description.hide()

@@ -225,11 +225,14 @@ class ShowsMenu(QMainWindow):
 
 	def update_my_shows(self):
 		'''Updates my shows content based on the filter'''
-		self.clear_layout(self.ui.myshows_layout)
-		items = self.user_state.find_item(self.ui.showfilter_box.text())
-		if not items: return
-		for s in items:
-			self.add_to_layout(self.ui.myshows_layout, ShowWidget(s, self.user_state, self))
+		try:
+			if self.ui.stackedWidget.currentIndex() == 2: # my shows page
+				self.clear_layout(self.ui.myshows_layout)
+				items = self.user_state.find_item(self.ui.showfilter_box.text())
+				if not items: return
+				for s in items:
+					self.add_to_layout(self.ui.myshows_layout, ShowWidget(s, self.user_state, self))
+		except RuntimeError: pass
 
 	def update_search(self):
 		'''Maintains search boxes from both stack pages in sync'''
@@ -280,24 +283,23 @@ class ShowWidget(QWidget):
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)
 
-# -------------- FIXME NOT WORKING
-			begin_hover(self).connect(self.show_counter)
-			end_hover(self).connect(self.hide_counter)
-# ---------------
-			#self.ui.counter_label.hide()
+			begin_hover(self.ui.banner).connect(self.show_counter)
+			end_hover(self.ui.banner).connect(self.hide_counter)
 
 			watched, total = self.tvshow.get_watched_ratio()
-			self.ui.counter_label.setText("%d, %d " % (watched, total))
+			self.ui.counter_label.setText("%d/%d " % (watched, total))
+			self.ui.counter_label.hide()
 			# spacer items dont get a reference from pyuic so we must get it from the layout
 			if watched == 0:
 				self.ui.progress_bar.hide()
 			else:
 				for i in range(self.ui.bar_layout.count()):
 					if type(self.ui.bar_layout.itemAt(i)) == QSpacerItem:
-						width = self.ui.banner.size().width()
-						self.ui.bar_layout.itemAt(i).changeSize(width - float(watched)/total * width,0)
+						width = self.ui.banner.size().width() # small ajustment
+						# base size must be 8 pixels otherwise the bound will be passed.. dunno why, it just works
+						self.ui.bar_layout.itemAt(i).changeSize(width - float(watched)/total * width + 8,0)
 						break
-			self.ui.progress_bar.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+			self.ui.progress_bar.setStyleSheet("background-color: " + settings._GREEN_COLOR)
 
 	@threaded
 	def download_banner(self, url):
@@ -342,7 +344,7 @@ class ShowWidget(QWidget):
 		'''
 		self.ui.add_button.clicked.disconnect()
 		self.ui.add_button.setText("+ add")
-		self.ui.add_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+		self.ui.add_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
 
 		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
 		name = self.user_state.remove_show(name) # dont remove assignment (it returns none in case of failure to remove)
@@ -351,19 +353,13 @@ class ShowWidget(QWidget):
 
 		self.ui.add_button.clicked.connect(self.add_show)
 
-# -------------- FIXME NOT WORKING
 	def show_counter(self):
-		print "hover"
 		if type(self.tvshow) == dict or not self.user_state.is_tracked(self.tvshow.real_name):
 			return
-		watched, total = self.tvshow.get_watched_ratio()
-		self.ui.counter_label.setText("[%d, %d] %d%" % (watched, total, watched/total * 100))
 		self.ui.counter_label.show()
 
 	def hide_counter(self):
-		print "end hover"
 		self.ui.counter_label.hide()
-# --------------
 
 class UnwatchedWidget(QWidget):
 	'''Small banner to identify a show and represent number of unwatched episodes in it

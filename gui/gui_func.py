@@ -65,7 +65,8 @@ def begin_hover(widget):
 
 		def eventFilter(self, obj, event):
 			if obj == widget:
-				if event.type() == QtCore.QEvent.HoverEnter:
+				#if event.type() == QtCore.QEvent.HoverEnter:
+				if event.type() == QtCore.QEvent.Enter:
 					self.begin_hover.emit()
 					return True
 			return False
@@ -80,7 +81,8 @@ def end_hover(widget):
 
 		def eventFilter(self, obj, event):
 			if obj == widget:
-				if event.type() == QtCore.QEvent.HoverLeave:
+				#if event.type() == QtCore.QEvent.HoverLeave:
+				if event.type() == QtCore.QEvent.Leave:
 					self.end_hover.emit()
 					return True
 			return False
