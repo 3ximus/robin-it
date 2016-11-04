@@ -1957,7 +1957,7 @@
              <x>0</x>
              <y>0</y>
              <width>1009</width>
-             <height>497</height>
+             <height>496</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_7">
@@ -2249,17 +2249,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="towatch_button">
-            <property name="maximumSize">
-             <size>
-              <width>80</width>
-              <height>20</height>
-             </size>
-            </property>
+           <widget class="QCheckBox" name="unwatched_checkbox">
             <property name="palette">
              <palette>
               <active>
-               <colorrole role="ButtonText">
+               <colorrole role="WindowText">
                 <brush brushstyle="SolidPattern">
                  <color alpha="255">
                   <red>255</red>
@@ -2270,7 +2264,7 @@
                </colorrole>
               </active>
               <inactive>
-               <colorrole role="ButtonText">
+               <colorrole role="WindowText">
                 <brush brushstyle="SolidPattern">
                  <color alpha="255">
                   <red>255</red>
@@ -2281,7 +2275,7 @@
                </colorrole>
               </inactive>
               <disabled>
-               <colorrole role="ButtonText">
+               <colorrole role="WindowText">
                 <brush brushstyle="SolidPattern">
                  <color alpha="255">
                   <red>1</red>
@@ -2294,7 +2288,7 @@
              </palette>
             </property>
             <property name="text">
-             <string>to watch</string>
+             <string>unwatched</string>
             </property>
            </widget>
           </item>
@@ -2363,8 +2357,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1009</width>
-             <height>497</height>
+             <width>16</width>
+             <height>16</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_9">

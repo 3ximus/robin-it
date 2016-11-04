@@ -72,7 +72,7 @@ class ShowsMenu(QMainWindow):
 		self.ui.back_button_3.clicked.connect(partial(self.go_to, index=0))
 
 		self.ui.myshows_button.clicked.connect(self.load_my_shows)
-		self.ui.towatch_button.clicked.connect(self.load_unwatched)
+		self.ui.unwatched_checkbox.stateChanged.connect(self.set_unwatched_filter)
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
 		self.ui.showfilter_box.textChanged.connect(self.update_shows)
@@ -80,6 +80,7 @@ class ShowsMenu(QMainWindow):
 		self.ui.search_box_2.textChanged.connect(self.update_search_2)
 
 		self.search_results = []
+		self.filter_by_unwatched = False
 
 		for show in self.user_state.shows.values():
 			if show.last_updated:
@@ -141,7 +142,7 @@ class ShowsMenu(QMainWindow):
 			is triggered, displaying the remaining results.
 			This is done in order to only display bannerless shows at the end
 		'''
-		# TODO ditch all this nonsense and just display all results, lett images load when they can
+		# TODO ditch all this nonsense and just display all results, let images load when they can
 
 		def _status_update():
 			'''Updates Status bar loading message with progress_bar'''
@@ -208,17 +209,12 @@ class ShowsMenu(QMainWindow):
 		self.clear_layout(self.ui.myshows_layout)
 		for show in self.user_state.shows.values():
 			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state, self))
+		pass
 
-	def load_unwatched(self):
+	def set_unwatched_filter(self):
 		'''Load only the shows with unwatched episodes'''
-		self.ui.showfilter_box.clear()
-		self.clear_layout(self.ui.myshows_button)
-		for show in self.user_state.unwatched_shows():
-			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state, self))
-
-	def update_filter(self):
-		'''Filters the news and updates box'''
-		print self.ui.filter_box.text()
+		self.filter_by_unwatched = self.ui.unwatched_checkbox.isChecked()
+		self.update_shows()
 
 	def update_shows(self):
 		'''Updates my shows content based on the filter'''
@@ -227,9 +223,17 @@ class ShowsMenu(QMainWindow):
 				self.clear_layout(self.ui.myshows_layout)
 				items = self.user_state.find_item(self.ui.showfilter_box.text())
 				if not items: return
+				if self.filter_by_unwatched: # create list of unwatched
+					unwatched = self.user_state.unwatched_shows()
 				for s in items:
+					if self.filter_by_unwatched and not s in unwatched: # if filter is set but its not an unwatched episode ignore it
+						continue
 					self.add_to_layout(self.ui.myshows_layout, ShowWidget(s, self.user_state, self))
 		except RuntimeError as e: print "RuntimeError:", e
+
+	def update_filter(self):
+		'''Filters the news and updates box'''
+		print self.ui.filter_box.text()
 
 	def update_search(self):
 		'''Maintains search boxes from both stack pages in sync'''
