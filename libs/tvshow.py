@@ -133,8 +133,13 @@ class Show:
 	def toogle_watched(self, state=None):
 		''' Toogle the watched state, if state is given set the the state to the given one'''
 		self.watched = (not self.watched) if state==None else state # toogle watched
+		# due to updates being kind of cyclic the self.watched value will be updated
+		# to False automaticly since after setting the first season the show wathced state
+		# will be evaluated again, resulting in assigning false, so we use a variable to
+		# maintain the true value and let the update take care of everything in the end
+		state = self.watched
 		for season in self.seasons: # replicate action to every season
-			season.set_watched(self.watched)
+			season.set_watched(state)
 
 	def update_watched(self):
 		'''Update watched on the entire tv show
@@ -145,6 +150,7 @@ class Show:
 		for season in self.seasons: # for every season on this show
 			if season.watched: seasons_watched += 1
 		if seasons_watched == len(self.seasons): self.watched = True
+		else: self.watched = False
 
 	def set_torrent(self, torrent):
 		'''Set torrent instance associated with this episode'''
@@ -170,21 +176,29 @@ class Show:
 				seasons.update({str(season.s_id):episode_list})
 		return seasons
 
-	def get_episodes_list(self):
-		'''Returns full list of episodes'''
+	def get_episodes_list(self, aired=True, unaired=True):
+		'''Returns full list of episodes by default, aired or unaired can be given to filter list returned'''
 		episodes_list = []
-		for season in self.seasons:
-			for episode in season.episodes:
-				episodes_list.append(episode)
+		first_aired = False
+		for season in reversed(self.seasons):
+			for episode in reversed(season.episodes):
+				if first_aired or episode.already_aired():
+					first_aired = True
+					if aired: episodes_list.insert(0, episode)
+				elif unaired and not first_aired:
+					episodes_list.insert(0, episode)
 		return episodes_list
 
 	def get_watched_ratio(self):
 		'''Returns 2 values: #watched eps, #total episodes'''
 		eps = 0
 		watched = 0
-		for s in self.seasons:
-			for e in s.episodes:
-				eps += 1
+		first_aired = False
+		for s in reversed(self.seasons):
+			for e in reversed(s.episodes):
+				if first_aired or e.already_aired():
+						eps += 1
+						first_aired = True # optimization, bypasses checks for already_aired
 				if e.watched: watched += 1
 		return watched, eps
 
@@ -281,6 +295,7 @@ class Season():
 		for episode in self.episodes: # for every episode on this season
 			if episode.watched: cont += 1
 		if cont == len(self.episodes): self.watched = True
+		else: self.watched = False
 		self.tv_show.update_watched() # call update on tv show
 
 class Episode:
@@ -353,7 +368,7 @@ class Episode:
 		self.tv_show.seasons[self.s_id-1].update_watched()
 
 	def already_aired(self):
-		'''Returns bollean if this this episode has aired or not'''
+		'''Returns boolean if this this episode has aired or not'''
 		if self.airdate == None: return False
 		date_split = self.airdate.split('-')
 		return datetime.date.today() > datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))

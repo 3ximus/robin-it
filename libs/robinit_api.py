@@ -141,6 +141,7 @@ class UserContent:
 		'''
 		if not self.is_tracked(name): return None
 		del(self.shows[name])
+		return name
 
 	def toogle_watched(self, name = None, item = None):
 		'''Toogles watched value
@@ -155,26 +156,18 @@ class UserContent:
 		elif name: # by name
 			if not self.is_tracked(name):
 				raise ValueError("I fucked up somewhere and didnt save the show with the real name")
-    		else:
+			else:
 				if show: self.shows[show].toogle_watched()
 
-	def mark_watched_until(self, name = None, season = None, episode = None, item = None, selection_handler = None):
-		'''Mark episodes/seasons watched until the episode/season given'''
-# TODO
-		pass
-
-	def update_watched_show(self, name = None, selection_handler = None): # TODO marked for review
-		'''Forces show watched states to be updated
-
-		If name is given only updates that name otherwise update every show being followed
-		Note: This only updates TV Shows
-		'''
-		if name:
-			show = self.get_show(name, selection_handler = selection_handler)
-			if show: show.update_watched()
-			else: print "No Show found"
-		else:
-			for show in self.shows: self.shows[show].update_watched()
+	def unwatched_shows(self):
+		'''Get all shows with episodes left to watch'''
+		unwatched = []
+		for show in self.shows.values():
+			if not show.watched :
+				for e in reversed(show.get_episodes_list(unaired=False)): # double check ignoring unaired episodes
+					if not e.watched:
+						unwatched.append(show)
+		return unwatched
 
 	def unwatched_episodes(self, name = None, show = None):
 		'''Get all episodes unwatched

@@ -2112,6 +2112,9 @@
                 </disabled>
                </palette>
               </property>
+              <property name="toolTip">
+               <string>Storage is the directory in wich downloads will be stored</string>
+              </property>
               <property name="frame">
                <bool>false</bool>
               </property>
@@ -2273,6 +2276,9 @@
                  </colorrole>
                 </disabled>
                </palette>
+              </property>
+              <property name="toolTip">
+               <string>This directory is where the user profiles are located</string>
               </property>
               <property name="text">
                <string/>
@@ -2439,6 +2445,10 @@
                 </disabled>
                </palette>
               </property>
+              <property name="toolTip">
+               <string>This directory is where the cache is located
+If you dont know what the cache is check the slider's tooltip below</string>
+              </property>
               <property name="frame">
                <bool>false</bool>
               </property>
@@ -2448,6 +2458,124 @@
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label1_10">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="WindowText">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>1</red>
+                  <green>83</green>
+                  <blue>49</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="text">
+             <string>&gt; set cache_level</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="cache_slider">
+            <property name="palette">
+             <palette>
+              <active>
+               <colorrole role="Highlight">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>190</red>
+                  <green>190</green>
+                  <blue>190</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </active>
+              <inactive>
+               <colorrole role="Highlight">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>190</red>
+                  <green>190</green>
+                  <blue>190</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </inactive>
+              <disabled>
+               <colorrole role="Highlight">
+                <brush brushstyle="SolidPattern">
+                 <color alpha="255">
+                  <red>53</red>
+                  <green>57</green>
+                  <blue>70</blue>
+                 </color>
+                </brush>
+               </colorrole>
+              </disabled>
+             </palette>
+            </property>
+            <property name="toolTip">
+             <string>0 - No caching is used (not recomended)
+1 - Cache TVShow information retrieved from the database
+2 - Cache Show banners
+3 - Cache season posters
+4 - Cache Everything
+Note: The higher the cache level the more storage will be used but the faster images
+will load after being first downloaded ( unless you have a ridiculous internet bandwidth )</string>
+            </property>
+            <property name="maximum">
+             <number>4</number>
+            </property>
+            <property name="pageStep">
+             <number>1</number>
+            </property>
+            <property name="sliderPosition">
+             <number>4</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksBelow</enum>
+            </property>
+            <property name="tickInterval">
+             <number>1</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -2600,6 +2728,9 @@
                  </colorrole>
                 </disabled>
                </palette>
+              </property>
+              <property name="toolTip">
+               <string>The profile loaded automaticly (remove it to be asked to login at startup )</string>
               </property>
               <property name="frame">
                <bool>false</bool>

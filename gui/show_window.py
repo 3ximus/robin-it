@@ -111,8 +111,7 @@ class ShowWindow(QMainWindow):
 		else:
 			self.ui.mark_button.setText("mark")
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
-		# maybe there is a better way for this?
-		self.origin_window.update_my_shows()
+		self.origin_window.update_shows()
 
 	@threaded
 	def force_update(self):
