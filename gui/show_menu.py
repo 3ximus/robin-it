@@ -76,12 +76,14 @@ class ShowsMenu(QMainWindow):
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
 		self.ui.showfilter_box.textChanged.connect(self.update_shows)
-		self.ui.search_box.textChanged.connect(self.update_search)
-		self.ui.search_box_2.textChanged.connect(self.update_search_2)
+		# use 0 for search_box and 1 for search_box_2
+		self.ui.search_box.textChanged.connect(partial(self.update_search, 0))
+		self.ui.search_box_2.textChanged.connect(partial(self.update_search, 1))
 
 		self.search_results = []
 		self.filter_by_unwatched = False
 
+		# updates the shows if they have not been updated for a while, specifically (settings._UPDATE_SHOW_INTERVAL)
 		for show in self.user_state.shows.values():
 			if show.last_updated:
 				if abs(show.last_updated - datetime.date.today()) > datetime.timedelta(settings._UPDATE_SHOW_INTERVAL):
@@ -209,7 +211,6 @@ class ShowsMenu(QMainWindow):
 		self.clear_layout(self.ui.myshows_layout)
 		for show in self.user_state.shows.values():
 			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state, self))
-		pass
 
 	def set_unwatched_filter(self):
 		'''Load only the shows with unwatched episodes'''
@@ -235,13 +236,12 @@ class ShowsMenu(QMainWindow):
 		'''Filters the news and updates box'''
 		print self.ui.filter_box.text()
 
-	def update_search(self):
-		'''Maintains search boxes from both stack pages in sync'''
-		self.ui.search_box_2.setText(self.ui.search_box.text())
-
-	def update_search_2(self):
-		'''Maintains search boxes from both stack pages in sync'''
-		self.ui.search_box.setText(self.ui.search_box_2.text())
+	def update_search(self, entity):
+		'''Maintains search boxes from both stack pages in sync, entity identifies wich search_box called the update'''
+		if entity == 0:
+			self.ui.search_box_2.setText(self.ui.search_box.text())
+		else:
+			self.ui.search_box.setText(self.ui.search_box_2.text())
 
 
 class ShowWidget(QWidget):

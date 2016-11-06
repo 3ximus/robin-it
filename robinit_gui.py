@@ -190,6 +190,11 @@ class SettingsWindow(QMainWindow):
 
 		self.ui.back_button.clicked.connect(self.go_back)
 		self.ui.save_button.clicked.connect(self.save)
+
+		# update slider and text 0 identifies the slider and 1 identifies the text
+		self.ui.update_interval_slider.sliderMoved.connect(partial(self.update_show_interval, 0))
+		self.ui.update_interval_value.textChanged.connect(partial(self.update_show_interval, 1))
+
 		self.configure()
 
 	def go_back(self):
@@ -197,6 +202,15 @@ class SettingsWindow(QMainWindow):
 		self.main_window.show()
 		self.main_window.setEnabled(True)
 		self.close()
+
+	def update_show_interval(self, entity):
+		'''Updates the slider or the text based on given entity (0 -> means slider called, 1 -> means text_input called)'''
+		if entity == 0:
+			self.ui.update_interval_value.setText(str(self.ui.update_interval_slider.value()))
+		else:
+			try:
+				self.ui.update_interval_slider.setValue(int(self.ui.update_interval_value.text()))
+			except ValueError: pass
 
 	def save(self):
 		'''Saves configuration to a file, ignores or deletes a settinf from config dict if its set to default'''
