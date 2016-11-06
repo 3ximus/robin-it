@@ -22,13 +22,15 @@ def init():
 				'directories':{ 'storage_dir':'./storage',
 								'cache_dir':'./cache',
 								'user_dir':'./user'},
-				'other':{'definition':'hd'}}
+				'other':{'definition':'hd',
+							'update_show_interval':10}}
 
 	global _CONFIG_FILE
 	_CONFIG_FILE = 'config'
 
-	global _TVDB_BANNER_PREFIX
+	global _TVDB_BANNER_PREFIX, _TVDB_API_KEY
 	_TVDB_BANNER_PREFIX = "http://thetvdb.com/banners/"
+	_TVDB_API_KEY = "750B91D6C4BD0717"
 
 	global _RESULTS_TIMEOUT
 	_RESULTS_TIMEOUT = 20
@@ -46,5 +48,5 @@ def init():
 	_SEASON_MAX_COL = 5
 	_EPISODE_MAX_COL = 3
 
-	global _UPDATE_SHOW_INTERVAL
-	_UPDATE_SHOW_INTERVAL = 10
+	global _MAX_UPDATE_SHOW_INTERVAL
+	_MAX_UPDATE_SHOW_INTERVAL = 45

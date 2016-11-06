@@ -74,7 +74,8 @@ class MainWindow(QMainWindow):
 			self.set_user_state(UserContent(settings.config['default_user'],
 					user_dir=settings.config['user_dir'] if settings.config.has_property('user_dir') else None,
 					cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None,
-					storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None))
+					storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None,
+					apikey=settings._TVDB_API_KEY))
 		else: # create login window, this will use the function self.set_user_state to set the user_state
 			self.setEnabled(False)
 			self.loginwindow = LoginWindow(main_window=self)
@@ -160,7 +161,8 @@ class LoginWindow(QMainWindow):
 				UserContent(self.ui.login_box.text().replace(' ', '_'),
 						user_dir=settings.config['user_dir'] if settings.config.has_property('user_dir') else None,
 						cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None,
-						storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None))
+						storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None,
+						apikey=settings._TVDB_API_KEY))
 			self.main_window.setEnabled(True)
 			self.close()
 			self.destroy()
@@ -199,18 +201,23 @@ class SettingsWindow(QMainWindow):
 
 	def go_back(self):
 		'''Closes window and reenables to main_menu'''
+		self.close()
+
+	def closeEvent(self, event):
 		self.main_window.show()
 		self.main_window.setEnabled(True)
-		self.close()
 
 	def update_show_interval(self, entity):
 		'''Updates the slider or the text based on given entity (0 -> means slider called, 1 -> means text_input called)'''
 		if entity == 0:
-			self.ui.update_interval_value.setText(str(self.ui.update_interval_slider.value()))
+			self.ui.update_interval_value.setText(str(self.ui.update_interval_slider.sliderPosition()))
 		else:
 			try:
-				self.ui.update_interval_slider.setValue(int(self.ui.update_interval_value.text()))
+				val = int(self.ui.update_interval_value.text())
+				val = 1 if val < 1 else (settings._MAX_UPDATE_SHOW_INTERVAL if val > settings._MAX_UPDATE_SHOW_INTERVAL else val) # clamp the value
+				self.ui.update_interval_slider.setSliderPosition(val)
 			except ValueError: pass
+			finally: self.ui.update_interval_value.setText(str(self.ui.update_interval_slider.sliderPosition()))
 
 	def save(self):
 		'''Saves configuration to a file, ignores or deletes a settinf from config dict if its set to default'''
@@ -236,6 +243,8 @@ class SettingsWindow(QMainWindow):
 		self.main_window.user_state.set_cache_dir(settings.config['cache_dir'] if settings.config['cache_dir'] != '' else None)
 		self.main_window.user_state.save_state()
 
+		settings.config.add_property('update_show_interval', self.ui.update_interval_slider.sliderPosition())
+
 		settings.config.add_property('default_user',self.ui.defaultuser_box.text().replace(' ', '_'))
 
 		settings.config.save()
@@ -251,11 +260,11 @@ class SettingsWindow(QMainWindow):
 			self.ui.piratebay_checkbox.setChecked(settings.config['piratebay_allow'])
 
 		if settings.config.has_property('kickass'):
-			self.ui.kickass_box.setText(settings.config['kickass'])
+			self.ui.kickass_box.setText(str(settings.config['kickass']))
 		if settings.config.has_property('rarbg'):
-			self.ui.rarbg_box.setText(settings.config['rarbg'])
+			self.ui.rarbg_box.setText(str(settings.config['rarbg']))
 		if settings.config.has_property('piratebay'):
-			self.ui.piratebay_box.setText(settings.config['piratebay'])
+			self.ui.piratebay_box.setText(str(settings.config['piratebay']))
 
 		if settings.config.has_property('sub_en'):
 			self.ui.ensub_checkbox.setChecked(settings.config['sub_en'])
@@ -269,14 +278,18 @@ class SettingsWindow(QMainWindow):
 				self.ui.hd_button.setChecked(True)
 
 		if settings.config.has_property('storage_dir'):
-			self.ui.storage_box.setText(settings.config['storage_dir'] if settings.config['storage_dir'] != './storage' else '')
+			self.ui.storage_box.setText(str(settings.config['storage_dir'] if settings.config['storage_dir'] != './storage' else ''))
 		if settings.config.has_property('user_dir'):
-			self.ui.user_box.setText(settings.config['user_dir'] if settings.config['user_dir'] != './user' else '')
+			self.ui.user_box.setText(str(settings.config['user_dir'] if settings.config['user_dir'] != './user' else ''))
 		if settings.config.has_property('cache_dir'):
-			self.ui.cache_box.setText(settings.config['cache_dir'] if settings.config['cache_dir'] != './cache' else '')
+			self.ui.cache_box.setText(str(settings.config['cache_dir'] if settings.config['cache_dir'] != './cache' else ''))
+
+		if settings.config.has_property('update_show_interval'):
+			self.ui.update_interval_slider.setSliderPosition(settings.config['update_show_interval'])
+			self.update_show_interval(0)
 
 		if settings.config.has_property('default_user'):
-			self.ui.defaultuser_box.setText(settings.config['default_user'])
+			self.ui.defaultuser_box.setText(str(settings.config['default_user']))
 
 # ----------------
 #		MAIN

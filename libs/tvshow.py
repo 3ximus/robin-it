@@ -18,9 +18,9 @@ import re
 
 IMDB_TITLE = "http://www.imdb.com/title/"
 
-def search_for_show(search_term):
+def search_for_show(search_term, apikey=None):
 	'''Auxiliar method to search for TVShows in the database, returns None if no show found'''
-	try: return Tvdb(cache=False).search(search_term)
+	try: return Tvdb(cache=False, apikey=apikey).search(search_term)
 	except tvdb_error: raise NoConnectionException
 	except tvdb_shownotfound: return None
 
@@ -38,7 +38,7 @@ class Show:
 	This class is self updated, once the method update_info is called it updates itself
 	'''
 
-	def __init__(self, name, header_only = False, cache=False, banners=False):
+	def __init__(self, name, header_only = False, cache=False, banners=False, apikey=None):
 		'''Class constructor
 
 		Parameters:
@@ -71,8 +71,9 @@ class Show:
 		self.imdb_id = '' # imdb id
 		self.watched = False
 		self.torrent = None
-		self.cache=cache
+		self.cache = cache
 		self.last_updated = None
+		self.apikey = apikey
 
 		if self.cache:
 			if not os.path.exists(self.cache):
@@ -93,7 +94,7 @@ class Show:
 		This method function is responsible for building the entire data structure of a TV Show
 		It is mandatory that self.real_name is set otherwise build will fail
 		'''
-		database = Tvdb(cache = (self.cache if not override_cache else override_cache), banners=banners)
+		database = Tvdb(cache = (self.cache if not override_cache else override_cache), banners=banners, apikey=self.apikey)
 
 		if not header_only:
 			# updates seasons list
@@ -101,7 +102,7 @@ class Show:
 			if seasons_list[0] == 0: del(seasons_list[0]) # remove first element if it is season 0
 			self.seasons = []
 			for i in seasons_list: # generates the seasons list
-				new_season = Season(s_id = i, tv_show = self, cache=(self.cache if not override_cache else override_cache))
+				new_season = Season(s_id = i, tv_show = self, cache=(self.cache if not override_cache else override_cache), apikey=self.apikey)
 				self.seasons.append(new_season)
 
 		self.last_updated = datetime.date.today()
@@ -214,7 +215,7 @@ class Season():
 	Its self updatable with method update_info, this updates every episode information
 	'''
 
-	def __init__(self, s_id, tv_show, cache=False, banners=True):
+	def __init__(self, s_id, tv_show, cache=False, banners=True, apikey=None):
 		'''Constructor method
 
 		Parameters:
@@ -231,6 +232,7 @@ class Season():
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.cache=cache
+		self.apikey=apikey
 		self.update_info(cache=cache, banners=banners)
 
 	def to_string(self):
@@ -247,7 +249,7 @@ class Season():
 			banners - retrieve season banners and posters
 		'''
 		# update posters
-		database = Tvdb(cache = self.cache, banners = banners)
+		database = Tvdb(cache = self.cache, banners = banners, apikey=self.apikey)
 		try: posters = database[self.tv_show.real_name]['_banners']['season']
 		except tvdb_attributenotfound: pass # posters werent loaded so ignore them
 		except KeyError: print "No poster for %d : %s" % (self.s_id, self.tv_show.name)
@@ -270,7 +272,7 @@ class Season():
 		episodes_list = database[self.tv_show.real_name][self.s_id].keys()
 		self.episodes = [] # reset cached values
 		for i in episodes_list: # generate the episodes list
-			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show, cache=self.cache)
+			new_episode = Episode(e_id = i, s_id = self.s_id, tv_show = self.tv_show, cache=self.cache, apikey=self.apikey)
 			self.episodes.append(new_episode)
 
 	def toogle_watched(self):
@@ -304,7 +306,7 @@ class Episode:
 	Its self updatable with method update_info updating episode information
 	'''
 
-	def __init__(self, e_id, s_id, tv_show, cache=False):
+	def __init__(self, e_id, s_id, tv_show, cache=False, apikey=None):
 		'''Constructor method
 
 		Must receive an episode id number, a season id number and a tv_show from where this episode belongs to
@@ -326,6 +328,7 @@ class Episode:
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.cache=cache
+		self.apikey=apikey
 		self.update_info()
 
 	def to_string(self):
@@ -335,7 +338,7 @@ class Episode:
 
 	def update_info(self):
 		'''Searches thetvdb.com and updates all episodes it contains '''
-		database = Tvdb(cache = self.cache)
+		database = Tvdb(cache = self.cache, apikey=self.apikey)
 		self.name = database[self.tv_show.real_name][self.s_id][self.e_id]['episodename']
 		self.description = database[self.tv_show.real_name][self.s_id][self.e_id]['overview']
 		self.episode_number = database[self.tv_show.real_name][self.s_id][self.e_id]['episodenumber']

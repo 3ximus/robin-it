@@ -86,7 +86,7 @@ class ShowsMenu(QMainWindow):
 		# updates the shows if they have not been updated for a while, specifically (settings._UPDATE_SHOW_INTERVAL)
 		for show in self.user_state.shows.values():
 			if show.last_updated:
-				if abs(show.last_updated - datetime.date.today()) > datetime.timedelta(settings._UPDATE_SHOW_INTERVAL):
+				if abs(show.last_updated - datetime.date.today()) > datetime.timedelta(settings.config['update_show_interval']):
 					self.update_show(show)
 
 		self.col = 0
@@ -108,7 +108,7 @@ class ShowsMenu(QMainWindow):
 		'''Searches for TV shows by given keywords
 			Emits self.search_complete when finished
 		'''
-		results = search_for_show(text)
+		results = search_for_show(text, apikey=settings._TVDB_API_KEY)
 		self.search_complete.emit(results)
 
 	@threaded
