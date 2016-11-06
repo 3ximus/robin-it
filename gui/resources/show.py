@@ -587,7 +587,7 @@ class Ui_show_window(object):
 
     def retranslateUi(self, show_window):
         _translate = QtCore.QCoreApplication.translate
-        show_window.setWindowTitle(_translate("show_window", "Robin_it_v0.6"))
+        show_window.setWindowTitle(_translate("show_window", "Robin_it_v1.0"))
         self.showname_label.setText(_translate("show_window", "// show name"))
         self.last_updated_label.setText(_translate("show_window", "last updated"))
         self.genre_label.setText(_translate("show_window", "genre"))

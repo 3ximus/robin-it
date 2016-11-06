@@ -909,7 +909,7 @@ class Ui_shows_menu(object):
 
     def retranslateUi(self, shows_menu):
         _translate = QtCore.QCoreApplication.translate
-        shows_menu.setWindowTitle(_translate("shows_menu", "Robin_it_v0.6"))
+        shows_menu.setWindowTitle(_translate("shows_menu", "Robin_it_v1.0"))
         self.sign_label_2.setText(_translate("shows_menu", ">"))
         self.filter_box.setPlaceholderText(_translate("shows_menu", "updates_filter"))
         self.downloads_button.setText(_translate("shows_menu", "downloads"))

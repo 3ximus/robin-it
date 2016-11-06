@@ -1082,7 +1082,7 @@ class Ui_settings_window(object):
 
     def retranslateUi(self, settings_window):
         _translate = QtCore.QCoreApplication.translate
-        settings_window.setWindowTitle(_translate("settings_window", "Robin_it_v0.6"))
+        settings_window.setWindowTitle(_translate("settings_window", "Robin_it_v1.0"))
         self.shows_label.setText(_translate("settings_window", "[ settings ]"))
         self.label1_3.setText(_translate("settings_window", "> set torrent_hosts"))
         self.kickass_checkbox.setText(_translate("settings_window", "kickass >"))
@@ -1107,7 +1107,7 @@ class Ui_settings_window(object):
         self.cache_box.setToolTip(_translate("settings_window", "This directory is where the cache is located\n"
 "If you dont know what the cache is check the slider\'s tooltip below"))
         self.cache_box.setPlaceholderText(_translate("settings_window", "./cache"))
-        self.label1_10.setText(_translate("settings_window", "> set cache_level"))
+        self.label1_10.setText(_translate("settings_window", "> set cache_level (not implemented yet)"))
         self.cache_slider.setToolTip(_translate("settings_window", "0 - No caching is used (not recomended)\n"
 "1 - Cache TVShow information retrieved from the database\n"
 "2 - Cache Show banners\n"

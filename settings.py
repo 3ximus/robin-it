@@ -1,11 +1,11 @@
 '''
 Holds global variables
-Latest Update - v0.6
+Latest Update - v1.0
 Created - 29.10.16
 Copyright (C) 2016 - eximus
 '''
 
-__version__ = '0.6'
+__version__ = '1.0'
 from libs.config import Config
 
 def init():
@@ -35,10 +35,11 @@ def init():
 	global _RESULTS_TIMEOUT
 	_RESULTS_TIMEOUT = 20
 
-	global _MAIN_COLOR, _RED_COLOR, _GREEN_COLOR
+	global _MAIN_COLOR, _RED_COLOR, _GREEN_COLOR, _MAIN_COLOR_RGB_ALPHA
 	_MAIN_COLOR = "#323841"
 	_RED_COLOR = "#bf273d"
 	_GREEN_COLOR = "#03a662"
+	_MAIN_COLOR_RGB_ALPHA = "rgba(50,56,65,230)"
 
 	global _BLUR_RADIOUS, _DARKNESS
 	_BLUR_RADIOUS = 10
