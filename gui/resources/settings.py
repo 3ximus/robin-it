@@ -1107,7 +1107,7 @@ class Ui_settings_window(object):
         self.cache_box.setToolTip(_translate("settings_window", "This directory is where the cache is located\n"
 "If you dont know what the cache is check the slider\'s tooltip below"))
         self.cache_box.setPlaceholderText(_translate("settings_window", "./cache"))
-        self.label1_10.setText(_translate("settings_window", "> set cache_level"))
+        self.label1_10.setText(_translate("settings_window", "> set cache_level (not implemented yet)"))
         self.cache_slider.setToolTip(_translate("settings_window", "0 - No caching is used (not recomended)\n"
 "1 - Cache TVShow information retrieved from the database\n"
 "2 - Cache Show banners\n"

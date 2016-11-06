@@ -1,4 +1,4 @@
-#Robin It#
+#Robin It
 ================================
 
 *Version 0.4*
@@ -7,7 +7,13 @@ Python GUI Application to search, track and download tvshows and movie torrents
 
 --------------------------------
 
-##Instalation
+## Screenshots
+
+![screenshot](screenshots/my_shows_screen_v1.0.png)
+
+![screenshot](screenshots/tv_show_screen_v1.0.png)
+
+## Instalation
 
 Before manually installing try one of the compiled builds on the branches "releases-<arch>", if that does not work follow this:
 
@@ -18,6 +24,7 @@ The python version used is python2.7, i will popssibly port it to python3.5 sinc
 Python bindings for Qt5 can be installed through:
 
 ubuntu: 	`apt-get install python-qt5` or ` python-pyqt5`
+
 arch: 		`pacman -S python2-pyqt5`
 
 Run `python robinit_gui.py`

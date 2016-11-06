@@ -365,7 +365,7 @@ class EpisodeWidget(QWidget):
 		self.ui.info_label.setText('%s %s' % (self.episode.airdate, self.episode.rating))
 		self.ui.description.setText(self.episode.description)
 		self.ui.download_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
-		self.ui.filler.setStyleSheet("background-color: " + settings._MAIN_COLOR)
+		self.ui.filler.setStyleSheet("background-color: " + settings._MAIN_COLOR_RGB_ALPHA)
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
@@ -399,7 +399,9 @@ class EpisodeWidget(QWidget):
 	def show_details(self):
 		self.ui.filler.show()
 		self.ui.description.show()
+		self.ui.name_label.hide()
 
 	def hide_details(self):
 		self.ui.filler.hide()
 		self.ui.description.hide()
+		self.ui.name_label.show()
