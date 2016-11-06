@@ -86,7 +86,7 @@ class ShowsMenu(QMainWindow):
 		# updates the shows if they have not been updated for a while, specifically (settings._UPDATE_SHOW_INTERVAL)
 		for show in self.user_state.shows.values():
 			if show.last_updated:
-				if abs(show.last_updated - datetime.date.today()) > datetime.timedelta(settings._UPDATE_SHOW_INTERVAL):
+				if abs(show.last_updated - datetime.date.today()) > datetime.timedelta(settings.config['update_show_interval']):
 					self.update_show(show)
 
 		self.col = 0

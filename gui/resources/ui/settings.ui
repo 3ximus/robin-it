@@ -556,7 +556,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-419</y>
+         <y>-416</y>
          <width>497</width>
          <height>800</height>
         </rect>
@@ -2505,7 +2505,7 @@ If you dont know what the cache is check the slider's tooltip below</string>
              </palette>
             </property>
             <property name="text">
-             <string>&gt; set cache_level</string>
+             <string>&gt; set cache_level (not implemented yet)</string>
             </property>
            </widget>
           </item>
@@ -2578,6 +2578,77 @@ will load after being first downloaded ( unless you have a ridiculous internet b
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_3">
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="Base">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Window">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>3</red>
+                <green>166</green>
+                <blue>98</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="Base">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Window">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>3</red>
+                <green>166</green>
+                <blue>98</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled>
+             <colorrole role="Base">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>3</red>
+                <green>166</green>
+                <blue>98</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Window">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>3</red>
+                <green>166</green>
+                <blue>98</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </disabled>
+           </palette>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -2745,77 +2816,6 @@ will load after being first downloaded ( unless you have a ridiculous internet b
          </layout>
         </item>
         <item>
-         <widget class="Line" name="line_3">
-          <property name="palette">
-           <palette>
-            <active>
-             <colorrole role="Base">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </brush>
-             </colorrole>
-             <colorrole role="Window">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>3</red>
-                <green>166</green>
-                <blue>98</blue>
-               </color>
-              </brush>
-             </colorrole>
-            </active>
-            <inactive>
-             <colorrole role="Base">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </brush>
-             </colorrole>
-             <colorrole role="Window">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>3</red>
-                <green>166</green>
-                <blue>98</blue>
-               </color>
-              </brush>
-             </colorrole>
-            </inactive>
-            <disabled>
-             <colorrole role="Base">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>3</red>
-                <green>166</green>
-                <blue>98</blue>
-               </color>
-              </brush>
-             </colorrole>
-             <colorrole role="Window">
-              <brush brushstyle="SolidPattern">
-               <color alpha="255">
-                <red>3</red>
-                <green>166</green>
-                <blue>98</blue>
-               </color>
-              </brush>
-             </colorrole>
-            </disabled>
-           </palette>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QVBoxLayout" name="verticalLayout_20">
           <item>
            <widget class="QLabel" name="label1_17">
@@ -2912,10 +2912,14 @@ will load after being first downloaded ( unless you have a ridiculous internet b
                </palette>
               </property>
               <property name="toolTip">
-               <string>Time in days until a shows gets its information updated again. (recomended value of 10 days)</string>
+               <string>Time in days until a shows gets its information updated again. (recomended value of 10 days)
+If you are an idiot and put letters in the text box the value on the slider is the one used</string>
+              </property>
+              <property name="minimum">
+               <number>1</number>
               </property>
               <property name="maximum">
-               <number>31</number>
+               <number>45</number>
               </property>
               <property name="pageStep">
                <number>4</number>
@@ -2930,7 +2934,7 @@ will load after being first downloaded ( unless you have a ridiculous internet b
                <enum>QSlider::TicksBelow</enum>
               </property>
               <property name="tickInterval">
-               <number>2</number>
+               <number>4</number>
               </property>
              </widget>
             </item>
@@ -3034,7 +3038,8 @@ will load after being first downloaded ( unless you have a ridiculous internet b
                </palette>
               </property>
               <property name="toolTip">
-               <string>This directory is where the user profiles are located</string>
+               <string>Time in days until a shows gets its information updated again. (recomended value of 10 days)
+If you are an idiot and put letters in the text box the value on the slider is the one used</string>
               </property>
               <property name="text">
                <string>10</string>

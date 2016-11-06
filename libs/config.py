@@ -58,7 +58,7 @@ class Config():
 	def add_property(self, key, value, category=None):
 		if type(key) != str:
 			raise AttributeError("[ERROR] Tried to add property to class with name not string")
-		if type(value) != str and type(value) != bool and type(value) != unicode:
+		if type(value) != str and type(value) != bool and type(value) != unicode and type(value) != int:
 			print "[\033[33mWARNING\033[0m] Property %s value is not a string nor bool" % key
 		cat = category if category else 'other'
 		if cat not in self.dict:
@@ -87,6 +87,8 @@ class Config():
 						key, eq, value = line.strip('\t').split(' ')
 						if value.lower() == 'true': value = True
 						elif value.lower() == 'false': value = False
+						try: value = int(value)
+						except ValueError: pass
 						self.add_property(key, value, category)
 						continue
 					raise ValueError("[ERROR] Line %d in %s: \" %s \"" % (n, self.config_file, ' '.join(line)))

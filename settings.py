@@ -22,7 +22,8 @@ def init():
 				'directories':{ 'storage_dir':'./storage',
 								'cache_dir':'./cache',
 								'user_dir':'./user'},
-				'other':{'definition':'hd'}}
+				'other':{'definition':'hd',
+							'update_show_interval':10}}
 
 	global _CONFIG_FILE
 	_CONFIG_FILE = 'config'
@@ -47,5 +48,5 @@ def init():
 	_SEASON_MAX_COL = 5
 	_EPISODE_MAX_COL = 3
 
-	global _UPDATE_SHOW_INTERVAL
-	_UPDATE_SHOW_INTERVAL = 10
+	global _MAX_UPDATE_SHOW_INTERVAL
+	_MAX_UPDATE_SHOW_INTERVAL = 45
