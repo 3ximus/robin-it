@@ -108,7 +108,7 @@ class ShowsMenu(QMainWindow):
 		'''Searches for TV shows by given keywords
 			Emits self.search_complete when finished
 		'''
-		results = search_for_show(text)
+		results = search_for_show(text, apikey=settings._TVDB_API_KEY)
 		self.search_complete.emit(results)
 
 	@threaded

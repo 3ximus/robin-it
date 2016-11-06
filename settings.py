@@ -27,8 +27,9 @@ def init():
 	global _CONFIG_FILE
 	_CONFIG_FILE = 'config'
 
-	global _TVDB_BANNER_PREFIX
+	global _TVDB_BANNER_PREFIX, _TVDB_API_KEY
 	_TVDB_BANNER_PREFIX = "http://thetvdb.com/banners/"
+	_TVDB_API_KEY = "750B91D6C4BD0717"
 
 	global _RESULTS_TIMEOUT
 	_RESULTS_TIMEOUT = 20

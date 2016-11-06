@@ -74,7 +74,8 @@ class MainWindow(QMainWindow):
 			self.set_user_state(UserContent(settings.config['default_user'],
 					user_dir=settings.config['user_dir'] if settings.config.has_property('user_dir') else None,
 					cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None,
-					storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None))
+					storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None,
+					apikey=settings._TVDB_API_KEY))
 		else: # create login window, this will use the function self.set_user_state to set the user_state
 			self.setEnabled(False)
 			self.loginwindow = LoginWindow(main_window=self)
@@ -160,7 +161,8 @@ class LoginWindow(QMainWindow):
 				UserContent(self.ui.login_box.text().replace(' ', '_'),
 						user_dir=settings.config['user_dir'] if settings.config.has_property('user_dir') else None,
 						cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None,
-						storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None))
+						storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None,
+						apikey=settings._TVDB_API_KEY))
 			self.main_window.setEnabled(True)
 			self.close()
 			self.destroy()

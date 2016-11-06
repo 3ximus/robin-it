@@ -31,11 +31,11 @@ class UserContent:
 	Contains list with following shows being Show instances
 	'''
 
-	def __init__(self, uname = '', cache_dir='cache/', user_dir='user/', storage_dir='storage/'):
+	def __init__(self, uname = '', cache_dir='cache/', user_dir='user/', storage_dir='storage/', apikey=None):
 		if uname != '': self.username = uname
 		else: raise ValueError("Username cannot be empty")
 
-		self.tvdb_apikey = '' # TODO API KEY
+		self.tvdb_apikey = apikey
 		self.shows = {} # following tv shows
 		self.actions = {}
 
@@ -129,7 +129,7 @@ class UserContent:
 			self.shows.update({show.real_name:show})
 			return show.real_name
 		elif not self.is_tracked(name):
-			new_show = tvshow.Show(name, cache=self.cache_dir)
+			new_show = tvshow.Show(name, cache=self.cache_dir, apikey=self.tvdb_apikey)
 			self.shows.update({new_show.name:new_show})
 			return new_show.real_name
 		else:
