@@ -1,11 +1,11 @@
 '''
 Holds global variables
-Latest Update - v0.6
+Latest Update - v1.0
 Created - 29.10.16
 Copyright (C) 2016 - eximus
 '''
 
-__version__ = '0.6'
+__version__ = '1.0'
 from libs.config import Config
 
 def init():

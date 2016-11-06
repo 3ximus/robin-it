@@ -18,11 +18,11 @@
 '''
 Frontend Aplication GUI
 Notes: Uses a global config class through the settings file
-Latest Update - v0.6
+Latest Update - v1.0
 Created - 21.9.16
 Copyright (C) 2016 - eximus
 '''
-__version__ = '0.6'
+__version__ = '1.0'
 
 # PYQT5 IMPORTS
 from PyQt5.QtWidgets import QApplication, QMainWindow

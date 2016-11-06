@@ -35,6 +35,13 @@ Run `python robinit_gui.py`
 
 ## Changelog
 
+**New in v1.0**
+
+- Basic tracking system fullt implemented
+    - See shows left to watch
+- GUI stability and coherence improvements
+- Settings menu functionality
+
 **New in v0.5**
 
 - Stability Improvements

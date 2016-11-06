@@ -1082,7 +1082,7 @@ class Ui_settings_window(object):
 
     def retranslateUi(self, settings_window):
         _translate = QtCore.QCoreApplication.translate
-        settings_window.setWindowTitle(_translate("settings_window", "Robin_it_v0.6"))
+        settings_window.setWindowTitle(_translate("settings_window", "Robin_it_v1.0"))
         self.shows_label.setText(_translate("settings_window", "[ settings ]"))
         self.label1_3.setText(_translate("settings_window", "> set torrent_hosts"))
         self.kickass_checkbox.setText(_translate("settings_window", "kickass >"))
