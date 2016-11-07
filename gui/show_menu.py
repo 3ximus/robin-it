@@ -70,6 +70,12 @@ class ShowsMenu(QMainWindow):
 		self.ui.back_button_1.clicked.connect(partial(self.go_to, index=0))
 		self.ui.back_button_2.clicked.connect(partial(self.go_to, index=0))
 		self.ui.back_button_3.clicked.connect(partial(self.go_to, index=0))
+		self.ui.back_button_4.clicked.connect(partial(self.go_to, index=0))
+		self.ui.back_button_5.clicked.connect(partial(self.go_to, index=0))
+
+		self.ui.stats_button.clicked.connect(partial(self.go_to, index=3))
+		self.ui.downloads_button.clicked.connect(partial(self.go_to, index=4))
+		self.ui.calendar_button.clicked.connect(partial(self.go_to, index=5))
 
 		self.ui.myshows_button.clicked.connect(self.load_my_shows)
 		self.ui.unwatched_checkbox.stateChanged.connect(self.set_unwatched_filter)
@@ -269,7 +275,7 @@ class ShowWidget(QWidget):
 		self.ui.setupUi(self)
 
 		name = self.tvshow['seriesname'] if type(self.tvshow) == dict else self.tvshow.real_name
-		self.ui.name_label.setText('< %s >' % name)
+		self.ui.name_label.setText('%s' % name)
 		clickable(self).connect(self.view_show)
 
 		self.ui.add_button.clicked.connect(self.add_show)
