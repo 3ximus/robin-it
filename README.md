@@ -33,38 +33,8 @@ Run `python robinit_gui.py`
 
 Run `python robinit_gui.py`
 
-## Changelog
-
-**New in v1.0**
-
-- Basic tracking system fullt implemented
-    - See shows left to watch
-- GUI stability and coherence improvements
-- Settings menu functionality
-
-**New in v0.5**
-
-- Stability Improvements
-
-**New in v0.4**
-
-- Delete followed shows
-- Mark shows, seasons or episodes as watched
-
-**v0.3**
-
-- Able to add shows
-
-**v0.2**
-
-- TVShow search function
-
-**v0.1**
-
-- Preliminar GUI version
+## [Changelog](https://github.com/3ximus/robin-it/blob/master/CHANGELOG.md)
 
 --------------------------------
 
-##Known Bugs
-
-See [here](https://github.com/3ximus/robin-it-console/labels/bug)
+## [Known Bugs](https://github.com/3ximus/robin-it/labels/bug)
