@@ -11,10 +11,8 @@ Copyright (C) 2015 - eximus
 
 from tvdb_api import Tvdb
 from tvdb_exceptions import tvdb_error, tvdb_shownotfound, tvdb_attributenotfound
-from torrent import Torrent
 import datetime
 import os
-import re
 
 IMDB_TITLE = "http://www.imdb.com/title/"
 
@@ -249,7 +247,7 @@ class Season():
 			banners - retrieve season banners and posters
 		'''
 		# update posters
-		database = Tvdb(cache = self.cache, banners = banners, apikey=self.apikey)
+		database = Tvdb(cache = self.cache if not cache else cache, banners = banners, apikey=self.apikey)
 		try: posters = database[self.tv_show.real_name]['_banners']['season']
 		except tvdb_attributenotfound: pass # posters werent loaded so ignore them
 		except KeyError: print "No poster for %d : %s" % (self.s_id, self.tv_show.name)
@@ -379,9 +377,9 @@ class Episode:
 # ------------------------------------------------------
 
 if __name__ == '__main__':
-	'''Sample Run'''
+	# probably doesnt work anymore
 	name = raw_input('Select a show: ')
-	s = Show(name, console = True)
+	s = Show(name)
 	s.to_string() # print show info
 	s.seasons[0].to_string() # print season info
 	print "Posters:"

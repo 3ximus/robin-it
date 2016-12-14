@@ -7,8 +7,8 @@ Copyright (C) 2016 - eximus
 '''
 
 import re
-CAT_REGEX = re.compile("^\[.+\]$")
-CONF_REGEX = re.compile("^\t.+ = .+$")
+CAT_REGEX = re.compile(r"^\[.+\]$")
+CONF_REGEX = re.compile(r"^\t.+ = .+$")
 
 class Config():
 	'''Loads a config file if it exists otherwise creates a new one.

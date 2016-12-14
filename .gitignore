@@ -1,11 +1,19 @@
+# generated editor files
 *.swp
 *.pyc
 *.vim
 .vscode
+
+# generated dirs
 cache
 storage
 user
 build
 dist
 config
+
+# project dirs
 venv
+
+# other files
+.tags

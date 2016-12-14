@@ -11,13 +11,9 @@ Copyright (C) 2016 - eximus
 __version__ = '1.0'
 
 
-import tvshow
+from libs.tvshow import Show
 import os
 import cPickle
-
-# Torrent libs
-#from utillib import UtillibError
-#import gatherer
 
 class UserContent:
 	'''User TV Shows Content Class
@@ -129,7 +125,7 @@ class UserContent:
 			self.shows.update({show.real_name:show})
 			return show.real_name
 		elif not self.is_tracked(name):
-			new_show = tvshow.Show(name, cache=self.cache_dir, apikey=self.tvdb_apikey)
+			new_show = Show(name, cache=self.cache_dir, apikey=self.tvdb_apikey)
 			self.shows.update({new_show.name:new_show})
 			return new_show.real_name
 		else:
@@ -142,22 +138,6 @@ class UserContent:
 		if not self.is_tracked(name): return None
 		del(self.shows[name])
 		return name
-
-	def toogle_watched(self, name = None, item = None):
-		'''Toogles watched value
-
-		If an item with watch state is given name is ignored
-		If name is given only updates that name
-		This recursivly sets all seasons and episodes to watched/unwatched if its a show/season
-		'''
-		if item:
-			try: item.toogle_watched() # if valid item
-			except AttributeError: raise ValueError("Invalid item passed to toogle_watched_show")
-		elif name: # by name
-			if not self.is_tracked(name):
-				raise ValueError("I fucked up somewhere and didnt save the show with the real name")
-			else:
-				if show: self.shows[show].toogle_watched()
 
 	def unwatched_shows(self):
 		'''Get all shows with episodes left to watch'''
@@ -184,51 +164,19 @@ class UserContent:
 			of episode class:
 			{ <show_name> : { <season_id> : [ <episode>, <episode>, ... ] , ... }, ... }
 		'''
-		unwatched_dict = {}
-
-		def _make_unwatched_dict(show):
-			if show.watched: return
-			if seasons_dict != {}: unwatched_dict.update({show.realname:show.get_unwatched_episodes()})
-
-		if show:
-			_make_unwatched_dict(show)
-		elif name:
-			if self.is_tracked(name):
-				_make_unwatched_dict(self.shows[name])
-		else:
-			for show in self.shows.values():
-				_make_unwatched_dict(show)
-		return unwatched_dict
-
-	def assign_torrents(self, episode_list, force=False, selection_handler=None):
-		'''Assign torrents to every episode given
-
-		Parameters:
-			episode_list -- list with episode instances
-			force -- force overwrite of torrents if already defined
-			selection_handler -- is a function that must return an integer (or None if canceled) and receives
-				a list of strings, this function must then return the user selection.
-					NOTE: This argument is mandatory! See top Documentation
-		This function yields every episode it finishes gathering and a flag representing its failure or sucess
-		'''
-		status = True
-		for e in episode_list:
-			yield False, e, status
-			if not e.torrent or force:
-					search_term = '%s %s %s' % (e.tv_show.name, 's%02d' % int(e.s_id) + 'e%02d' % int(e.e_id), "720p")
-					try:
-						results = gatherer.search(gatherer.KICKASS, search_term)
-						if selection_handler:
-							choice = selection_handler(gatherer.present_results(results, header=False, output=False))
-							if choice:
-								e.torrent = results[choice]
-								status = True
-						else:
-							if not results: status = False
-							else:
-								e.torrent = results[0] # TODO ADD A BETTER METHOD FOR THIS
-								status = True
-					except UtillibError:
-						status = False
-			yield True, e, status
-
+		pass
+	#	unwatched_dict = {}
+#
+	#	def _make_unwatched_dict(show):
+	#		if show.watched: return
+	#		if seasons_dict != {}: unwatched_dict.update({show.realname:show.get_unwatched_episodes()})
+#
+	#	if show:
+	#		_make_unwatched_dict(show)
+	#	elif name:
+	#		if self.is_tracked(name):
+	#			_make_unwatched_dict(self.shows[name])
+	#	else:
+	#		for show in self.shows.values():
+	#			_make_unwatched_dict(show)
+	#	return unwatched_dict
