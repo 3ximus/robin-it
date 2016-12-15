@@ -4,7 +4,6 @@
  Created - 19.9.15
  Copyright (C) 2015 - eximus
 '''
-import sys
 
 def progress_bar(percent_complete, show_percentage=False, bar_body = "#", bar_empty = " ", bar_begin = "[", bar_end = "]", bar_size=20, bar_arrow=None):
 

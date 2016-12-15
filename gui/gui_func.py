@@ -54,9 +54,9 @@ def clickable(widget):
 					return True
 			return False
 
-	filter = Filter(widget)
-	widget.installEventFilter(filter)
-	return filter.clicked
+	ret_filter = Filter(widget)
+	widget.installEventFilter(ret_filter)
+	return ret_filter.clicked
 
 def begin_hover(widget):
 	'''Makes a widget emit a signal when mouse enters its bounds'''
@@ -70,9 +70,9 @@ def begin_hover(widget):
 					self.begin_hover.emit()
 					return True
 			return False
-	filter = Filter(widget)
-	widget.installEventFilter(filter)
-	return filter.begin_hover
+	ret_filter = Filter(widget)
+	widget.installEventFilter(ret_filter)
+	return ret_filter.begin_hover
 
 def end_hover(widget):
 	'''Makes a widget emit a signal when mouse leaves its bounds'''
@@ -86,6 +86,6 @@ def end_hover(widget):
 					self.end_hover.emit()
 					return True
 			return False
-	filter = Filter(widget)
-	widget.installEventFilter(filter)
-	return filter.end_hover
+	ret_filter = Filter(widget)
+	widget.installEventFilter(ret_filter)
+	return ret_filter.end_hover

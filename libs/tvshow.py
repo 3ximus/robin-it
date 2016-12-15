@@ -148,8 +148,7 @@ class Show:
 		seasons_watched = 0
 		for season in self.seasons: # for every season on this show
 			if season.watched: seasons_watched += 1
-		if seasons_watched == len(self.seasons): self.watched = True
-		else: self.watched = False
+		self.watched = bool(seasons_watched == len(self.seasons))
 
 	def set_torrent(self, torrent):
 		'''Set torrent instance associated with this episode'''
@@ -294,8 +293,7 @@ class Season():
 		cont = 0
 		for episode in self.episodes: # for every episode on this season
 			if episode.watched: cont += 1
-		if cont == len(self.episodes): self.watched = True
-		else: self.watched = False
+		self.watched = bool(cont == len(self.episodes))
 		self.tv_show.update_watched() # call update on tv show
 
 class Episode:
@@ -379,10 +377,10 @@ class Episode:
 if __name__ == '__main__':
 	# probably doesnt work anymore
 	name = raw_input('Select a show: ')
-	s = Show(name)
-	s.to_string() # print show info
-	s.seasons[0].to_string() # print season info
+	sw = Show(name)
+	sw.to_string() # print show info
+	sw.seasons[0].to_string() # print season info
 	print "Posters:"
-	for a in s.seasons[0].poster: # get list of season posters (use poster_wide for wide posters)
+	for a in sw.seasons[0].poster: # get list of season posters (use poster_wide for wide posters)
 		print a
-	s.seasons[0].episodes[0].to_string() # print episode info
+	sw.seasons[0].episodes[0].to_string() # print episode info

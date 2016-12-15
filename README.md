@@ -27,14 +27,10 @@ ubuntu: 	`apt-get install python-qt5` or ` python-pyqt5`
 
 arch: 		`pacman -S python2-pyqt5`
 
-Run `python robinit_gui.py`
-
 ## Usage
 
 Run `python robinit_gui.py`
 
 ## [Changelog](https://github.com/3ximus/robin-it/blob/master/CHANGELOG.md)
-
---------------------------------
 
 ## [Known Bugs](https://github.com/3ximus/robin-it/labels/bug)

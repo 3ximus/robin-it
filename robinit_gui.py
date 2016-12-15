@@ -68,6 +68,8 @@ class MainWindow(QMainWindow):
 
 		# User
 		self.user_state = None
+		self.shows_window = None
+		self.settings = None
 
 		settings.config = Config(settings._CONFIG_FILE, default_config=settings._DEFAULTS)
 		if settings.config.has_property('default_user'):
