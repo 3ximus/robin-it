@@ -31,8 +31,8 @@ class PirateBay:
 					magnet=a[1]['href'],
 					seeds=int(cells[2].text),  # column #2 contains seeds
 					peers=int(cells[3].text),  # column #3 contains leechs
-					age=match.group(1).encode('ascii', 'replace').decode('ascii'),
-					size=match.group(2).encode('ascii', 'replace').decode('ascii'),
+					age=match.group(1).encode('ascii', 'replace').decode('ascii'), # contains non ascii
+					size=match.group(2).encode('ascii', 'replace').decode('ascii'), # contains non ascii
 					host=base_url
 				)
 				torrents.append(tor)

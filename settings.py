@@ -16,16 +16,22 @@ def init():
 	global _DEFAULTS
 	_DEFAULTS =  {
 		'torrents': {
+			'piratebay_allow':False,
 			'kickass_allow':True,
 			'rarbg_allow':False,
-			'piratebay_allow':False},
+			'piratebay':"https://pirateproxy.vip",
+			'rarbg':"https://rarbg.to",
+			'kickass':"http://kickasstorrents.to"
+		},
 		'subtitles': {
 			'sub_en':True,
-			'sub_pt':True},
+			'sub_pt':True
+		},
 		'directories':{
 			'storage_dir':'./storage',
 			'cache_dir':'./cache',
-			'user_dir':'./user'},
+			'user_dir':'./user'
+		},
 		'other':{
 			'definition':'hd',
 			'update_show_interval':10

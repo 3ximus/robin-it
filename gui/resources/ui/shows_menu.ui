@@ -2025,7 +2025,7 @@
            </font>
           </property>
           <property name="text">
-           <string>[ my_shows ]</string>
+           <string>[ my shows ]</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -2640,8 +2640,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1009</width>
-             <height>498</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_9">

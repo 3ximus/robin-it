@@ -8,7 +8,7 @@ Copyright (C) 2016 - eximus
 
 import re
 CAT_REGEX = re.compile(r"^\[.+\]$")
-CONF_REGEX = re.compile(r"^\t.+ = .+$")
+CONF_REGEX = re.compile(r"^\t.+=.+$")
 
 class Config():
 	'''Loads a config file if it exists otherwise creates a new one.
@@ -22,11 +22,11 @@ class Config():
 	def __init__(self, config_file, start_config = None, default_config = None):
 		self.dict = {}
 		self.config_file = config_file
-		if default_config and type(default_config) == dict:
-			self.default_config = default_config
-			self.update(default_config)
-		else:
-				self.default_config = {}
+
+		# because having {} as default argument for default_config is considered
+		# static and is # persistent across calls
+		self.default_config = default_config if default_config and type(default_config) == dict else {}
+		self.update(self.default_config)
 
 		self.load()
 		if start_config and type(start_config) == dict:
@@ -34,7 +34,7 @@ class Config():
 			self.save()
 
 	def has_property(self, key, defaults=False):
-		'''Check if jey exists, if defaults is True it will search in the default configuration instead'''
+		'''Check if key exists, if defaults is True it will search in the default configuration instead'''
 		dic = self.dict if not defaults else self.default_config
 		for category in dic.values():
 			if key in category:
@@ -59,7 +59,7 @@ class Config():
 		if type(key) != str:
 			raise AttributeError("[ERROR] Tried to add property to class with name not string")
 		if type(value) != str and type(value) != bool and type(value) != unicode and type(value) != int:
-			print "[\033[33mWARNING\033[0m] Property %s value is not a string nor bool" % key
+			print "[WARNING] Property %s value is not a string nor bool" % key
 		cat = category if category else 'other'
 		if cat not in self.dict:
 			self.dict[cat] = {}
@@ -84,14 +84,15 @@ class Config():
 						category = line.strip('[]')
 						continue
 					if CONF_REGEX.match(line):
-						key, eq, value = line.strip('\t').split(' ')
+						key, value = [x.strip() for x in line.strip('\t').split('=')]
 						if value.lower() == 'true': value = True
 						elif value.lower() == 'false': value = False
 						try: value = int(value)
 						except ValueError: pass
 						self.add_property(key, value, category)
+						print "[+] Loaded config Value: %s -> %s" % (key, value)
 						continue
-					raise ValueError("[ERROR] Line %d in %s: \" %s \"" % (n, self.config_file, ' '.join(line)))
+					raise SystemExit("[ERROR] Line %d in %s: \" %s \"" % (n+1, self.config_file, ''.join(line)))
 		except IOError: return None # file doesnt exist
 		return self.dict
 
@@ -99,7 +100,7 @@ class Config():
 		with open(self.config_file, 'w') as fp:
 			for category, content in self.dict.iteritems():
 				writter = "[%s]\n" % category
-				write = False
+				write = False # to help decide when to write (dont write if category is empty)
 				for key, value in content.iteritems():
 					if value == "" or (self.has_property(key, defaults=True) and value == self.default_config[category][key]):
 						continue

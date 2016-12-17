@@ -33,8 +33,8 @@ from gui.resources.login import Ui_loginwindow
 from gui.resources.settings import Ui_settings_window
 
 # GUI CLASSES
-from gui.show_menu import *
-from gui.show_window import *
+from gui.show_menu import ShowsMenu
+from libs.config import Config
 
 # LIBS IMPORT
 from libs.robinit_api import UserContent
@@ -84,6 +84,7 @@ class MainWindow(QMainWindow):
 			self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
 			self.loginwindow.show()
 
+		print "Loaded user \"%s\"" % self.user_state.username
 		self.ui.shows_button.clicked.connect(self.display_shows)
 		self.ui.config_button.clicked.connect(self.display_settings)
 
@@ -156,11 +157,12 @@ class LoginWindow(QMainWindow):
 			If the autologin checkbox is checked it will save this user to the config file
 		'''
 		if self.ui.login_box.text() != "":
+			username = self.ui.login_box.text().replace(' ', '_')
 			if self.autologin:
-				settings.config.add_property('default_user', self.ui.login_box.text().replace(' ', '_'))
+				settings.config.add_property('default_user', username)
 				settings.config.save()
 			self.main_window.set_user_state(
-				UserContent(self.ui.login_box.text().replace(' ', '_'),
+				UserContent(username,
 						user_dir=settings.config['user_dir'] if settings.config.has_property('user_dir') else None,
 						cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None,
 						storage_dir=settings.config['storage_dir'] if settings.config.has_property('storage_dir') else None,
@@ -224,12 +226,12 @@ class SettingsWindow(QMainWindow):
 	def save(self):
 		'''Saves configuration to a file, ignores or deletes a settinf from config dict if its set to default'''
 
-		settings.config.add_property('kickass_allow', self.ui.kickass_checkbox.isChecked(), 'torrents')
-		settings.config.add_property('rarbg_allow', self.ui.rarbg_checkbox.isChecked(), 'torrents')
 		settings.config.add_property('piratebay_allow', self.ui.piratebay_checkbox.isChecked(), 'torrents')
-		settings.config.add_property('kickass', self.ui.kickass_box.text().replace(' ', '_'), 'torrents')
-		settings.config.add_property('rarbg', self.ui.rarbg_box.text().replace(' ', '_'), 'torrents')
 		settings.config.add_property('piratebay', self.ui.piratebay_box.text().replace(' ', '_'), 'torrents')
+		settings.config.add_property('kickass_allow', self.ui.kickass_checkbox.isChecked(), 'torrents')
+		settings.config.add_property('kickass', self.ui.kickass_box.text().replace(' ', '_'), 'torrents')
+		settings.config.add_property('rarbg_allow', self.ui.rarbg_checkbox.isChecked(), 'torrents')
+		settings.config.add_property('rarbg', self.ui.rarbg_box.text().replace(' ', '_'), 'torrents')
 
 		settings.config.add_property('sub_en', self.ui.ensub_checkbox.isChecked(), 'subtitles')
 		settings.config.add_property('sub_pt', self.ui.ensub_checkbox.isChecked(), 'subtitles')
@@ -254,19 +256,24 @@ class SettingsWindow(QMainWindow):
 
 	def configure(self):
 		'''Sets the settings displayed according to given config dictionary'''
+		if settings.config.has_property('piratebay_allow'):
+			self.ui.piratebay_checkbox.setChecked(settings.config['piratebay_allow'])
 		if settings.config.has_property('kickass_allow'):
 			self.ui.kickass_checkbox.setChecked(settings.config['kickass_allow'])
 		if settings.config.has_property('rarbg_allow'):
 			self.ui.rarbg_checkbox.setChecked(settings.config['rarbg_allow'])
-		if settings.config.has_property('piratebay_allow'):
-			self.ui.piratebay_checkbox.setChecked(settings.config['piratebay_allow'])
 
-		if settings.config.has_property('kickass'):
-			self.ui.kickass_box.setText(str(settings.config['kickass']))
-		if settings.config.has_property('rarbg'):
-			self.ui.rarbg_box.setText(str(settings.config['rarbg']))
 		if settings.config.has_property('piratebay'):
-			self.ui.piratebay_box.setText(str(settings.config['piratebay']))
+			self.ui.piratebay_box.setText(str(settings.config['piratebay'] if settings.config['piratebay'] != settings._DEFAULTS['torrents']['piratebay'] else ''))
+		if settings.config.has_property('kickass'):
+			self.ui.kickass_box.setText(str(settings.config['kickass'] if settings.config['kickass'] != settings._DEFAULTS['torrents']['kickass'] else ''))
+		if settings.config.has_property('rarbg'):
+			self.ui.rarbg_box.setText(str(settings.config['rarbg'] if settings.config['rarbg'] != settings._DEFAULTS['torrents']['rarbg'] else ''))
+
+		# set placeholder texts for this (given by source update)
+		self.ui.piratebay_box.setPlaceholderText(str(settings._DEFAULTS['torrents']['piratebay']))
+		self.ui.kickass_box.setPlaceholderText(str(settings._DEFAULTS['torrents']['kickass']))
+		self.ui.rarbg_box.setPlaceholderText(str(settings._DEFAULTS['torrents']['rarbg']))
 
 		if settings.config.has_property('sub_en'):
 			self.ui.ensub_checkbox.setChecked(settings.config['sub_en'])
@@ -280,11 +287,11 @@ class SettingsWindow(QMainWindow):
 				self.ui.hd_button.setChecked(True)
 
 		if settings.config.has_property('storage_dir'):
-			self.ui.storage_box.setText(str(settings.config['storage_dir'] if settings.config['storage_dir'] != './storage' else ''))
+			self.ui.storage_box.setText(str(settings.config['storage_dir'] if settings.config['storage_dir'] != settings._DEFAULTS['directories']['storage_dir'] else ''))
 		if settings.config.has_property('user_dir'):
-			self.ui.user_box.setText(str(settings.config['user_dir'] if settings.config['user_dir'] != './user' else ''))
+			self.ui.user_box.setText(str(settings.config['user_dir'] if settings.config['user_dir'] != settings._DEFAULTS['directories']['user_dir'] else ''))
 		if settings.config.has_property('cache_dir'):
-			self.ui.cache_box.setText(str(settings.config['cache_dir'] if settings.config['cache_dir'] != './cache' else ''))
+			self.ui.cache_box.setText(str(settings.config['cache_dir'] if settings.config['cache_dir'] != settings._DEFAULTS['directories']['cache_dir'] else ''))
 
 		if settings.config.has_property('update_show_interval'):
 			self.ui.update_interval_slider.setSliderPosition(settings.config['update_show_interval'])

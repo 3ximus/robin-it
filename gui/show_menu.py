@@ -8,27 +8,28 @@ Copyright (C) 2016 - eximus
 
 __version__ = '1.0'
 
-# PYQT5 IMPORTS
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow, QWidget, QSpacerItem
-from PyQt5.QtGui import QPixmap, QPalette, QBrush, QColor
-
-# IMPORT FORMS
-from gui.resources.shows_menu import Ui_shows_menu
-from gui.resources.show_banner_widget import Ui_show_banner_widget
-
-# LIBS IMPORT
-from gui_func import clickable, download_object, end_hover, begin_hover
-from show_window import ShowWindow
-from libs.tvshow import search_for_show
-from libs.thread_decorator import threaded
-from libs.loading import progress_bar
-import settings
-
 # TOOLS
 import datetime
-from time import sleep
 from functools import partial
+from time import sleep
+
+# PYQT5 IMPORTS
+from PyQt5 import QtCore
+from PyQt5.QtGui import QBrush, QColor, QPalette, QPixmap
+from PyQt5.QtWidgets import QMainWindow, QSpacerItem, QWidget
+
+import settings
+# IMPORT FORMS
+from gui.resources.show_banner_widget import Ui_show_banner_widget
+from gui.resources.shows_menu import Ui_shows_menu
+
+# LIBS IMPORT
+from gui.gui_func import begin_hover, clickable, download_object, end_hover
+from libs.loading import progress_bar
+from libs.thread_decorator import threaded
+from libs.tvshow import search_for_show
+from gui.show_window import ShowWindow
+
 
 class ShowsMenu(QMainWindow):
 	'''Works with stacked pages
@@ -97,6 +98,7 @@ class ShowsMenu(QMainWindow):
 
 		self.col = 0
 		self.row = 0
+		self.loaded_results=0
 
 	def search(self):
 		'''Searches for TV Show by a given keyword in the search box
@@ -270,6 +272,7 @@ class ShowWidget(QWidget):
 		self.tvshow = tvshow
 		self.user_state = user_state
 		self.window = window
+		self.show_window = None
 
 		self.ui = Ui_show_banner_widget()
 		self.ui.setupUi(self)
