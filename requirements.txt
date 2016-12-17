@@ -2,3 +2,5 @@ beautifulsoup4==4.5.1
 bs4==0.0.1
 Pillow==3.3.1
 tvdb-api==1.10
+lxml==3.6.4
+requests==2.11.1

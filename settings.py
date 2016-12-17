@@ -14,16 +14,23 @@ def init():
 	config = Config
 
 	global _DEFAULTS
-	_DEFAULTS =  {'torrents': {'kickass_allow':True,
-							'rarbg_allow':False,
-							'piratebay_allow':False},
-				'subtitles': {'sub_en':True,
-							'sub_pt':True},
-				'directories':{ 'storage_dir':'./storage',
-								'cache_dir':'./cache',
-								'user_dir':'./user'},
-				'other':{'definition':'hd',
-							'update_show_interval':10}}
+	_DEFAULTS =  {
+		'torrents': {
+			'kickass_allow':True,
+			'rarbg_allow':False,
+			'piratebay_allow':False},
+		'subtitles': {
+			'sub_en':True,
+			'sub_pt':True},
+		'directories':{
+			'storage_dir':'./storage',
+			'cache_dir':'./cache',
+			'user_dir':'./user'},
+		'other':{
+			'definition':'hd',
+			'update_show_interval':10
+		}
+	}
 
 	global _CONFIG_FILE
 	_CONFIG_FILE = 'config'
@@ -31,6 +38,9 @@ def init():
 	global _TVDB_BANNER_PREFIX, _TVDB_API_KEY
 	_TVDB_BANNER_PREFIX = "http://thetvdb.com/banners/"
 	_TVDB_API_KEY = "750B91D6C4BD0717"
+
+	global _USER_AGENT_HEADER
+	_USER_AGENT_HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36'}
 
 	global _RESULTS_TIMEOUT
 	_RESULTS_TIMEOUT = 20

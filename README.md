@@ -1,7 +1,7 @@
 #Robin It
 ================================
 
-*Version 0.4*
+*Version 1.0*
 
 Python GUI Application to search, track and download tvshows and movie torrents
 
@@ -12,6 +12,8 @@ Python GUI Application to search, track and download tvshows and movie torrents
 ![screenshot](screenshots/my_shows_screen_v1.0.png)
 
 ![screenshot](screenshots/tv_show_screen_v1.0.png)
+
+*NOTE: screenshots were taken on kde, they may differ on other systems*
 
 ## Instalation
 
