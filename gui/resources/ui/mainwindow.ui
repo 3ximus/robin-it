@@ -644,7 +644,7 @@
          <enum>Qt::WheelFocus</enum>
         </property>
         <property name="text">
-         <string>load tv_shows</string>
+         <string>load tv shows</string>
         </property>
        </widget>
       </item>

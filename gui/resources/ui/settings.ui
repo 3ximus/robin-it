@@ -556,7 +556,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
+         <y>-384</y>
          <width>497</width>
          <height>800</height>
         </rect>
@@ -773,7 +773,7 @@
                  <string>piratebay &gt;</string>
                 </property>
                 <property name="checked">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1066,6 +1066,9 @@
               </item>
               <item>
                <widget class="QLineEdit" name="rarbg_box">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="palette">
                  <palette>
                   <active>
@@ -1270,7 +1273,7 @@
               <item>
                <widget class="QLineEdit" name="kickass_box">
                 <property name="enabled">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                 <property name="palette">
                  <palette>
@@ -3058,10 +3061,13 @@ If you are an idiot and put letters in the text box the value on the slider is t
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_10">
       <property name="spacing">
-       <number>350</number>
+       <number>140</number>
       </property>
       <property name="leftMargin">
-       <number>20</number>
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
       </property>
       <item>
        <widget class="QPushButton" name="back_button">
@@ -3117,6 +3123,63 @@ If you are an idiot and put letters in the text box the value on the slider is t
         </property>
         <property name="text">
          <string>&lt;&lt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="defaults_button">
+        <property name="maximumSize">
+         <size>
+          <width>90</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="ButtonText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="ButtonText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="ButtonText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>1</red>
+              <green>83</green>
+              <blue>49</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>defaults</string>
         </property>
        </widget>
       </item>

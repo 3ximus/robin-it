@@ -31,3 +31,7 @@ for f in gui/resources/*.qrc; do
 	$pyrcc $f -o $(echo $f | sed 's/\.qrc/_rc\.py/');
 done
 
+
+echo "Removing .pyc files"
+rm */*/*.pyc
+rm */*.pyc

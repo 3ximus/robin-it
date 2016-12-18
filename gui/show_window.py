@@ -19,18 +19,15 @@ from gui.resources.season_banner_widget import Ui_season_banner_widget
 from gui.resources.episode_banner_widget import Ui_episode_banner_widget
 
 # LIBS IMPORT
-from gui_func import clickable, download_object, begin_hover, end_hover
+from gui.gui_func import clickable, download_object, begin_hover, end_hover
 from libs.tvshow import Show
 from libs.thread_decorator import threaded
-from libs.config import Config
 import settings
 
 # TOOLS
 from functools import partial
 from PIL import Image, ImageFilter
 from cStringIO import StringIO
-import math
-import urllib
 
 # --------------------
 #      Classes

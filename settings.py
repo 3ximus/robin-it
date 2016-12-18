@@ -8,7 +8,7 @@ Copyright (C) 2016 - eximus
 __version__ = '1.0'
 from libs.config import Config
 
-def init():
+def init(): # call only once to prevent multiple initialization
 	'''Initializer global variables'''
 	global config
 	config = Config
@@ -16,8 +16,8 @@ def init():
 	global _DEFAULTS
 	_DEFAULTS =  {
 		'torrents': {
-			'piratebay_allow':False,
-			'kickass_allow':True,
+			'piratebay_allow':True,
+			'kickass_allow':False,
 			'rarbg_allow':False,
 			'piratebay':"https://pirateproxy.vip",
 			'rarbg':"https://rarbg.to",

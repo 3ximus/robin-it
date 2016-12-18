@@ -72,6 +72,13 @@ class Config():
 					self.add_property(key, content[k][key], category=k)
 			else: self.add_property(k, content[k])
 
+	def reset(self, new_defaults=None):
+		if new_defaults and type(new_defaults) == dict:
+			self.dict = new_defaults
+			self.default_config = new_defaults
+		else:
+			self.dict = self.default_config
+
 	def load(self):
 		'''Loads a config file to the self.__dict__ variable'''
 		try:

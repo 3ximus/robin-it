@@ -885,7 +885,7 @@ class Ui_shows_menu(object):
         self.scrollArea_4.setWidgetResizable(True)
         self.scrollArea_4.setObjectName("scrollArea_4")
         self.scrollAreaWidgetContents_4 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_4.setGeometry(QtCore.QRect(0, 0, 100, 30))
+        self.scrollAreaWidgetContents_4.setGeometry(QtCore.QRect(0, 0, 1009, 498))
         self.scrollAreaWidgetContents_4.setObjectName("scrollAreaWidgetContents_4")
         self.gridLayout_9 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_4)
         self.gridLayout_9.setContentsMargins(0, 0, 0, 0)

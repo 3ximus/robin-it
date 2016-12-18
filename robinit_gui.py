@@ -37,7 +37,7 @@ from gui.show_menu import ShowsMenu
 from libs.config import Config
 
 # LIBS IMPORT
-from libs.robinit_api import UserContent
+from libs.user import UserContent
 import settings
 
 # TOOLS
@@ -258,10 +258,13 @@ class SettingsWindow(QMainWindow):
 		'''Sets the settings displayed according to given config dictionary'''
 		if settings.config.has_property('piratebay_allow'):
 			self.ui.piratebay_checkbox.setChecked(settings.config['piratebay_allow'])
+			self.ui.piratebay_box.setEnabled(settings.config['piratebay_allow'])
 		if settings.config.has_property('kickass_allow'):
 			self.ui.kickass_checkbox.setChecked(settings.config['kickass_allow'])
+			self.ui.kickass_box.setEnabled(settings.config['kickass_allow'])
 		if settings.config.has_property('rarbg_allow'):
 			self.ui.rarbg_checkbox.setChecked(settings.config['rarbg_allow'])
+			self.ui.rarbg_box.setEnabled(settings.config['rarbg_allow'])
 
 		if settings.config.has_property('piratebay'):
 			self.ui.piratebay_box.setText(str(settings.config['piratebay'] if settings.config['piratebay'] != settings._DEFAULTS['torrents']['piratebay'] else ''))
