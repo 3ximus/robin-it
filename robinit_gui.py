@@ -84,7 +84,6 @@ class MainWindow(QMainWindow):
 			self.loginwindow.move(self.pos()+self.rect().center()-self.loginwindow.rect().center()) # position login window
 			self.loginwindow.show()
 
-		print "Loaded user \"%s\"" % self.user_state.username
 		self.ui.shows_button.clicked.connect(self.display_shows)
 		self.ui.config_button.clicked.connect(self.display_settings)
 
@@ -109,6 +108,7 @@ class MainWindow(QMainWindow):
 		'''
 		self.user_state=user_state
 		self.ui.user_label.setText('<%s>' % self.user_state.username)
+		print "Loaded user \"%s\"" % self.user_state.username
 
 	def closeEvent(self, event):
 		'''This is here because it stops segmentation fault when exiting, but stops the
@@ -196,6 +196,7 @@ class SettingsWindow(QMainWindow):
 
 		self.ui.back_button.clicked.connect(self.go_back)
 		self.ui.save_button.clicked.connect(self.save)
+		self.ui.defaults_button.clicked.connect(self.set_defaults)
 
 		# update slider and text 0 identifies the slider and 1 identifies the text
 		self.ui.update_interval_slider.sliderMoved.connect(partial(self.update_show_interval, 0))
@@ -302,6 +303,11 @@ class SettingsWindow(QMainWindow):
 
 		if settings.config.has_property('default_user'):
 			self.ui.defaultuser_box.setText(str(settings.config['default_user']))
+
+	def set_defaults(self):
+		'''Set defaut values to the settings'''
+		settings.config.reset()
+		self.configure()
 
 # ----------------
 #		MAIN
