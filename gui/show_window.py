@@ -318,6 +318,7 @@ class SeasonWidget(QWidget):
 			data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
 			self.poster_loaded.emit(data)
 		except IOError: print "Error Loading season poster url: %s" % url
+		except RuntimeError: pass # image loaded after the window was closed
 
 	def load_poster(self, data):
 		'''Load poster from downloaded data to the widget'''
@@ -381,6 +382,7 @@ class EpisodeWidget(QWidget):
 			data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
 			self.image_loaded.emit(data)
 		except IOError: print "Error Loading episode image url: %s" % url
+		except RuntimeError: pass # image loaded after the window was closed
 
 	def load_image(self, data):
 		'''Triggered by image_loaded signal. Loads image to the widget'''

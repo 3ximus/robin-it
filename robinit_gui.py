@@ -42,6 +42,8 @@ import settings
 
 # TOOLS
 from functools import partial
+import shutil
+import os
 import sys
 
 # ----------------------------
@@ -197,10 +199,21 @@ class SettingsWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.go_back)
 		self.ui.save_button.clicked.connect(self.save)
 		self.ui.defaults_button.clicked.connect(self.set_defaults)
+		self.ui.clean_cache_button.clicked.connect(self.clean_cache)
 
 		# update slider and text 0 identifies the slider and 1 identifies the text
 		self.ui.update_interval_slider.sliderMoved.connect(partial(self.update_show_interval, 0))
 		self.ui.update_interval_value.textChanged.connect(partial(self.update_show_interval, 1))
+
+		# naively calculate cache size
+		total_size = 0
+		for dirpath, dirnames, filenames in os.walk(settings.config['cache_dir']):
+			for f in filenames:
+				fp = os.path.join(dirpath, f)
+				total_size += os.path.getsize(fp)
+		kb = total_size / 1000
+		mb = total_size / 1000000
+		self.ui.clean_cache_label.setText("> delete image and shows cached [ %d %s ]" % ((kb, 'Kb') if not mb else (mb, 'Mb')))
 
 		self.configure()
 
@@ -308,6 +321,11 @@ class SettingsWindow(QMainWindow):
 		'''Set defaut values to the settings'''
 		settings.config.reset()
 		self.configure()
+
+	def clean_cache(self):
+		'''Cleans Cache Directory'''
+		shutil.rmtree(settings.config['cache_dir'])
+		self.ui.clean_cache_label.setText("> delete image and shows cached [ 0 Mb ]")
 
 # ----------------
 #		MAIN
