@@ -248,10 +248,11 @@ class SettingsWindow(QMainWindow):
 		settings.config.add_property('rarbg', self.ui.rarbg_box.text().replace(' ', '_'), 'torrents')
 
 		settings.config.add_property('sub_en', self.ui.ensub_checkbox.isChecked(), 'subtitles')
-		settings.config.add_property('sub_pt', self.ui.ensub_checkbox.isChecked(), 'subtitles')
+		settings.config.add_property('sub_pt', self.ui.ptsub_checkbox.isChecked(), 'subtitles')
 
-		if self.ui.sd_button.isChecked(): settings.config.add_property('definition', 'sd')
-		if self.ui.hd_button.isChecked(): settings.config.add_property('definition', 'hd')
+		settings.config.add_property('sd', self.ui.sd_checkbox.isChecked(), 'definition')
+		settings.config.add_property('hd720', self.ui.hd720_checkbox.isChecked(), 'definition')
+		settings.config.add_property('hd1080', self.ui.hd1080_checkbox.isChecked(), 'definition')
 
 		settings.config.add_property('storage_dir',self.ui.storage_box.text().replace(' ', '_'), 'directories')
 		settings.config.add_property('user_dir', self.ui.user_box.text().replace(' ', '_'), 'directories')
@@ -297,11 +298,12 @@ class SettingsWindow(QMainWindow):
 		if settings.config.has_property('sub_pt'):
 			self.ui.ptsub_checkbox.setChecked(settings.config['sub_pt'])
 
-		if settings.config.has_property('definition'):
-			if settings.config['definition'] == 'sd':
-				self.ui.sd_button.setChecked(True)
-			elif settings.config['definition'] == 'hd':
-				self.ui.hd_button.setChecked(True)
+		if settings.config.has_property('sd'):
+			self.ui.sd_checkbox.setChecked(settings.config['sd'])
+		if settings.config.has_property('hd720'):
+			self.ui.hd720_checkbox.setChecked(settings.config['hd720'])
+		if settings.config.has_property('hd1080'):
+			self.ui.hd1080_checkbox.setChecked(settings.config['hd1080'])
 
 		if settings.config.has_property('storage_dir'):
 			self.ui.storage_box.setText(str(settings.config['storage_dir'] if settings.config['storage_dir'] != settings._DEFAULTS['directories']['storage_dir'] else ''))

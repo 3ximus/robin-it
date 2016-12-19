@@ -32,8 +32,12 @@ def init(): # call only once to prevent multiple initialization
 			'cache_dir':'./cache',
 			'user_dir':'./user'
 		},
+		'definition':{
+			'sd':False,
+			'hd720':True,
+			'hd1080':False
+		},
 		'other':{
-			'definition':'hd',
 			'update_show_interval':10
 		}
 	}
