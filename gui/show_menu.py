@@ -19,16 +19,15 @@ from PyQt5.QtGui import QBrush, QColor, QPalette, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QSpacerItem, QWidget
 
 import settings
+from gui.gui_func import begin_hover, clickable, download_object, end_hover
 # IMPORT FORMS
 from gui.resources.show_banner_widget import Ui_show_banner_widget
 from gui.resources.shows_menu import Ui_shows_menu
-
+from gui.show_window import ShowWindow
 # LIBS IMPORT
-from gui.gui_func import begin_hover, clickable, download_object, end_hover
 from libs.loading import progress_bar
 from libs.thread_decorator import threaded
 from libs.tvshow import search_for_show
-from gui.show_window import ShowWindow
 
 
 class ShowsMenu(QMainWindow):

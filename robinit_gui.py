@@ -250,9 +250,12 @@ class SettingsWindow(QMainWindow):
 		settings.config.add_property('sub_en', self.ui.ensub_checkbox.isChecked(), 'subtitles')
 		settings.config.add_property('sub_pt', self.ui.ptsub_checkbox.isChecked(), 'subtitles')
 
-		settings.config.add_property('sd', self.ui.sd_checkbox.isChecked(), 'definition')
-		settings.config.add_property('hd720', self.ui.hd720_checkbox.isChecked(), 'definition')
-		settings.config.add_property('hd1080', self.ui.hd1080_checkbox.isChecked(), 'definition')
+		settings.config.add_property('sd', self.ui.sd_checkbox.isChecked(), 'torrents')
+		settings.config.add_property('hd720', self.ui.hd720_checkbox.isChecked(), 'torrents')
+		settings.config.add_property('hd1080', self.ui.hd1080_checkbox.isChecked(), 'torrents')
+
+		settings.config.add_property('seeds_autodownload', self.ui.seed_checkbox.isChecked(), 'torrents')
+		settings.config.add_property('seeds_threshold', self.ui.seed_spinbox.value(), 'torrents')
 
 		settings.config.add_property('storage_dir',self.ui.storage_box.text().replace(' ', '_'), 'directories')
 		settings.config.add_property('user_dir', self.ui.user_box.text().replace(' ', '_'), 'directories')
@@ -260,10 +263,9 @@ class SettingsWindow(QMainWindow):
 		self.main_window.user_state.set_storage_dir(settings.config['storage_dir'] if settings.config['storage_dir'] != '' else None)
 		self.main_window.user_state.set_user_dir(settings.config['user_dir'] if settings.config['user_dir'] != '' else None)
 		self.main_window.user_state.set_cache_dir(settings.config['cache_dir'] if settings.config['cache_dir'] != '' else None)
-		self.main_window.user_state.save_state()
+		self.main_window.user_state.save_state() # hacky solution to avoid dependencies from UserContent
 
 		settings.config.add_property('update_show_interval', self.ui.update_interval_slider.sliderPosition())
-
 		settings.config.add_property('default_user',self.ui.defaultuser_box.text().replace(' ', '_'))
 
 		settings.config.save()
@@ -271,50 +273,40 @@ class SettingsWindow(QMainWindow):
 
 	def configure(self):
 		'''Sets the settings displayed according to given config dictionary'''
-		if settings.config.has_property('piratebay_allow'):
-			self.ui.piratebay_checkbox.setChecked(settings.config['piratebay_allow'])
-			self.ui.piratebay_box.setEnabled(settings.config['piratebay_allow'])
-		if settings.config.has_property('kickass_allow'):
-			self.ui.kickass_checkbox.setChecked(settings.config['kickass_allow'])
-			self.ui.kickass_box.setEnabled(settings.config['kickass_allow'])
-		if settings.config.has_property('rarbg_allow'):
-			self.ui.rarbg_checkbox.setChecked(settings.config['rarbg_allow'])
-			self.ui.rarbg_box.setEnabled(settings.config['rarbg_allow'])
 
-		if settings.config.has_property('piratebay'):
-			self.ui.piratebay_box.setText(str(settings.config['piratebay'] if settings.config['piratebay'] != settings._DEFAULTS['torrents']['piratebay'] else ''))
-		if settings.config.has_property('kickass'):
-			self.ui.kickass_box.setText(str(settings.config['kickass'] if settings.config['kickass'] != settings._DEFAULTS['torrents']['kickass'] else ''))
-		if settings.config.has_property('rarbg'):
-			self.ui.rarbg_box.setText(str(settings.config['rarbg'] if settings.config['rarbg'] != settings._DEFAULTS['torrents']['rarbg'] else ''))
+		self.ui.piratebay_checkbox.setChecked(settings.config['piratebay_allow'])
+		self.ui.piratebay_box.setEnabled(settings.config['piratebay_allow'])
+		self.ui.kickass_checkbox.setChecked(settings.config['kickass_allow'])
+		self.ui.kickass_box.setEnabled(settings.config['kickass_allow'])
+		self.ui.rarbg_checkbox.setChecked(settings.config['rarbg_allow'])
+		self.ui.rarbg_box.setEnabled(settings.config['rarbg_allow'])
 
-		# set placeholder texts for this (given by source update)
+		self.ui.piratebay_box.setText(str(settings.config['piratebay'] if settings.config['piratebay'] != settings._DEFAULTS['torrents']['piratebay'] else ''))
 		self.ui.piratebay_box.setPlaceholderText(str(settings._DEFAULTS['torrents']['piratebay']))
+		self.ui.kickass_box.setText(str(settings.config['kickass'] if settings.config['kickass'] != settings._DEFAULTS['torrents']['kickass'] else ''))
 		self.ui.kickass_box.setPlaceholderText(str(settings._DEFAULTS['torrents']['kickass']))
+		self.ui.rarbg_box.setText(str(settings.config['rarbg'] if settings.config['rarbg'] != settings._DEFAULTS['torrents']['rarbg'] else ''))
 		self.ui.rarbg_box.setPlaceholderText(str(settings._DEFAULTS['torrents']['rarbg']))
 
-		if settings.config.has_property('sub_en'):
-			self.ui.ensub_checkbox.setChecked(settings.config['sub_en'])
-		if settings.config.has_property('sub_pt'):
-			self.ui.ptsub_checkbox.setChecked(settings.config['sub_pt'])
+		self.ui.ensub_checkbox.setChecked(settings.config['sub_en'])
+		self.ui.ptsub_checkbox.setChecked(settings.config['sub_pt'])
 
-		if settings.config.has_property('sd'):
-			self.ui.sd_checkbox.setChecked(settings.config['sd'])
-		if settings.config.has_property('hd720'):
-			self.ui.hd720_checkbox.setChecked(settings.config['hd720'])
-		if settings.config.has_property('hd1080'):
-			self.ui.hd1080_checkbox.setChecked(settings.config['hd1080'])
+		self.ui.sd_checkbox.setChecked(settings.config['sd'])
+		self.ui.hd720_checkbox.setChecked(settings.config['hd720'])
+		self.ui.hd1080_checkbox.setChecked(settings.config['hd1080'])
 
-		if settings.config.has_property('storage_dir'):
-			self.ui.storage_box.setText(str(settings.config['storage_dir'] if settings.config['storage_dir'] != settings._DEFAULTS['directories']['storage_dir'] else ''))
-		if settings.config.has_property('user_dir'):
-			self.ui.user_box.setText(str(settings.config['user_dir'] if settings.config['user_dir'] != settings._DEFAULTS['directories']['user_dir'] else ''))
-		if settings.config.has_property('cache_dir'):
-			self.ui.cache_box.setText(str(settings.config['cache_dir'] if settings.config['cache_dir'] != settings._DEFAULTS['directories']['cache_dir'] else ''))
+		self.ui.seed_checkbox.setChecked(settings.config['seeds_autodownload'])
+		self.ui.seed_spinbox.setValue(settings.config['seeds_threshold'])
 
-		if settings.config.has_property('update_show_interval'):
-			self.ui.update_interval_slider.setSliderPosition(settings.config['update_show_interval'])
-			self.update_show_interval(0)
+		self.ui.storage_box.setText(str(settings.config['storage_dir'] if settings.config['storage_dir'] != settings._DEFAULTS['directories']['storage_dir'] else ''))
+		self.ui.storage_box.setPlaceholderText(settings._DEFAULTS['directories']['storage_dir'])
+		self.ui.user_box.setText(str(settings.config['user_dir'] if settings.config['user_dir'] != settings._DEFAULTS['directories']['user_dir'] else ''))
+		self.ui.user_box.setPlaceholderText(settings._DEFAULTS['directories']['user_dir'])
+		self.ui.cache_box.setText(str(settings.config['cache_dir'] if settings.config['cache_dir'] != settings._DEFAULTS['directories']['cache_dir'] else ''))
+		self.ui.cache_box.setPlaceholderText(settings._DEFAULTS['directories']['cache_dir'])
+
+		self.ui.update_interval_slider.setSliderPosition(settings.config['update_show_interval'])
+		self.update_show_interval(0)
 
 		if settings.config.has_property('default_user'):
 			self.ui.defaultuser_box.setText(str(settings.config['default_user']))

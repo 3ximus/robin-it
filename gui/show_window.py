@@ -8,26 +8,26 @@ Copyright (C) 2016 - eximus
 
 __version__ = '1.0'
 
-# PYQT5 IMPORTS
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow, QWidget
-from PyQt5.QtGui import QPixmap, QPalette, QBrush
-
-# IMPORT FORMS
-from gui.resources.show import Ui_show_window
-from gui.resources.season_banner_widget import Ui_season_banner_widget
-from gui.resources.episode_banner_widget import Ui_episode_banner_widget
-
-# LIBS IMPORT
-from gui.gui_func import clickable, download_object, begin_hover, end_hover
-from libs.tvshow import Show
-from libs.thread_decorator import threaded
-import settings
-
 # TOOLS
+from cStringIO import StringIO
 from functools import partial
 from PIL import Image, ImageFilter
-from cStringIO import StringIO
+
+# PYQT5 IMPORTS
+from PyQt5 import QtCore
+from PyQt5.QtGui import QBrush, QPalette, QPixmap
+from PyQt5.QtWidgets import QMainWindow, QWidget
+
+import settings
+# LIBS IMPORT
+from gui.gui_func import begin_hover, clickable, download_object, end_hover
+from gui.resources.episode_banner_widget import Ui_episode_banner_widget
+from gui.resources.season_banner_widget import Ui_season_banner_widget
+# IMPORT FORMS
+from gui.resources.show import Ui_show_window
+from libs.thread_decorator import threaded
+from libs.tvshow import Show
+
 
 # --------------------
 #      Classes
@@ -270,10 +270,12 @@ class ShowWindow(QMainWindow):
 		self.update_shout.emit() #update button
 
 	def closeEvent(self, event):
-		self.clear_layout(self.ui.episodes_layout)
-		self.clear_layout(self.ui.last_row_episodes_layout)
-		self.clear_layout(self.ui.seasons_layout)
-		self.clear_layout(self.ui.last_row_seasons_layout)
+		try:
+			self.clear_layout(self.ui.episodes_layout)
+			self.clear_layout(self.ui.last_row_episodes_layout)
+			self.clear_layout(self.ui.seasons_layout)
+			self.clear_layout(self.ui.last_row_seasons_layout)
+		except AttributeError: pass # it has already been deleted somehow
 		self.deleteLater()
 
 class SeasonWidget(QWidget):
@@ -355,6 +357,7 @@ class EpisodeWidget(QWidget):
 
 		self.update_me()
 		self.ui.mark_button.clicked.connect(self.toogle_episode)
+		self.ui.download_button.clicked.connect(self.download_episode)
 		self.window.update_shout.connect(self.update_me)
 		self.image_loaded.connect(self.load_image)
 		self.download_image(self.episode.image)
@@ -373,6 +376,10 @@ class EpisodeWidget(QWidget):
 		else:
 			self.ui.mark_button.setText("mark")
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
+
+	@threaded
+	def download_episode(self, event):
+		print "Downloading..."
 
 	@threaded
 	def download_image(self, url):

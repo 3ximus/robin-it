@@ -21,7 +21,12 @@ def init(): # call only once to prevent multiple initialization
 			'rarbg_allow':False,
 			'piratebay':"https://pirateproxy.vip",
 			'rarbg':"https://rarbg.to",
-			'kickass':"http://kickasstorrents.to"
+			'kickass':"http://kickasstorrents.to",
+			'sd':False,
+			'hd720':True,
+			'hd1080':False,
+			'seeds_autodownload':True,
+			'seeds_threshold':200
 		},
 		'subtitles': {
 			'sub_en':True,
@@ -31,11 +36,6 @@ def init(): # call only once to prevent multiple initialization
 			'storage_dir':'./storage',
 			'cache_dir':'./cache',
 			'user_dir':'./user'
-		},
-		'definition':{
-			'sd':False,
-			'hd720':True,
-			'hd1080':False
 		},
 		'other':{
 			'update_show_interval':10
