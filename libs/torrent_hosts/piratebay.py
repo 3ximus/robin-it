@@ -17,6 +17,9 @@ class PirateBay:
 		torrents = []
 		results_table = soup.find(id="searchResult")
 		pattern = re.compile(r'Uploaded (.*), Size (.*), ULed by')
+
+		if not results_table: # no results found
+			return []
 		# iterate over table rows
 		for row in results_table.find_all('tr'):
 			# get all table cells , cell #0 is useless, only represents the

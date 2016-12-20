@@ -238,7 +238,9 @@ class SettingsWindow(QMainWindow):
 			finally: self.ui.update_interval_value.setText(str(self.ui.update_interval_slider.sliderPosition()))
 
 	def save(self):
-		'''Saves configuration to a file, ignores or deletes a settinf from config dict if its set to default'''
+		'''Saves configuration to a file, ignores or deletes a setting from config dict if its set to default'''
+
+		settings.config.add_property('client_application', self.ui.torclient_box.text(), 'torrents')
 
 		settings.config.add_property('piratebay_allow', self.ui.piratebay_checkbox.isChecked(), 'torrents')
 		settings.config.add_property('piratebay', self.ui.piratebay_box.text().replace(' ', '_'), 'torrents')
@@ -250,7 +252,6 @@ class SettingsWindow(QMainWindow):
 		settings.config.add_property('sub_en', self.ui.ensub_checkbox.isChecked(), 'subtitles')
 		settings.config.add_property('sub_pt', self.ui.ptsub_checkbox.isChecked(), 'subtitles')
 
-		settings.config.add_property('sd', self.ui.sd_checkbox.isChecked(), 'torrents')
 		settings.config.add_property('hd720', self.ui.hd720_checkbox.isChecked(), 'torrents')
 		settings.config.add_property('hd1080', self.ui.hd1080_checkbox.isChecked(), 'torrents')
 
@@ -273,6 +274,8 @@ class SettingsWindow(QMainWindow):
 
 	def configure(self):
 		'''Sets the settings displayed according to given config dictionary'''
+		self.ui.torclient_box.setText(settings.config['client_application'] if settings.config['client_application'] != settings._DEFAULTS['torrents']['client_application'] else '')
+		self.ui.torclient_box.setPlaceholderText(str(settings._DEFAULTS['torrents']['client_application']))
 
 		self.ui.piratebay_checkbox.setChecked(settings.config['piratebay_allow'])
 		self.ui.piratebay_box.setEnabled(settings.config['piratebay_allow'])
@@ -291,7 +294,6 @@ class SettingsWindow(QMainWindow):
 		self.ui.ensub_checkbox.setChecked(settings.config['sub_en'])
 		self.ui.ptsub_checkbox.setChecked(settings.config['sub_pt'])
 
-		self.ui.sd_checkbox.setChecked(settings.config['sd'])
 		self.ui.hd720_checkbox.setChecked(settings.config['hd720'])
 		self.ui.hd1080_checkbox.setChecked(settings.config['hd1080'])
 

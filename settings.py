@@ -16,17 +16,17 @@ def init(): # call only once to prevent multiple initialization
 	global _DEFAULTS
 	_DEFAULTS =  {
 		'torrents': {
+			'client_application':'/usr/bin/transmission-qt',
 			'piratebay_allow':True,
 			'kickass_allow':False,
 			'rarbg_allow':False,
 			'piratebay':"https://pirateproxy.vip",
 			'rarbg':"https://rarbg.to",
 			'kickass':"http://kickasstorrents.to",
-			'sd':False,
 			'hd720':True,
 			'hd1080':False,
 			'seeds_autodownload':True,
-			'seeds_threshold':200
+			'seeds_threshold':100
 		},
 		'subtitles': {
 			'sub_en':True,
