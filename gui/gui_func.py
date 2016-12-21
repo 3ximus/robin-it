@@ -9,10 +9,12 @@ Copyright (C) 2016 - eximus
 __version__ = '1.0'
 
 
-from PyQt5 import QtCore
-from hashlib import md5
 import os
 import urllib
+from hashlib import md5
+
+from PyQt5 import QtCore
+
 
 def download_object(url, cache_dir=None, cache_this=True):
 	'''Download object at the given url

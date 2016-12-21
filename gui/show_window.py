@@ -28,7 +28,6 @@ from gui.resources.season_banner_widget import Ui_season_banner_widget
 from gui.resources.show import Ui_show_window
 from libs.thread_decorator import threaded
 from libs.tvshow import Show
-from libs.torrent_hosts.piratebay import PirateBay
 from libs.torrent import Torrent
 
 
@@ -79,6 +78,7 @@ class ShowWindow(QMainWindow):
 		self.season_row = 0
 		self.episode_col = 0
 		self.episode_row = 0
+		self.back_ratio = 0
 
 		if type(tvshow) == dict:
 			if not self.user_state.is_tracked(tvshow['seriesname']):
@@ -193,7 +193,9 @@ class ShowWindow(QMainWindow):
 		if not url: return
 		data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
 		data = self._apply_filters(data)
-		self.background_loaded.emit(data)
+		try:
+			self.background_loaded.emit(data)
+		except RuntimeError: pass # window has already been closed
 
 	def _apply_filters(self, data):
 		'''Function to apply filter to an image in the form of binary data'''
@@ -383,48 +385,40 @@ class EpisodeWidget(QWidget):
 	@threaded
 	def download_episode(self, event):
 
-		def _search_wrapper(query):
-			torrent_list = []
-			# search multiple providers
-			if settings.config['piratebay_allow']:
-				torrent_list.extend(PirateBay.search(query, base_url=settings.config['piratebay']))
-			if settings.config['kickass_allow']:
-				pass
-			if settings.config['rarbg_allow']:
-				pass
+		if not self.episode.already_aired():
+			return #TODO schedule
 
-			if torrent_list == []: # no results found
-				return None
-			# check auto download
-			if settings.config['seeds_autodownload']:
-				most_seeded = max(torrent_list, key=lambda x: x.seeds)  # get max by seeds
-				# check seeds threshold
-				if most_seeded.seeds >= settings.config['seeds_threshold']:
-					return most_seeded
-			return torrent_list
+		hosts={} # set hosts
+		if settings.config['piratebay_allow']:
+			hosts.update({'piratebay':settings.config['piratebay']})
+		if settings.config['kickass_allow']:
+			pass
+		if settings.config['rarbg_allow']:
+			pass
 
-		query = "%s s%02de%02d" % (self.episode.tv_show.name, self.episode.s_id, self.episode.e_id)
-		# TODO check airdate
-		# check quality
-		result = None
-		if settings.config['hd1080']:
-			query += " 1080p"
-			result = _search_wrapper(query)
-		elif settings.config['hd720'] and result == None:
-			query += " 720p"
-			result = _search_wrapper(query)
-		elif result == None:
-			result = _search_wrapper(query)
+		quality=[] # set quality
+		if settings.config['hd1080']: # 1080 allowed
+			quality.append('1080p')
+		if settings.config['hd720']: # 720p allowed
+			quality.append('720p')
+
+		# perform search
+		result = self.episode.find_torrents(
+			allow_min_seeds=settings.config['seeds_autodownload'],
+			min_seeds=settings.config['seeds_threshold'],
+			quality=quality,
+			hosts=hosts)
+
 		if result == None:
-			print "No torrent found for " + query
+			print "No torrent found or connection timed out for %s s%02de%02d" % (self.episode.tv_show.name, self.episode.s_id, self.episode.e_id)
 			return # TODO display some "no results found" message
-		if type(result) == list:
-			print "Multiple torrents... Unhandled yet"
-			return # TODO add to pending list
 		elif isinstance(result, Torrent): # type must be instance of Torrent
 			print "Found Torrent, downloading..."
 			print "\t-> %s\n\t-> Seeds: %d, Host: %s" % (result.name, result.seeds, result.host)
 			subprocess.Popen([settings.config['client_application'],result.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+		else: # else result will be a list
+			print "Multiple torrents... Unhandled yet"
+			return # TODO add to pending list
 
 
 	@threaded

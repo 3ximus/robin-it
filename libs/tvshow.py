@@ -9,10 +9,14 @@ Created - 30.12.15
 Copyright (C) 2015 - eximus
 '''
 
-from tvdb_api import Tvdb
-from tvdb_exceptions import tvdb_error, tvdb_shownotfound, tvdb_attributenotfound
 import datetime
 import os
+
+from tvdb_api import Tvdb
+from tvdb_exceptions import (tvdb_attributenotfound, tvdb_error,
+                             tvdb_shownotfound)
+
+from libs.torrent_hosts.piratebay import PirateBay
 
 IMDB_TITLE = "http://www.imdb.com/title/"
 
@@ -68,7 +72,6 @@ class Show:
 		self.all_images = None # posters fanart banners
 		self.imdb_id = '' # imdb id
 		self.watched = False
-		self.torrent = None
 		self.cache = cache
 		self.last_updated = None
 		self.apikey = apikey
@@ -150,14 +153,9 @@ class Show:
 			if season.watched: seasons_watched += 1
 		self.watched = bool(seasons_watched == len(self.seasons))
 
-	def set_torrent(self, torrent):
-		'''Set torrent instance associated with this episode'''
-		self.torrent=torrent
-
-	def to_string(self):
+	def __repr__(self):
 		'''Print this class information'''
-		print "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %sBanner: %s\nIMDB Link: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.banner, self.imdb_id)
-		print "Description: %s" % self.description.encode('utf-8')
+		return "\t TV Show info:\nName: %s\nGenre: %s\nRuntime: %s\nStatus: %s\nNetwork: %s\nAiring Day: %s\nAir Time: %s\nRating: %s\nPoster: %sBanner: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.genre, self.runtime, self.status, self.network, self.air_dayofweek, self.air_time, self.rating, self.poster, self.banner, self.imdb_id, self.description.encode('utf-8'))
 
 	def get_unwatched_episodes(self):
 		'''Returns unwatched episodes
@@ -225,18 +223,17 @@ class Season():
 		self.poster = [] # list of season poster
 		self.poster_wide = [] # list of season wide posters
 		self.watched = False
-		self.torrent = None
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.cache=cache
 		self.apikey=apikey
 		self.update_info(cache=cache, banners=banners)
 
-	def to_string(self):
+	def __repr__(self):
 		'''Print this class information'''
 		return_string = ''
 		for episode in self.episodes: return_string += "%s - %s\n" % (episode.episode_number, episode.name)
-		print return_string
+		return return_string
 
 	def update_info(self, cache=False, banners=True):
 		'''Searches thetvdb.com and updates all episodes it contains
@@ -284,10 +281,6 @@ class Season():
 			episode.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
 
-	def set_torrent(self, torrent):
-		'''Set torrent instance associated with this episode'''
-		self.torrent=torrent
-
 	def update_watched(self):
 		''' Update watched state according to its content'''
 		cont = 0
@@ -320,17 +313,15 @@ class Episode:
 		self.imdb_id = ''
 		self.airdate = ''
 		self.watched = False
-		self.torrent = None
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
 		self.cache=cache
 		self.apikey=apikey
 		self.update_info()
 
-	def to_string(self):
+	def __repr(self):
 		'''Print this class information'''
-		print "\t Episode info:\nName: %s\nSeason: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s" % (self.name, self.season, self.episode_number, self.director, self.writer, self.rating, self.image, self.airdate, self.imdb_id)
-		print "Description: %s" % self.description.encode('utf-8') # fix encoding
+		return "\t Episode info:\nName: %s\nSeason: %s\nEpisode Number: %s\nDirector: %s\nWriter: %s\nRating: %s\nImage: %s\nAir Date: %s\nIMDB Link: %s\nDescription: %s" % (self.name, self.season, self.episode_number, self.director, self.writer, self.rating, self.image, self.airdate, self.imdb_id, self.description.encode('utf-8'))
 
 	def update_info(self):
 		'''Searches thetvdb.com and updates all episodes it contains '''
@@ -357,10 +348,6 @@ class Episode:
 		self.watched = value
 		self.update_watched() # after setting the value call update_watched to propagate change
 
-	def set_torrent(self, torrent):
-		'''Set torrent instance associated with this episode'''
-		self.torrent=torrent
-
 	def update_watched(self):
 		''' Update watched state according to its content'''
 		# call update on the belonging season
@@ -372,15 +359,48 @@ class Episode:
 		date_split = self.airdate.split('-')
 		return datetime.date.today() > datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
 
+	def find_torrents(self, allow_min_seeds=False, min_seeds=100, quality=None, hosts=None):
+		'''Gets torrents for this episode
+
+		Returns torrent list, Torrent instance ( if min_seeds conditions are met ) or None
+			if no results found or episode hasn't aired
+
+		Parameters:
+			allow_min_seeds -- allow auto download by min seeds threshold
+			min_seeds -- min seeds threshold
+			quality -- list with diferent qualities to search for
+			hosts -- dictionary of hosts in the form {'piratebay':'https://piratebay.org'}
+
+		Note: Only PirateBay is supported right now
+		'''
+
+		if not self.already_aired():
+			return None
+
+		query = "%s s%02de%02d" % (self.tv_show.name, self.s_id, self.e_id)
+		torrent_list = []
+		if 'piratebay' in hosts.keys():
+			query += ' ' + '|'.join(quality) # piratebay supports this
+			torrent_list.extend(PirateBay.search(query.strip(), base_url=hosts['piratebay']))
+		if 'kickass' in hosts.keys():
+			pass
+		if 'rarbg' in hosts.keys():
+			pass
+		if torrent_list != [] and allow_min_seeds:
+			most_seeded = max(torrent_list, key=lambda x: x.seeds) # get max by seeds
+			if most_seeded.seeds >= min_seeds: # seed threshold
+				return most_seeded
+		return torrent_list if torrent_list != [] else None
+
+
 # ------------------------------------------------------
 
 if __name__ == '__main__':
-	# probably doesnt work anymore
-	name = raw_input('Select a show: ')
-	sw = Show(name)
-	sw.to_string() # print show info
-	sw.seasons[0].to_string() # print season info
+	n = raw_input('Select a show: ')
+	sw = Show(n)
+	print sw # print show info
+	print sw.seasons[0] # print season info
 	print "Posters:"
 	for a in sw.seasons[0].poster: # get list of season posters (use poster_wide for wide posters)
 		print a
-	sw.seasons[0].episodes[0].to_string() # print episode info
+	print sw.seasons[0].episodes[0] # print episode info

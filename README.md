@@ -1,5 +1,4 @@
 #Robin It
-================================
 
 *Version 1.0*
 
@@ -13,15 +12,13 @@ Python GUI Application to search, track and download tvshows and movie torrents
 
 ![screenshot](screenshots/tv_show_screen_v1.0.png)
 
-*NOTE: screenshots were taken on kde, they may differ on other systems*
+*NOTE: screenshots were taken on KDE5 with Breeze theme, they may differ on other systems*
 
 ## Instalation
 
-Before manually installing try one of the compiled builds on the branches "releases-<arch>", if that does not work follow this:
-
 The python version used is python2.7, i will popssibly port it to python3.5 since PyQt5 only officially supports 3.5 if i'm not mistaken. The main dependencies are listed in the requirements.txt, and can be installed through:
 
- `pip install -r requirements.txt`
+ `pip install -r requirements.txt` *using pip for python2.7 (pip2)*
 
 Python bindings for Qt5 can be installed through:
 

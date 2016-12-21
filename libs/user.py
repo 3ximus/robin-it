@@ -33,7 +33,8 @@ class UserContent:
 
 		self.tvdb_apikey = apikey
 		self.shows = {} # following tv shows
-		self.actions = {}
+		self.pending_download = {}
+		self.scheduled = {}
 
 		self.user_dir = user_dir if user_dir else 'user/' # force defaults if None
 		self.load_state(self.user_dir)
@@ -148,35 +149,3 @@ class UserContent:
 					if not e.watched:
 						unwatched.append(show)
 		return unwatched
-
-	def unwatched_episodes(self, name = None, show = None):
-		'''Get all episodes unwatched
-
-		Parameters:
-			name -- show to get episodes from
-			show -- Show instance to get episodes from
-
-			Note:show has precedence over name
-
-		If both parameters are omited it will return episodes from all shows
-		Returns a dictionary where keys are shows and the values are lists, these are lists
-			of pairs, being the first element the season id and the second a list with instances
-			of episode class:
-			{ <show_name> : { <season_id> : [ <episode>, <episode>, ... ] , ... }, ... }
-		'''
-		pass
-	#	unwatched_dict = {}
-#
-	#	def _make_unwatched_dict(show):
-	#		if show.watched: return
-	#		if seasons_dict != {}: unwatched_dict.update({show.realname:show.get_unwatched_episodes()})
-#
-	#	if show:
-	#		_make_unwatched_dict(show)
-	#	elif name:
-	#		if self.is_tracked(name):
-	#			_make_unwatched_dict(self.shows[name])
-	#	else:
-	#		for show in self.shows.values():
-	#			_make_unwatched_dict(show)
-	#	return unwatched_dict
