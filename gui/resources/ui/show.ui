@@ -600,7 +600,7 @@
          <x>0</x>
          <y>0</y>
          <width>1055</width>
-         <height>759</height>
+         <height>763</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1019,7 +1019,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>529</width>
-                   <height>577</height>
+                   <height>584</height>
                   </rect>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -1683,9 +1683,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>98</red>
-         <green>98</green>
-         <blue>98</blue>
+         <red>190</red>
+         <green>190</green>
+         <blue>190</blue>
         </color>
        </brush>
       </colorrole>
@@ -1694,9 +1694,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>98</red>
-         <green>98</green>
-         <blue>98</blue>
+         <red>190</red>
+         <green>190</green>
+         <blue>190</blue>
         </color>
        </brush>
       </colorrole>

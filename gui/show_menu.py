@@ -74,8 +74,8 @@ class ShowsMenu(QMainWindow):
 		self.ui.back_button_5.clicked.connect(partial(self.go_to, index=0))
 
 		self.ui.stats_button.clicked.connect(partial(self.go_to, index=3))
-		self.ui.downloads_button.clicked.connect(partial(self.go_to, index=4))
 		self.ui.calendar_button.clicked.connect(partial(self.go_to, index=5))
+		self.ui.downloads_button.clicked.connect(self.load_downloads)
 
 		self.ui.myshows_button.clicked.connect(self.load_my_shows)
 		self.ui.unwatched_checkbox.stateChanged.connect(self.set_unwatched_filter)
@@ -89,11 +89,18 @@ class ShowsMenu(QMainWindow):
 		self.search_results = []
 		self.filter_by_unwatched = False
 
+		self.ui.pending_downloads_label.setStyleSheet("background-color: " + settings._GREEN_COLOR)
+		if self.user_state.pending_download == {}:
+			self.ui.pending_downloads_label.hide()
+		else:
+			self.ui.pending_downloads_label.setText("%d Pending Downloads" % len(self.user_state.pending_download.keys()))
+			self.ui.downloads_button.setStyleSheet("background-color: " + settings._YELLOW_COLOR)
+
 		# updates the shows if they have not been updated for a while, specifically (settings._UPDATE_SHOW_INTERVAL)
 		for show in self.user_state.shows.values():
 			if show.last_updated:
 				if abs(show.last_updated - datetime.date.today()) > datetime.timedelta(settings.config['update_show_interval']):
-					self.update_show(show)
+					self.update_show_info(show)
 
 		self.col = 0
 		self.row = 0
@@ -119,7 +126,7 @@ class ShowsMenu(QMainWindow):
 		self.search_complete.emit(results)
 
 	@threaded
-	def update_show(self, show):
+	def update_show_info(self, show):
 		show.update_info()
 
 	def clear_layout(self, layout):
@@ -219,6 +226,12 @@ class ShowsMenu(QMainWindow):
 		for show in self.user_state.shows.values():
 			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state, self))
 
+	def load_downloads(self):
+		self.ui.stackedWidget.setCurrentIndex(4)
+		self.ui.downloadsfilter_box.setFocus()
+		self.clear_layout(self.ui.downloads_layout)
+		# TODO add downloads here
+
 	def set_unwatched_filter(self):
 		'''Load only the shows with unwatched episodes'''
 		self.filter_by_unwatched = self.ui.unwatched_checkbox.isChecked()
@@ -238,6 +251,16 @@ class ShowsMenu(QMainWindow):
 						continue
 					self.add_to_layout(self.ui.myshows_layout, ShowWidget(s, self.user_state, self))
 		except RuntimeError as e: print "RuntimeError:", e
+
+	def update_downloads(self):
+		'''Updates Labels and download buttons'''
+		if self.user_state.pending_download == {}:
+			self.ui.pending_downloads_label.hide()
+			self.ui.downloads_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
+		else:
+			self.ui.pending_downloads_label.show()
+			self.ui.pending_downloads_label.setText("%d Pending Downloads" % len(self.user_state.pending_download.keys()))
+			self.ui.downloads_button.setStyleSheet("background-color: " + settings._YELLOW_COLOR)
 
 	def update_filter(self):
 		'''Filters the news and updates box'''

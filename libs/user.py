@@ -11,7 +11,7 @@ Copyright (C) 2016 - eximus
 __version__ = '1.0'
 
 
-from libs.tvshow import Show
+from libs.tvshow import Show, Episode
 import os
 import cPickle
 
@@ -34,7 +34,8 @@ class UserContent:
 		self.tvdb_apikey = apikey
 		self.shows = {} # following tv shows
 		self.pending_download = {}
-		self.scheduled = {}
+		self.scheduled = [] # for scheduled episodes
+		self.scheduled_shows = [] # for scheduled shows
 
 		self.user_dir = user_dir if user_dir else 'user/' # force defaults if None
 		self.load_state(self.user_dir)
@@ -149,3 +150,18 @@ class UserContent:
 					if not e.watched:
 						unwatched.append(show)
 		return unwatched
+
+	def schedule(self, item):
+		'''Adds an item to the scheduled list, this item can only be a Show or an Episode'''
+		if isinstance(item, Episode):
+			self.scheduled.append(item)
+		elif isinstance(item, Show):
+			self.scheduled_shows.append(item)
+		else:
+			return
+
+	def pend_download(self, item, torrent_list):
+		'''Adds an item to the pending download list'''
+		if isinstance(item, Episode):
+			self.pending_download.update({item:torrent_list})
+

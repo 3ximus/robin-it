@@ -311,7 +311,7 @@ class Episode:
 		self.season = ''
 		self.image = ''
 		self.imdb_id = ''
-		self.airdate = ''
+		self.airdate = None
 		self.watched = False
 		if tv_show: self.tv_show = tv_show # set show instance
 		else: raise TVError("tv_show must be a Show instance") # tv_show cant be None
@@ -336,7 +336,8 @@ class Episode:
 		self.image = database[self.tv_show.real_name][self.s_id][self.e_id]['filename']
 		imdb_id = database[self.tv_show.real_name][self.s_id][self.e_id]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
-		self.airdate = database[self.tv_show.real_name][self.s_id][self.e_id]['firstaired']
+		date_split = database[self.tv_show.real_name][self.s_id][self.e_id]['firstaired'].split('-')
+		self.airdate = datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
 
 	def toogle_watched(self):
 		''' Toogle the watched state '''
@@ -356,8 +357,7 @@ class Episode:
 	def already_aired(self):
 		'''Returns boolean if this this episode has aired or not'''
 		if self.airdate == None: return False
-		date_split = self.airdate.split('-')
-		return datetime.date.today() > datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
+		return datetime.date.today() > self.airdate
 
 	def find_torrents(self, allow_min_seeds=False, min_seeds=100, quality=None, hosts=None):
 		'''Gets torrents for this episode

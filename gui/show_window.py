@@ -52,6 +52,7 @@ class ShowWindow(QMainWindow):
 	show_loaded = QtCore.pyqtSignal()
 	background_loaded = QtCore.pyqtSignal(object)
 	update_shout = QtCore.pyqtSignal()
+	update_downloads = QtCore.pyqtSignal()
 
 	def __init__(self, tvshow, user_state, origin_window):
 		super(ShowWindow, self).__init__()
@@ -63,6 +64,7 @@ class ShowWindow(QMainWindow):
 		self.ui.setupUi(self)
 
 		self.update_shout.connect(self.update_me)
+		self.update_downloads.connect(self.update_menu_downloads)
 
 		self.ui.back_button.clicked.connect(self.close)
 		self.ui.add_button.clicked.connect(self.add_show)
@@ -112,6 +114,10 @@ class ShowWindow(QMainWindow):
 			self.ui.mark_button.setText("mark")
 			self.ui.mark_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
 		self.origin_window.update_shows()
+
+	def update_menu_downloads(self):
+		'''Triggered by update_downloads. Updates GUI elements on the main show menu'''
+		self.origin_window.update_downloads()
 
 	@threaded
 	def force_update(self):
@@ -386,7 +392,10 @@ class EpisodeWidget(QWidget):
 	def download_episode(self, event):
 
 		if not self.episode.already_aired():
-			return #TODO schedule
+			self.window.ui.statusbar.showMessage("Episode scheduled for download")
+			self.window.user_state.schedule(self.episode)
+			self.window.update_downloads.emit()
+			return
 
 		hosts={} # set hosts
 		if settings.config['piratebay_allow']:
@@ -410,15 +419,17 @@ class EpisodeWidget(QWidget):
 			hosts=hosts)
 
 		if result == None:
-			print "No torrent found or connection timed out for %s s%02de%02d" % (self.episode.tv_show.name, self.episode.s_id, self.episode.e_id)
-			return # TODO display some "no results found" message
+			print "No torrent found or connection timed out for s%02de%02d" % (self.episode.s_id, self.episode.e_id)
+			self.window.ui.statusbar.showMessage("No torrent found or connection timed out for s%02de%02d" % (self.episode.s_id, self.episode.e_id))
+			return
 		elif isinstance(result, Torrent): # type must be instance of Torrent
-			print "Found Torrent, downloading..."
-			print "\t-> %s\n\t-> Seeds: %d, Host: %s" % (result.name, result.seeds, result.host)
+			self.window.ui.statusbar.showMessage("Downloading: %s" % result.name)
+			print "Downloading: %s\n\t-> Seeds: %d, Host: %s" % (result.name, result.seeds, result.host)
 			subprocess.Popen([settings.config['client_application'],result.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 		else: # else result will be a list
-			print "Multiple torrents... Unhandled yet"
-			return # TODO add to pending list
+			self.window.ui.statusbar.showMessage("Multiple torrents found for s%02de%02d, Added to pending Downloads" % (self.episode.s_id, self.episode.e_id))
+			self.window.user_state.pend_download(self.episode, result)
+			self.window.update_downloads.emit()
 
 
 	@threaded
