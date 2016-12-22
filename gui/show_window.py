@@ -312,7 +312,7 @@ class SeasonWidget(QWidget):
 		self.poster_loaded.connect(self.load_poster)
 		self.ui.download_button.setStyleSheet("background-color: " + settings._MAIN_COLOR)
 		if len(self.season.poster) > 0:
-			self.download_poster(self.season.poster[0])
+			self.download_poster(self.season.poster[0]) # TODO use a selected poster
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''

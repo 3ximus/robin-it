@@ -50,12 +50,26 @@ class UserContent:
 		'''Returns True if show is being tracked, else otherwise'''
 		return name in self.shows
 
-	def find_item(self, name):
-		'''Find shows in the dictionary using a partial name'''
+	def find_item(self, name, lst=None, key=None):
+		'''Find shows in the dictionary using a partial name
+
+		Optional Parameters
+			lst -- list where to search for, if omitted self.shows is used
+			key -- one argument function to specify the field used in comparisons,
+					similar to the ones used in builtin map function or list.sort()
+		'''
 		matches = []
-		for name_key, value in self.shows.iteritems(): # build match list
-			if name.lower() in name_key.lower():
-				matches.append(value)
+		search_in = lst.iteritems() if lst != None and type(lst) == dict else self.shows.iteritems() # default
+		if lst != None and type(lst) == list:
+			for x in lst: # case lst is a list use this
+				k = x if key == None else key(x) # apply filter if needed
+				if name.lower() in k.lower():
+					matches.append(x)
+		else:
+			for name_key, value in search_in: # build match list
+				k = name_key if key == None else key(name_key) # apply filter if needed
+				if name.lower() in k.lower():
+					matches.append(value)
 		return matches
 
 # SET METHODS

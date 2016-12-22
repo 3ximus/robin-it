@@ -30,3 +30,5 @@ for f in gui/resources/*.qrc; do
 	echo " - Compiling $f";
 	$pyrcc $f -o $(echo $f | sed 's/\.qrc/_rc\.py/');
 done
+
+echo "Done"

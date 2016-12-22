@@ -65,6 +65,12 @@ class ShowsMenu(QMainWindow):
 		self.ui.search_button.clicked.connect(self.search)
 		self.ui.search_button_2.clicked.connect(self.search)
 		self.search_complete.connect(self.display_results)
+		self.ui.clear_button_1.hide()
+		self.ui.clear_button_2.hide()
+		self.ui.clear_button_3.hide()
+		self.ui.clear_button_4.hide()
+		self.ui.clear_button_5.hide()
+
 
 		self.ui.back_button_0.clicked.connect(self.go_back)
 		self.ui.back_button_1.clicked.connect(partial(self.go_to, index=0))
@@ -82,6 +88,7 @@ class ShowsMenu(QMainWindow):
 
 		self.ui.filter_box.textChanged.connect(self.update_filter)
 		self.ui.showfilter_box.textChanged.connect(self.update_shows)
+		self.ui.downloadsfilter_box.textChanged.connect(self.update_downloads)
 		# use 0 for search_box and 1 for search_box_2
 		self.ui.search_box.textChanged.connect(partial(self.update_search, 0))
 		self.ui.search_box_2.textChanged.connect(partial(self.update_search, 1))
@@ -221,16 +228,13 @@ class ShowsMenu(QMainWindow):
 	def load_my_shows(self):
 		'''Load shows and got to page 2'''
 		self.ui.stackedWidget.setCurrentIndex(2)
+		self.update_shows()
 		self.ui.showfilter_box.setFocus()
-		self.clear_layout(self.ui.myshows_layout)
-		for show in self.user_state.shows.values():
-			self.add_to_layout(self.ui.myshows_layout, ShowWidget(show, self.user_state, self))
 
 	def load_downloads(self):
 		self.ui.stackedWidget.setCurrentIndex(4)
+		self.update_downloads()
 		self.ui.downloadsfilter_box.setFocus()
-		self.clear_layout(self.ui.downloads_layout)
-		# TODO add downloads here
 
 	def set_unwatched_filter(self):
 		'''Load only the shows with unwatched episodes'''
@@ -241,6 +245,10 @@ class ShowsMenu(QMainWindow):
 		'''Updates my shows content based on the filter'''
 		try:
 			if self.ui.stackedWidget.currentIndex() == 2: # my shows page
+				if self.ui.showfilter_box.text() == "":
+					self.ui.clear_button_2.hide()
+				else:
+					self.ui.clear_button_2.show()
 				self.clear_layout(self.ui.myshows_layout)
 				items = self.user_state.find_item(self.ui.showfilter_box.text())
 				if not items: return
@@ -254,13 +262,39 @@ class ShowsMenu(QMainWindow):
 
 	def update_downloads(self):
 		'''Updates Labels and download buttons'''
-		if self.user_state.pending_download == {}:
-			self.ui.pending_downloads_label.hide()
-			self.ui.downloads_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
-		else:
-			self.ui.pending_downloads_label.show()
-			self.ui.pending_downloads_label.setText("%d Pending Downloads" % len(self.user_state.pending_download.keys()))
-			self.ui.downloads_button.setStyleSheet("background-color: " + settings._YELLOW_COLOR)
+		if self.ui.stackedWidget.currentIndex() == 4:
+			self.clear_layout(self.ui.pending_layout)
+			self.clear_layout(self.ui.scheduled_layout)
+
+			if self.ui.downloadsfilter_box.text() == "":
+				self.ui.clear_button_4.hide()
+			else:
+				self.ui.clear_button_4.show()
+
+			if self.user_state.pending_download == {}:
+				# main show menu
+				self.ui.pending_downloads_label.hide()
+				self.ui.downloads_button.setStyleSheet("background-color: " + settings._GREEN_COLOR)
+				# download menu
+				self.ui.pending_label.hide()
+			else:
+				# main show menu
+				self.ui.pending_downloads_label.show()
+				self.ui.pending_downloads_label.setText("%d Pending Downloads" % len(self.user_state.pending_download.keys()))
+				self.ui.downloads_button.setStyleSheet("background-color: " + settings._YELLOW_COLOR)
+				# download menu
+				self.ui.pending_label.show()
+
+			if self.user_state.scheduled == []:
+				self.ui.scheduled_label.hide()
+			else:
+				self.ui.scheduled_label.show()
+
+			if self.user_state.scheduled_shows == []:
+				self.ui.scheduled_shows_label.hide()
+			else:
+				self.ui.scheduled_shows_label.show()
+
 
 	def update_filter(self):
 		'''Filters the news and updates box'''
@@ -272,6 +306,13 @@ class ShowsMenu(QMainWindow):
 			self.ui.search_box_2.setText(self.ui.search_box.text())
 		else:
 			self.ui.search_box.setText(self.ui.search_box_2.text())
+		if self.ui.search_box.text() != "":
+			self.ui.clear_button_1.show()
+			self.ui.clear_button_5.show()
+		else:
+			self.ui.clear_button_1.hide()
+			self.ui.clear_button_5.hide()
+
 
 
 class ShowWidget(QWidget):
