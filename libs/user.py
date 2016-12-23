@@ -138,7 +138,7 @@ class UserContent:
 			return show.real_name
 		elif not self.is_tracked(name):
 			new_show = Show(name, cache=self.cache_dir, apikey=self.tvdb_apikey)
-			self.shows.update({new_show.name:new_show})
+			self.shows.update({new_show.real_name:new_show})
 			return new_show.real_name
 		else:
 			return None
