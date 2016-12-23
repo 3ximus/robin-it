@@ -169,7 +169,7 @@ class Show:
 			for episode in season.episodes:
 				if not episode.watched: episode_list.append(episode)
 			if episode_list != []:
-				seasons.update({str(season.s_id):episode_list})
+				seasons.update({season.s_id:episode_list})
 		return seasons
 
 	def get_episodes_list(self, aired=True, unaired=True):
@@ -336,8 +336,12 @@ class Episode:
 		self.image = database[self.tv_show.real_name][self.s_id][self.e_id]['filename']
 		imdb_id = database[self.tv_show.real_name][self.s_id][self.e_id]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
-		date_split = database[self.tv_show.real_name][self.s_id][self.e_id]['firstaired'].split('-')
-		self.airdate = datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
+		raw_date = database[self.tv_show.real_name][self.s_id][self.e_id]['firstaired']
+		if raw_date:
+			date_split = raw_date.split('-')
+			self.airdate = datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
+		else:
+			self.airdate = None
 
 	def toogle_watched(self):
 		''' Toogle the watched state '''

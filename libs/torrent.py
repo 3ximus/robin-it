@@ -9,7 +9,7 @@ Copyright (C) 2015 - eximus
 class Torrent():
     '''Torrent data structure'''
 
-    def __init__(self, name='', url='', magnet='', tor_file='', seeds='', peers='', age='', files='', size='', host=''):
+    def __init__(self, name='', url='', magnet='', tor_file='', seeds='', peers='', age='', files='', size='', host='', host_name=''):
         '''Torrent data Constructor
 
         Parameters:
@@ -33,6 +33,8 @@ class Torrent():
         self.seeds = seeds
         self.peers = peers
         self.host = host
+        self.host_name = host_name
+
 
     def __repr__(self):
         rep = "Torrent:\n"

@@ -28,6 +28,7 @@ from gui.resources.shows_menu import Ui_shows_menu
 from gui.resources.episode_download_widget import Ui_episode_download_widget
 from gui.resources.torrent_selection_window import Ui_torrent_selection_window
 from gui.resources.torrent_row_widget import Ui_torrent_row_widget
+from gui.resources.show_scheduled_widget import Ui_show_scheduled_widget
 from gui.show_window import ShowWindow
 # LIBS IMPORT
 from libs.loading import progress_bar
@@ -279,6 +280,7 @@ class ShowsMenu(QMainWindow):
 		if self.ui.stackedWidget.currentIndex() == 4:
 			self.clear_layout(self.ui.pending_layout)
 			self.clear_layout(self.ui.scheduled_layout)
+			self.clear_layout(self.ui.scheduled_shows_layout)
 
 			# filter text clear button
 			if self.ui.downloadsfilter_box.text() == "": self.ui.clear_button_4.hide()
@@ -298,7 +300,7 @@ class ShowsMenu(QMainWindow):
 				self.ui.downloads_button.setStyleSheet("background-color: " + settings._YELLOW_COLOR)
 				# download menu
 				self.ui.pending_label.show()
-				items = self.user_state.find_item(self.ui.showfilter_box.text(),
+				items = self.user_state.find_item(self.ui.downloadsfilter_box.text(),
 												lst=self.user_state.pending_download,
 												key=lambda x: x.tv_show.name,
 												return_key=True)
@@ -310,12 +312,20 @@ class ShowsMenu(QMainWindow):
 				self.ui.scheduled_label.hide()
 			else:
 				self.ui.scheduled_label.show()
+				# TODO EpisodeDownloadWidget needs special condition for this case
+				#items = self.user_state.find_item(self.ui.downloadsfilter_box.text(), lst=self.user_state.scheduled)
+				#for episode in items:
+				#	self.add_to_layout(self.ui.scheduled_layout, EpisodeDownloadWidget(episode, None, self))
 
 			# -- scheduled shows
 			if self.user_state.scheduled_shows == []:
 				self.ui.scheduled_shows_label.hide()
 			else:
 				self.ui.scheduled_shows_label.show()
+				items = self.user_state.find_item(self.ui.downloadsfilter_box.text(), lst=self.user_state.scheduled_shows)
+				for show in items:
+					self.add_to_layout(self.ui.scheduled_shows_layout,
+					                   ShowScheduledWidget(show, self.user_state, self))
 
 
 	def update_filter(self):
@@ -378,7 +388,6 @@ class ShowWidget(QWidget):
 			self.banner_loaded.connect(self.load_banner)
 			self.download_banner(self.tvshow.banner)
 
-
 			begin_hover(self).connect(self.show_more)
 			end_hover(self).connect(self.show_less)
 
@@ -387,6 +396,7 @@ class ShowWidget(QWidget):
 			self.ui.counter_label.hide()
 			self.ui.add_button.hide()
 			self.ui.download_button.hide()
+			self.ui.download_button.clicked.connect(self.schedule_show)
 			# spacer items dont get a reference from pyuic so we must get it from the layout
 			if watched == 0:
 				self.ui.progress_bar.hide()
@@ -428,6 +438,11 @@ class ShowWidget(QWidget):
 		print "Added: " + name
 		self.window.ui.statusbar.clearMessage()
 		self.make_del_button()
+
+	def schedule_show(self):
+		self.user_state.schedule(self.tvshow)
+		self.user_state.save_state()
+		self.window.ui.statusbar.showMessage("Scheduled %s for download" % self.tvshow.name)
 
 	def make_del_button(self):
 		'''Transforms the add button into a delete button'''
@@ -487,6 +502,7 @@ class EpisodeDownloadWidget(QWidget):
 		self.ui.setupUi(self)
 
 		self.ui.download_button.clicked.connect(self.download_episode)
+		self.ui.delete_button.clicked.connect(self.remove)
 		self.image_loaded.connect(self.load_image)
 		self.download_image(self.episode.image)
 
@@ -496,7 +512,7 @@ class EpisodeDownloadWidget(QWidget):
 
 		clickable(self).connect(self.display_torrent_selection_window)
 
-	def download_episode(self, event, torrent=None):
+	def download_episode(self, torrent=None):
 		'''Button that overrides the min seed requirement'''
 		if not torrent:
 			torrent = max(self.torrent_list, key=lambda x: x.seeds) # get max by seeds
@@ -504,6 +520,9 @@ class EpisodeDownloadWidget(QWidget):
 		self.window.ui.statusbar.showMessage("Downloading: %s" % torrent.name)
 		print "Downloading: %s\n\t-> Seeds: %d, Host: %s" % (torrent.name, torrent.seeds, torrent.host)
 		subprocess.Popen([settings.config['client_application'],torrent.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+		self.remove()
+
+	def remove(self):
 		self.window.user_state.remove_pending(self.episode)
 		self.window.user_state.save_state()
 		self.window.update_downloads()
@@ -567,9 +586,59 @@ class TorrentRow(QWidget):
 
 		self.ui.name_label.setText(self.torrent.name)
 		self.ui.info_label.setText(" | %8s | %5d | %5d | %10s | %s" % (
-			self.torrent.size, self.torrent.seeds, self.torrent.peers, self.torrent.age, self.torrent.host))
+			self.torrent.size, self.torrent.seeds, self.torrent.peers, self.torrent.age, self.torrent.host_name))
 		self.ui.download_button.clicked.connect(self.download)
 
 	def download(self):
-		self.window.episode_widget.download_episode(event=None, torrent=self.torrent)
+		self.window.episode_widget.download_episode(torrent=self.torrent)
 		self.window.go_back()
+
+class ShowScheduledWidget(QWidget):
+	'''Small banner to identify a scheduled show
+
+	Parameters:
+		tvshow -- search result to load the banner from or a Show instance
+		user_state -- UserContent class
+
+		The whole widget is clickable displaying a Show Window with the tvshow info
+		Has an add button to add the show to the followed shows
+		Emits banner_loaded signal when the banner image is loaded
+	'''
+	banner_loaded = QtCore.pyqtSignal(object)
+
+	def __init__(self, tvshow, user_state, window):
+		super(ShowScheduledWidget, self).__init__()
+		self.tvshow = tvshow
+		self.user_state = user_state
+		self.window = window
+		self.show_window = None
+
+		self.ui = Ui_show_scheduled_widget()
+		self.ui.setupUi(self)
+
+		self.ui.name_label.setText('%s' % self.tvshow.name)
+		clickable(self).connect(self.view_show)
+
+		self.banner_loaded.connect(self.load_banner)
+		self.download_banner(self.tvshow.banner)
+
+		self.ui.counter_label.setText("0")
+
+	@threaded
+	def download_banner(self, url):
+		'''Thread to download banner, emits self.banner_loaded signal when complete'''
+		if not url: return
+		data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
+		self.banner_loaded.emit(data)
+
+	def load_banner(self, data):
+		'''Triggered by self.banner_loaded signal. Loads the banner from downloaded data'''
+		if not data: return # when banner was not loaded or url couldnt be reached
+		banner = QPixmap()
+		banner.loadFromData(data)
+		self.ui.banner.setPixmap(banner)
+
+	def view_show(self):
+		'''Triggered clicking on the widget. Displays Show Window'''
+		self.show_window = ShowWindow(self.tvshow, self.user_state, self.window)
+		self.show_window.show()
