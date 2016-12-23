@@ -66,9 +66,11 @@ def init(): # call only once to prevent multiple initialization
 	_BLUR_RADIOUS = 10
 	_DARKNESS = 0.6
 
-	global _SEASON_MAX_COL, _EPISODE_MAX_COL
+	global _SEASON_MAX_COL, _EPISODE_MAX_COL, _MARGIN_SIZES, _LAYOUT_SPACING, _BASE_SIZE_TORRENT_WINDOW
 	_SEASON_MAX_COL = 5
 	_EPISODE_MAX_COL = 3
+	_MARGIN_SIZES = 100 # aproximated value to use when chosing numbers of columns in layout
+	_BASE_SIZE_TORRENT_WINDOW = 650
 
 	global _MAX_UPDATE_SHOW_INTERVAL
 	_MAX_UPDATE_SHOW_INTERVAL = 45

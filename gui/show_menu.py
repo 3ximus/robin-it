@@ -10,6 +10,7 @@ __version__ = '1.0'
 
 # TOOLS
 import datetime
+import subprocess
 from functools import partial
 from time import sleep
 
@@ -17,12 +18,16 @@ from time import sleep
 from PyQt5 import QtCore
 from PyQt5.QtGui import QBrush, QColor, QPalette, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QSpacerItem, QWidget
+from PyQt5.QtCore import QSize
 
 import settings
 from gui.gui_func import begin_hover, clickable, download_object, end_hover
 # IMPORT FORMS
 from gui.resources.show_banner_widget import Ui_show_banner_widget
 from gui.resources.shows_menu import Ui_shows_menu
+from gui.resources.episode_download_widget import Ui_episode_download_widget
+from gui.resources.torrent_selection_window import Ui_torrent_selection_window
+from gui.resources.torrent_row_widget import Ui_torrent_row_widget
 from gui.show_window import ShowWindow
 # LIBS IMPORT
 from libs.loading import progress_bar
@@ -71,7 +76,6 @@ class ShowsMenu(QMainWindow):
 		self.ui.clear_button_4.hide()
 		self.ui.clear_button_5.hide()
 
-
 		self.ui.back_button_0.clicked.connect(self.go_back)
 		self.ui.back_button_1.clicked.connect(partial(self.go_to, index=0))
 		self.ui.back_button_2.clicked.connect(partial(self.go_to, index=0))
@@ -112,6 +116,7 @@ class ShowsMenu(QMainWindow):
 		self.col = 0
 		self.row = 0
 		self.loaded_results=0
+		self.loaded_layouts = []
 
 	def search(self):
 		'''Searches for TV Show by a given keyword in the search box
@@ -123,6 +128,7 @@ class ShowsMenu(QMainWindow):
 		self._search_thread(self.ui.search_box.text()) # both input boxes are synced
 		self.ui.stackedWidget.setCurrentIndex(1)
 		self.ui.search_box_2.setFocus()
+		self.loaded_layouts = [self.ui.results_layout,]
 
 	@threaded
 	def _search_thread(self, text):
@@ -152,10 +158,14 @@ class ShowsMenu(QMainWindow):
 
 	def add_to_layout(self, layout, widget):
 		'''Takes the widget to be added and the layout to add it to'''
-		layout.addWidget(widget, int(self.row), self.col)
-		self.row += 0.5
-		self.col = 1 if self.col == 0 else 0
-		return
+		max_columns = (self.size().width() - settings._MARGIN_SIZES) / widget.size().width()
+		col = self.col % max_columns
+		if col == 0: self.row +=1
+		layout.addWidget(widget, int(self.row), self.col % max_columns)
+		self.col += 1
+
+	def resizeEvent(self, event):
+		pass # TODO do updates from time to time here see issues #27 and #63
 
 	def display_results(self, results):
 		'''Triggered by the self.search_complete signal. Displays TV show results on stack widget page 1
@@ -223,16 +233,20 @@ class ShowsMenu(QMainWindow):
 	def go_to(self, index):
 		'''Got to one of the stacked pages given by index'''
 		self.ui.stackedWidget.setCurrentIndex(index)
-		if index==0: self.ui.search_box.setFocus()
+		if index==0:
+			self.ui.search_box.setFocus()
+			self.loaded_layouts = []
 
 	def load_my_shows(self):
 		'''Load shows and got to page 2'''
 		self.ui.stackedWidget.setCurrentIndex(2)
+		self.loaded_layouts = [self.ui.myshows_layout,]
 		self.update_shows()
 		self.ui.showfilter_box.setFocus()
 
 	def load_downloads(self):
 		self.ui.stackedWidget.setCurrentIndex(4)
+		self.loaded_layouts = [self.ui.pending_layout,self.ui.scheduled_layout, self.ui.scheduled_shows_layout]
 		self.update_downloads()
 		self.ui.downloadsfilter_box.setFocus()
 
@@ -266,11 +280,11 @@ class ShowsMenu(QMainWindow):
 			self.clear_layout(self.ui.pending_layout)
 			self.clear_layout(self.ui.scheduled_layout)
 
-			if self.ui.downloadsfilter_box.text() == "":
-				self.ui.clear_button_4.hide()
-			else:
-				self.ui.clear_button_4.show()
+			# filter text clear button
+			if self.ui.downloadsfilter_box.text() == "": self.ui.clear_button_4.hide()
+			else: self.ui.clear_button_4.show()
 
+			# -- pending downloads
 			if self.user_state.pending_download == {}:
 				# main show menu
 				self.ui.pending_downloads_label.hide()
@@ -284,12 +298,20 @@ class ShowsMenu(QMainWindow):
 				self.ui.downloads_button.setStyleSheet("background-color: " + settings._YELLOW_COLOR)
 				# download menu
 				self.ui.pending_label.show()
+				items = self.user_state.find_item(self.ui.showfilter_box.text(),
+												lst=self.user_state.pending_download,
+												key=lambda x: x.tv_show.name,
+												return_key=True)
+				for episode, tor_list in items:
+					self.add_to_layout(self.ui.pending_layout, EpisodeDownloadWidget(episode, tor_list, self))
 
+			# -- scheduled episodes
 			if self.user_state.scheduled == []:
 				self.ui.scheduled_label.hide()
 			else:
 				self.ui.scheduled_label.show()
 
+			# -- scheduled shows
 			if self.user_state.scheduled_shows == []:
 				self.ui.scheduled_shows_label.hide()
 			else:
@@ -312,8 +334,6 @@ class ShowsMenu(QMainWindow):
 		else:
 			self.ui.clear_button_1.hide()
 			self.ui.clear_button_5.hide()
-
-
 
 class ShowWidget(QWidget):
 	'''Small banner to identify a show
@@ -443,3 +463,113 @@ class ShowWidget(QWidget):
 		self.ui.counter_label.hide()
 		self.ui.add_button.hide()
 		self.ui.download_button.hide()
+
+class EpisodeDownloadWidget(QWidget):
+	'''Small banner to identify an episode in the downloads list
+
+	Parameters:
+		episode -- Episode class instance
+		torrent_list -- List with torrents gathered
+
+		The whole widget is clickable displaying a list of torrents to choose from
+		Emits image_loaded signal when the episode image is loaded
+	'''
+	image_loaded = QtCore.pyqtSignal(object)
+
+	def __init__(self, episode, torrent_list, window):
+		super(EpisodeDownloadWidget, self).__init__()
+		self.episode = episode
+		self.torrent_list = torrent_list
+		self.window = window
+		self.torrent_selection_window = None
+
+		self.ui = Ui_episode_download_widget()
+		self.ui.setupUi(self)
+
+		self.ui.download_button.clicked.connect(self.download_episode)
+		self.image_loaded.connect(self.load_image)
+		self.download_image(self.episode.image)
+
+		self.ui.name_label.setText('[%02d] %s' % (int(self.episode.episode_number), self.episode.name))
+		self.ui.info_label.setText('%s %s' % (self.episode.airdate, self.episode.rating))
+		self.ui.show_label.setText(self.episode.tv_show.name)
+
+		clickable(self).connect(self.display_torrent_selection_window)
+
+	def download_episode(self, event, torrent=None):
+		'''Button that overrides the min seed requirement'''
+		if not torrent:
+			torrent = max(self.torrent_list, key=lambda x: x.seeds) # get max by seeds
+
+		self.window.ui.statusbar.showMessage("Downloading: %s" % torrent.name)
+		print "Downloading: %s\n\t-> Seeds: %d, Host: %s" % (torrent.name, torrent.seeds, torrent.host)
+		subprocess.Popen([settings.config['client_application'],torrent.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+		self.window.user_state.remove_pending(self.episode)
+		self.window.user_state.save_state()
+		self.window.update_downloads()
+
+	@threaded
+	def download_image(self, url):
+		'''Thread to downlaod episode image'''
+		if not url: return
+		try:
+			data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
+			self.image_loaded.emit(data)
+		except IOError: print "Error Loading episode image url: %s" % url
+		except RuntimeError: pass # image loaded after the window was closed
+
+	def load_image(self, data):
+		'''Triggered by image_loaded signal. Loads image to the widget'''
+		image=QPixmap()
+		image.loadFromData(data)
+		self.ui.image.setPixmap(image)
+
+	def display_torrent_selection_window(self):
+		self.window.setEnabled(False)
+		self.torrent_selection_window = TorrentSelectionWindow(self.torrent_list, self.window, self)
+		self.torrent_selection_window.show()
+		self.torrent_selection_window.move(self.window.pos()+self.window.rect().center()-self.torrent_selection_window.rect().center()) # position login window
+
+class TorrentSelectionWindow(QMainWindow):
+	'''Window with list of torrents to download'''
+
+	def __init__(self, torrent_list, parent_window, episode_widget=None):
+		super(TorrentSelectionWindow, self).__init__()
+		self.torrent_list = torrent_list
+		self.parent_window = parent_window
+		self.episode_widget = episode_widget
+
+		self.ui = Ui_torrent_selection_window()
+		self.ui.setupUi(self)
+		max_torname_len = len(max(torrent_list, key=lambda x: len(x.name)).name)
+		self.setMinimumSize(QSize(max_torname_len * 8 + settings._BASE_SIZE_TORRENT_WINDOW,0))
+
+		for torrent in self.torrent_list:
+			self.ui.torrent_layout.addWidget(TorrentRow(torrent, self))
+
+		self.ui.back_button.clicked.connect(self.go_back)
+
+	def go_back(self):
+		self.parent_window.setEnabled(True)
+		self.close()
+		self.destroy()
+
+class TorrentRow(QWidget):
+	'''Window with list of torrents to download'''
+
+	def __init__(self, torrent, window):
+		super(TorrentRow, self).__init__()
+		self.torrent = torrent
+		self.window = window
+
+		self.ui = Ui_torrent_row_widget()
+		self.ui.setupUi(self)
+
+		self.ui.name_label.setText(self.torrent.name)
+		self.ui.info_label.setText(" | %8s | %5d | %5d | %10s | %s" % (
+			self.torrent.size, self.torrent.seeds, self.torrent.peers, self.torrent.age, self.torrent.host))
+		self.ui.download_button.clicked.connect(self.download)
+
+	def download(self):
+		self.window.episode_widget.download_episode(event=None, torrent=self.torrent)
+		self.window.go_back()

@@ -81,6 +81,7 @@ class ShowWindow(QMainWindow):
 		self.episode_col = 0
 		self.episode_row = 0
 		self.back_ratio = 0
+		self.season_being_displayed = -1
 
 		if type(tvshow) == dict:
 			if not self.user_state.is_tracked(tvshow['seriesname']):
@@ -167,7 +168,7 @@ class ShowWindow(QMainWindow):
 		for i, s in enumerate(self.tvshow.seasons):
 			season = SeasonWidget(s, self)
 			clickable(season).connect(partial(self.display_episodes, sid=(s.s_id-1))) # 1 based
-			# this is a temporary workaround for seasons display
+			# this is a workaround for seasons display
 			if i < c: self.ui.seasons_layout.addWidget(season, self.season_row, self.season_col%settings._SEASON_MAX_COL)
 			else: self.ui.last_row_seasons_layout.addWidget(season, self.season_row, self.season_col%settings._SEASON_MAX_COL)
 			self.season_col+=1
@@ -177,16 +178,23 @@ class ShowWindow(QMainWindow):
 		'''Fills the GUI with episodes from selected season'''
 		self.episode_col = 0
 		self.episode_row = 0
-		self.ui.episodes_label.setText("[ s%02d episodes ]" % (sid+1))
 		self.clear_layout(self.ui.episodes_layout)
 		self.clear_layout(self.ui.last_row_episodes_layout)
+		if self.season_being_displayed == sid: # hide episodes if we click again in the same label
+			self.ui.episodes_label.hide()
+			self.season_being_displayed = -1 # reset so it can be opened again
+		else:
+			self.season_being_displayed = sid
+			self.ui.episodes_label.setText("[ s%02d episodes ]" % (sid+1))
+			self.clear_layout(self.ui.episodes_layout)
+			self.clear_layout(self.ui.last_row_episodes_layout)
 
-		c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%settings._EPISODE_MAX_COL
-		for i, e in enumerate(self.tvshow.seasons[sid].episodes):
-			if i < c: self.ui.episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%settings._EPISODE_MAX_COL)
-			else:  self.ui.last_row_episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%settings._EPISODE_MAX_COL)
-			self.episode_col+=1
-			if self.episode_col%settings._EPISODE_MAX_COL==0: self.episode_row+=1
+			c = len(self.tvshow.seasons[sid].episodes) - len(self.tvshow.seasons[sid].episodes)%settings._EPISODE_MAX_COL
+			for i, e in enumerate(self.tvshow.seasons[sid].episodes):
+				if i < c: self.ui.episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%settings._EPISODE_MAX_COL)
+				else:  self.ui.last_row_episodes_layout.addWidget(EpisodeWidget(e, self), self.episode_row, self.episode_col%settings._EPISODE_MAX_COL)
+				self.episode_col+=1
+				if self.episode_col%settings._EPISODE_MAX_COL==0: self.episode_row+=1
 
 	def clear_layout(self, layout):
 		'''Clear given layout'''
@@ -392,8 +400,10 @@ class EpisodeWidget(QWidget):
 	def download_episode(self, event):
 
 		if not self.episode.already_aired():
-			self.window.ui.statusbar.showMessage("Episode scheduled for download")
+			try: self.window.ui.statusbar.showMessage("Episode scheduled for download")
+			except RuntimeError: pass # closed too fast
 			self.window.user_state.schedule(self.episode)
+			self.window.user_state.save_state()
 			self.window.update_downloads.emit()
 			return
 
@@ -420,15 +430,19 @@ class EpisodeWidget(QWidget):
 
 		if result == None:
 			print "No torrent found or connection timed out for s%02de%02d" % (self.episode.s_id, self.episode.e_id)
-			self.window.ui.statusbar.showMessage("No torrent found or connection timed out for s%02de%02d" % (self.episode.s_id, self.episode.e_id))
+			try: self.window.ui.statusbar.showMessage("No torrent found or connection timed out for s%02de%02d" % (self.episode.s_id, self.episode.e_id))
+			except RuntimeError: pass # closed too fast
 			return
 		elif isinstance(result, Torrent): # type must be instance of Torrent
-			self.window.ui.statusbar.showMessage("Downloading: %s" % result.name)
+			try: self.window.ui.statusbar.showMessage("Downloading: %s" % result.name)
+			except RuntimeError: pass # closed too fast
 			print "Downloading: %s\n\t-> Seeds: %d, Host: %s" % (result.name, result.seeds, result.host)
 			subprocess.Popen([settings.config['client_application'],result.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 		else: # else result will be a list
-			self.window.ui.statusbar.showMessage("Multiple torrents found for s%02de%02d, Added to pending Downloads" % (self.episode.s_id, self.episode.e_id))
+			try: self.window.ui.statusbar.showMessage("Multiple torrents found for s%02de%02d, Added to pending Downloads" % (self.episode.s_id, self.episode.e_id))
+			except RuntimeError: pass # closed too fast
 			self.window.user_state.pend_download(self.episode, result)
+			self.window.user_state.save_state()
 			self.window.update_downloads.emit()
 
 

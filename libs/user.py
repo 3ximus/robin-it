@@ -50,26 +50,28 @@ class UserContent:
 		'''Returns True if show is being tracked, else otherwise'''
 		return name in self.shows
 
-	def find_item(self, name, lst=None, key=None):
+	def find_item(self, name, lst=None, key=None, return_key=False):
 		'''Find shows in the dictionary using a partial name
 
 		Optional Parameters
-			lst -- list where to search for, if omitted self.shows is used
+			lst -- list where to search for, if omitted self.shows is used (this can only be either a list or a dictionary)
 			key -- one argument function to specify the field used in comparisons,
 					similar to the ones used in builtin map function or list.sort()
+			return_key -- if set to true the returned list will contain both the keys and value of the matched
+					element in the dictionary
 		'''
 		matches = []
-		search_in = lst.iteritems() if lst != None and type(lst) == dict else self.shows.iteritems() # default
-		if lst != None and type(lst) == list:
+		if type(lst) == list:
 			for x in lst: # case lst is a list use this
 				k = x if key == None else key(x) # apply filter if needed
 				if name.lower() in k.lower():
 					matches.append(x)
 		else:
+			search_in = self.shows.iteritems() if lst == None else lst.iteritems()
 			for name_key, value in search_in: # build match list
 				k = name_key if key == None else key(name_key) # apply filter if needed
 				if name.lower() in k.lower():
-					matches.append(value)
+					matches.append((name_key,value) if return_key else value)
 		return matches
 
 # SET METHODS
@@ -171,11 +173,12 @@ class UserContent:
 			self.scheduled.append(item)
 		elif isinstance(item, Show):
 			self.scheduled_shows.append(item)
-		else:
-			return
 
 	def pend_download(self, item, torrent_list):
 		'''Adds an item to the pending download list'''
 		if isinstance(item, Episode):
 			self.pending_download.update({item:torrent_list})
+
+	def remove_pending(self, item):
+		del(self.pending_download[item])
 
