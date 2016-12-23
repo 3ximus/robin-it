@@ -308,7 +308,7 @@ class ShowsMenu(QMainWindow):
 					self.add_to_layout(self.ui.pending_layout, EpisodeDownloadWidget(episode, tor_list, self))
 
 			# -- scheduled episodes
-			if self.user_state.scheduled == []:
+			if self.user_state.scheduled == {}:
 				self.ui.scheduled_label.hide()
 			else:
 				self.ui.scheduled_label.show()
@@ -318,7 +318,7 @@ class ShowsMenu(QMainWindow):
 				#	self.add_to_layout(self.ui.scheduled_layout, EpisodeDownloadWidget(episode, None, self))
 
 			# -- scheduled shows
-			if self.user_state.scheduled_shows == []:
+			if self.user_state.scheduled_shows == {}:
 				self.ui.scheduled_shows_label.hide()
 			else:
 				self.ui.scheduled_shows_label.show()
@@ -415,7 +415,8 @@ class ShowWidget(QWidget):
 		'''Thread to download banner, emits self.banner_loaded signal when complete'''
 		if not url: return
 		data = download_object(url, cache_dir=settings.config['cache_dir'] if settings.config.has_property('cache_dir') else None)
-		self.banner_loaded.emit(data)
+		try: self.banner_loaded.emit(data)
+		except RuntimeError: pass # widget already deleted
 
 	def load_banner(self, data):
 		'''Triggered by self.banner_loaded signal. Loads the banner from downloaded data'''
