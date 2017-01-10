@@ -445,10 +445,16 @@ class EpisodeWidget(QWidget):
 			except RuntimeError: pass # closed too fast
 			return
 		elif isinstance(result, Torrent): # type must be instance of Torrent
-			try: self.window.ui.statusbar.showMessage("Downloading: %s" % result.name)
-			except RuntimeError: pass # closed too fast
-			print "Downloading: %s\n\t-> Seeds: %d, Host: %s" % (result.name, result.seeds, result.host)
-			subprocess.Popen([settings.config['client_application'],result.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+			try :
+				subprocess.Popen([settings.config['client_application'],result.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+				print "Downloading: %s\n\t-> Seeds: %d, Host: %s" % (result.name, result.seeds, result.host)
+				try: self.window.ui.statusbar.showMessage("Downloading: %s" % result.name)
+				except RuntimeError: pass # closed too fast
+			except OSError:
+				print "Application to open torrents/magnets doesn't exist: %s" % settings.config['client_application']
+				try: self.window.ui.statusbar.showMessage("Application to open torrents/magnets doesn't exist: %s" % settings.config['client_application'])
+				except RuntimeError: pass # closed too fast
+
 		else: # else result will be a list
 			try: self.window.ui.statusbar.showMessage("Not enough seeds on s%02de%02d, Added to pending Downloads" % (self.episode.s_id, self.episode.e_id))
 			except RuntimeError: pass # closed too fast
