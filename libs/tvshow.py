@@ -336,8 +336,11 @@ class Episode:
 		self.image = database[self.tv_show.real_name][self.s_id][self.e_id]['filename']
 		imdb_id = database[self.tv_show.real_name][self.s_id][self.e_id]['imdb_id']
 		self.imdb_id = IMDB_TITLE + (imdb_id if imdb_id else '')
-		date_split = database[self.tv_show.real_name][self.s_id][self.e_id]['firstaired'].split('-')
-		self.airdate = datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
+		_date = database[self.tv_show.real_name][self.s_id][self.e_id]['firstaired']
+		if _date:
+			date_split = _date.split('-')
+			self.airdate = datetime.date(int(date_split[0]),int(date_split[1]),int(date_split[2]))
+		else : self.airdate = datetime.date(1,1,1) # ugly... i know
 
 	def toogle_watched(self):
 		''' Toogle the watched state '''

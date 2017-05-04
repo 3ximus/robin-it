@@ -1,8 +1,11 @@
 # generated editor files
 *.swp
-*.pyc
 *.vim
 .vscode
+
+# generated files
+*.pyc
+gui/resources/*.py
 
 # generated dirs
 cache
