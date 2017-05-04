@@ -169,7 +169,7 @@ class Show:
 			for episode in season.episodes:
 				if not episode.watched: episode_list.append(episode)
 			if episode_list != []:
-				seasons.update({str(season.s_id):episode_list})
+				seasons.update({season.s_id:episode_list})
 		return seasons
 
 	def get_episodes_list(self, aired=True, unaired=True):

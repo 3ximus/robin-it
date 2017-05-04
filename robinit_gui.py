@@ -243,11 +243,11 @@ class SettingsWindow(QMainWindow):
 		settings.config.add_property('client_application', self.ui.torclient_box.text(), 'torrents')
 
 		settings.config.add_property('piratebay_allow', self.ui.piratebay_checkbox.isChecked(), 'torrents')
-		settings.config.add_property('piratebay', self.ui.piratebay_box.text().replace(' ', '_'), 'torrents')
+		if self.ui.piratebay_box.text() != "": settings.config.add_property('piratebay', self.ui.piratebay_box.text().replace(' ', '_'), 'torrents')
 		settings.config.add_property('kickass_allow', self.ui.kickass_checkbox.isChecked(), 'torrents')
-		settings.config.add_property('kickass', self.ui.kickass_box.text().replace(' ', '_'), 'torrents')
+		if self.ui.kickass_box.text() != "": settings.config.add_property('kickass', self.ui.kickass_box.text().replace(' ', '_'), 'torrents')
 		settings.config.add_property('rarbg_allow', self.ui.rarbg_checkbox.isChecked(), 'torrents')
-		settings.config.add_property('rarbg', self.ui.rarbg_box.text().replace(' ', '_'), 'torrents')
+		if self.ui.rarbg_box.text() != "": settings.config.add_property('rarbg', self.ui.rarbg_box.text().replace(' ', '_'), 'torrents')
 
 		settings.config.add_property('sub_en', self.ui.ensub_checkbox.isChecked(), 'subtitles')
 		settings.config.add_property('sub_pt', self.ui.ptsub_checkbox.isChecked(), 'subtitles')
@@ -258,9 +258,9 @@ class SettingsWindow(QMainWindow):
 		settings.config.add_property('seeds_autodownload', self.ui.seed_checkbox.isChecked(), 'torrents')
 		settings.config.add_property('seeds_threshold', self.ui.seed_spinbox.value(), 'torrents')
 
-		settings.config.add_property('storage_dir',self.ui.storage_box.text().replace(' ', '_'), 'directories')
-		settings.config.add_property('user_dir', self.ui.user_box.text().replace(' ', '_'), 'directories')
-		settings.config.add_property('cache_dir', self.ui.cache_box.text().replace(' ', '_'), 'directories')
+		if self.ui.storage_box.text() != "": settings.config.add_property('storage_dir',self.ui.storage_box.text().replace(' ', '_'), 'directories')
+		if self.ui.user_box.text() != "": settings.config.add_property('user_dir', self.ui.user_box.text().replace(' ', '_'), 'directories')
+		if self.ui.cache_box.text() != "": settings.config.add_property('cache_dir', self.ui.cache_box.text().replace(' ', '_'), 'directories')
 		self.main_window.user_state.set_storage_dir(settings.config['storage_dir'] if settings.config['storage_dir'] != '' else None)
 		self.main_window.user_state.set_user_dir(settings.config['user_dir'] if settings.config['user_dir'] != '' else None)
 		self.main_window.user_state.set_cache_dir(settings.config['cache_dir'] if settings.config['cache_dir'] != '' else None)

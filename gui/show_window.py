@@ -69,6 +69,7 @@ class ShowWindow(QMainWindow):
 		self.ui.back_button.clicked.connect(self.close)
 		self.ui.add_button.clicked.connect(self.add_show)
 		self.ui.mark_button.clicked.connect(self.toogle_watched)
+		self.ui.download_button.clicked.connect(self.schedule_show)
 
 		self.ui.add_button.setEnabled(False)
 		self.ui.mark_button.setEnabled(False)
@@ -101,7 +102,7 @@ class ShowWindow(QMainWindow):
 		self.update_me()
 		self.load_show()
 
-		# TODO uncoment this: self.ui.force_update_button.connect(self.force_update)
+		self.ui.force_update_button.clicked.connect(self.force_update)
 
 	def update_me(self):
 		'''Triggered by update_shout signal. Update some gui elements that may need sync'''
@@ -121,8 +122,17 @@ class ShowWindow(QMainWindow):
 		self.origin_window.update_downloads()
 
 	@threaded
-	def force_update(self):
+	def force_update(self, event):
+		self.ui.statusbar.showMessage("Updating...")
 		self.tvshow.update_info()
+		self.user_state.save_state()
+		self.ui.statusbar.showMessage("Finished Updating")
+
+	def schedule_show(self):
+		'''Add show to scheduled list'''
+		self.user_state.schedule(self.tvshow)
+		self.user_state.save_state()
+		self.ui.statusbar.showMessage("Scheduled %s for download" % self.tvshow.name)
 
 	@threaded
 	def get_show_data(self, name):
@@ -404,7 +414,8 @@ class EpisodeWidget(QWidget):
 			except RuntimeError: pass # closed too fast
 			self.window.user_state.schedule(self.episode)
 			self.window.user_state.save_state()
-			self.window.update_downloads.emit()
+			try:self.window.update_downloads.emit()
+			except RuntimeError: pass # closed too fast
 			return
 
 		hosts={} # set hosts
@@ -434,17 +445,23 @@ class EpisodeWidget(QWidget):
 			except RuntimeError: pass # closed too fast
 			return
 		elif isinstance(result, Torrent): # type must be instance of Torrent
-			try: self.window.ui.statusbar.showMessage("Downloading: %s" % result.name)
-			except RuntimeError: pass # closed too fast
-			print "Downloading: %s\n\t-> Seeds: %d, Host: %s" % (result.name, result.seeds, result.host)
-			subprocess.Popen([settings.config['client_application'],result.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+			try :
+				subprocess.Popen([settings.config['client_application'],result.magnet], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+				print "Downloading: %s\n\t-> Seeds: %d, Host: %s" % (result.name, result.seeds, result.host)
+				try: self.window.ui.statusbar.showMessage("Downloading: %s" % result.name)
+				except RuntimeError: pass # closed too fast
+			except OSError:
+				print "Application to open torrents/magnets doesn't exist: %s" % settings.config['client_application']
+				try: self.window.ui.statusbar.showMessage("Application to open torrents/magnets doesn't exist: %s" % settings.config['client_application'])
+				except RuntimeError: pass # closed too fast
+
 		else: # else result will be a list
-			try: self.window.ui.statusbar.showMessage("Multiple torrents found for s%02de%02d, Added to pending Downloads" % (self.episode.s_id, self.episode.e_id))
+			try: self.window.ui.statusbar.showMessage("Not enough seeds on s%02de%02d, Added to pending Downloads" % (self.episode.s_id, self.episode.e_id))
 			except RuntimeError: pass # closed too fast
 			self.window.user_state.pend_download(self.episode, result)
 			self.window.user_state.save_state()
-			self.window.update_downloads.emit()
-
+			try: self.window.update_downloads.emit()
+			except RuntimeError: pass # closed too fast
 
 	@threaded
 	def download_image(self, url):

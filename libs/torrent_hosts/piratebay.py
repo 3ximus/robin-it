@@ -36,7 +36,8 @@ class PirateBay:
 					peers=int(cells[3].text),  # column #3 contains leechs
 					age=match.group(1).encode('ascii', 'replace').decode('ascii'), # contains non ascii
 					size=match.group(2).encode('ascii', 'replace').decode('ascii'), # contains non ascii
-					host=base_url
+					host=base_url,
+					host_name='piratebay'
 				)
 				torrents.append(tor)
 		return torrents

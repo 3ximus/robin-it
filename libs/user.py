@@ -34,8 +34,8 @@ class UserContent:
 		self.tvdb_apikey = apikey
 		self.shows = {} # following tv shows
 		self.pending_download = {}
-		self.scheduled = [] # for scheduled episodes
-		self.scheduled_shows = [] # for scheduled shows
+		self.scheduled = {} # for scheduled episodes
+		self.scheduled_shows = {} # for scheduled shows
 
 		self.user_dir = user_dir if user_dir else 'user/' # force defaults if None
 		self.load_state(self.user_dir)
@@ -54,24 +54,18 @@ class UserContent:
 		'''Find shows in the dictionary using a partial name
 
 		Optional Parameters
-			lst -- list where to search for, if omitted self.shows is used (this can only be either a list or a dictionary)
+			lst -- list where to search for, if omitted self.shows is used (this can only be a dictionary)
 			key -- one argument function to specify the field used in comparisons,
 					similar to the ones used in builtin map function or list.sort()
 			return_key -- if set to true the returned list will contain both the keys and value of the matched
 					element in the dictionary
 		'''
 		matches = []
-		if type(lst) == list:
-			for x in lst: # case lst is a list use this
-				k = x if key == None else key(x) # apply filter if needed
-				if name.lower() in k.lower():
-					matches.append(x)
-		else:
-			search_in = self.shows.iteritems() if lst == None else lst.iteritems()
-			for name_key, value in search_in: # build match list
-				k = name_key if key == None else key(name_key) # apply filter if needed
-				if name.lower() in k.lower():
-					matches.append((name_key,value) if return_key else value)
+		search_in = self.shows.iteritems() if lst == None else lst.iteritems()
+		for name_key, value in search_in: # build match list
+			k = name_key if key == None else key(name_key) # apply filter if needed
+			if name.lower() in k.lower():
+				matches.append((name_key,value) if return_key else value)
 		return matches
 
 # SET METHODS
@@ -144,7 +138,7 @@ class UserContent:
 			return show.real_name
 		elif not self.is_tracked(name):
 			new_show = Show(name, cache=self.cache_dir, apikey=self.tvdb_apikey)
-			self.shows.update({new_show.name:new_show})
+			self.shows.update({new_show.real_name:new_show})
 			return new_show.real_name
 		else:
 			return None
@@ -170,9 +164,9 @@ class UserContent:
 	def schedule(self, item):
 		'''Adds an item to the scheduled list, this item can only be a Show or an Episode'''
 		if isinstance(item, Episode):
-			self.scheduled.append(item)
+			self.scheduled.update({item.tv_show.real_name:item})
 		elif isinstance(item, Show):
-			self.scheduled_shows.append(item)
+			self.scheduled_shows.update({item.real_name: item})
 
 	def pend_download(self, item, torrent_list):
 		'''Adds an item to the pending download list'''
