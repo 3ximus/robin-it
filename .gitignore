@@ -6,6 +6,7 @@
 # generated files
 *.pyc
 gui/resources/*.py
+!gui/resources/__init__.py
 
 # generated dirs
 cache
